@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Referral Bridge — Intelligence preview</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1F4E8C}a:hover{color:#163A69}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #F4F5F3; color: #16202A; font-family: Figtree, 'Segoe UI', system-ui, sans-serif; overflow: hidden">
+
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 18px 12px; background: #FFFFFF; border-bottom: 1px solid #E2E4E0">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 18px; font-weight: 800; letter-spacing: -0.01em">Referral Bridge</div>
+<div style="font-size: 12px; color: #555C63">Territory: All United States</div>
+</div>
+<div style="display: flex; gap: 8px; align-items: center">
+<div style="font-size: 11px; font-weight: 700; padding: 5px 9px; border-radius: 999px; background: #FBEBDD; color: #7A3A0C">SAMPLE DATA</div>
+<button onClick="{{goSources}}" style="min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{srcBtnBorder}}; background: {{srcBtnBg}}; color: {{srcBtnFg}}; font-size: 13px; font-weight: 700; cursor: pointer">Sources</button>
+</div>
+</div>
+
+<div style="flex-grow: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px">
+
+<sc-if value="{{isToday}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<button onClick="{{goAsk}}" style="display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 14px; border: 1px solid #D5D8D3; border-radius: 12px; background: #FFFFFF; color: #555C63; font-size: 14px; text-align: left; cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F4E8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+Ask about your opportunities…
+</button>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em">Today's Opportunities</h1>
+<div style="font-size: 13px; color: #555C63">Since your last visit · Tue Sep 29, 4:12 PM</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="background: #FFFFFF; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><div style="font-size: 24px; font-weight: 800; color: #1F4E8C">3</div><div style="font-size: 12px; color: #3F4448">worth contacting today</div></div>
+<div style="background: #FFFFFF; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><div style="font-size: 24px; font-weight: 800; color: #1F4E8C">{{feedCount}}</div><div style="font-size: 12px; color: #3F4448">new signals detected</div></div>
+<div style="background: #FFFFFF; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><div style="font-size: 24px; font-weight: 800; color: #1F4E8C">1</div><div style="font-size: 12px; color: #3F4448">existing client changing</div></div>
+</div>
+<sc-for list="{{todayCards}}" as="b" hint-placeholder-count="3">
+<button onClick="{{b.open}}" style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border: none; border-radius: 14px; background: #FFFFFF; color: #16202A; text-align: left; cursor: pointer; box-shadow: 0 1px 2px rgba(22,32,42,0.06)">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 3px">
+<div style="font-size: 12px; font-weight: 700; color: #7A3A0C">{{b.tag}}</div>
+<div style="font-size: 16px; font-weight: 700">{{b.name}}</div>
+<div style="font-size: 13px; color: #555C63">{{b.place}}</div>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; min-width: 52px; padding: 6px 8px; border-radius: 10px; background: {{b.pillBg}}; color: {{b.pillFg}}"><div style="font-size: 20px; font-weight: 800">{{b.score}}</div><div style="font-size: 10px; font-weight: 600">OPPORTUNITY</div></div>
+</div>
+<div style="font-size: 14px; line-height: 1.4; color: #2A3238">{{b.reason}}</div>
+<div style="font-size: 12px; color: #1F4E8C; font-weight: 600">{{b.top}}</div>
+</button>
+</sc-for>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; font-weight: 700; color: #3F4448">ALSO NEW</div>
+<sc-for list="{{alsoNew}}" as="a" hint-placeholder-count="2">
+<button onClick="{{a.open}}" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 48px; padding: 10px 14px; border: none; border-radius: 12px; background: #FFFFFF; color: #16202A; text-align: left; font-size: 14px; cursor: pointer">
+<span>{{a.text}}</span><span style="font-size: 13px; font-weight: 700; color: #1F4E8C">{{a.score}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isSignals}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em">Signals</h1>
+<div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px">
+<sc-for list="{{chips}}" as="c" hint-placeholder-count="5">
+<button onClick="{{c.pick}}" style="flex-shrink: 0; min-height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}; font-size: 13px; font-weight: 600; cursor: pointer">{{c.label}}</button>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{summaries}}" as="s" hint-placeholder-count="4">
+<div style="background: #FFFFFF; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><div style="font-size: 22px; font-weight: 800; color: #1F4E8C">{{s.n}}</div><div style="font-size: 12px; color: #3F4448; line-height: 1.35">{{s.label}}</div></div>
+</sc-for>
+</div>
+<div style="font-size: 12px; color: #555C63">Filters also available: geography, industry, score, need, date, source, advisor fit</div>
+<sc-for list="{{feed}}" as="f" hint-placeholder-count="5">
+<button onClick="{{f.open}}" style="display: flex; flex-direction: column; gap: 6px; padding: 14px; border: none; border-radius: 12px; background: #FFFFFF; color: #16202A; text-align: left; cursor: pointer">
+<div style="display: flex; justify-content: space-between; gap: 8px; align-items: center">
+<span style="font-size: 15px; font-weight: 700">{{f.title}}</span>
+<span style="font-size: 12px; color: #555C63; flex-shrink: 0">{{f.when}}</span>
+</div>
+<div style="font-size: 13px; color: #2A3238">{{f.bizName}} · {{f.state}}</div>
+<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
+<span style="font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 6px; background: {{f.provBg}}; color: {{f.provFg}}">{{f.prov}}</span>
+<span style="font-size: 12px; color: #555C63">{{f.src}}</span>
+</div>
+</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isList}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em">Businesses</h1>
+<div style="font-size: 13px; color: #555C63">One canonical record per business, sorted by Opportunity Score</div>
+<sc-for list="{{allBiz}}" as="b" hint-placeholder-count="5">
+<button onClick="{{b.open}}" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px; border: none; border-radius: 12px; background: #FFFFFF; color: #16202A; text-align: left; cursor: pointer">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 700">{{b.name}}</span><span style="font-size: 12px; color: #555C63">{{b.industry}} · {{b.place}}</span></div>
+<span style="min-width: 40px; text-align: center; padding: 6px 8px; border-radius: 8px; font-weight: 800; background: {{b.pillBg}}; color: {{b.pillFg}}">{{b.score}}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isBiz}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<button onClick="{{back}}" style="align-self: flex-start; min-height: 40px; padding: 0 4px; border: none; background: transparent; color: #1F4E8C; font-size: 14px; font-weight: 600; cursor: pointer">← Back</button>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 12px; font-weight: 700; color: #7A3A0C">{{biz.tag}}</div>
+<h1 style="margin: 0; font-size: 23px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2">{{biz.name}}</h1>
+<div style="font-size: 13px; color: #555C63">{{biz.industry}} · {{biz.place}}</div>
+<div style="font-size: 12px; color: #1B5E3A; font-weight: 600">{{biz.sources}}</div>
+</div>
+
+<div style="background: #16202A; color: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<button onClick="{{toggleWhy}}" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 0; border: none; background: transparent; color: #FFFFFF; text-align: left; cursor: pointer">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; font-weight: 600; color: #C9D2DB">OPPORTUNITY SCORE</span><span style="font-size: 13px; color: #C9D2DB">How likely they need help right now</span><span style="font-size: 13px; font-weight: 700; color: #9CC2F2">{{whyLabel}}</span></div>
+<span style="font-size: 44px; font-weight: 800; letter-spacing: -0.03em">{{biz.score}}</span>
+</button>
+<sc-if value="{{showWhy}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #3A4550; padding-top: 12px">
+<sc-for list="{{biz.breakdown}}" as="r" hint-placeholder-count="4">
+<div style="display: flex; gap: 12px; align-items: flex-start">
+<span style="min-width: 36px; font-size: 14px; font-weight: 800; color: #9CC2F2">{{r.pts}}</span>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 600">{{r.label}}</span><span style="font-size: 12px; color: #C9D2DB">{{r.note}}</span></div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; font-weight: 700; color: #3F4448">PREDICTED NEEDS</div>
+<sc-for list="{{biz.needs}}" as="n" hint-placeholder-count="3">
+<div style="background: #FFFFFF; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; gap: 8px; align-items: center"><span style="font-size: 15px; font-weight: 700">{{n.name}}</span><span style="font-size: 12px; font-weight: 700; color: {{n.urgFg}}">{{n.urgency}} urgency</span></div>
+<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><span style="font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 6px; background: #FBEBDD; color: #7A3A0C">AI INFERENCE</span><span style="font-size: 12px; color: #3F4448">Confidence {{n.conf}}</span></div>
+<div style="font-size: 13px; color: #2A3238; line-height: 1.4">{{n.why}}</div>
+<div style="font-size: 12px; color: #555C63">Advisor types: {{n.advisors}}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; font-weight: 700; color: #3F4448">SIGNAL TIMELINE</div>
+<div style="background: #FFFFFF; border-radius: 12px; padding: 4px 14px">
+<sc-for list="{{biz.signals}}" as="s" hint-placeholder-count="4">
+<div style="display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EEEFEC">
+<span style="min-width: 46px; font-size: 12px; font-weight: 700; color: #555C63">{{s.date}}</span>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 14px; font-weight: 600">{{s.title}}</span>
+<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><span style="font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 6px; background: {{s.provBg}}; color: {{s.provFg}}">{{s.prov}}</span><span style="font-size: 12px; color: #555C63">{{s.src}}</span></div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; font-weight: 700; color: #3F4448">ADVISOR MATCHES</div>
+<sc-for list="{{biz.matches}}" as="m" hint-placeholder-count="3">
+<div style="background: #FFFFFF; border-radius: 12px; padding: 12px 14px; display: flex; gap: 12px; align-items: center">
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 700">{{m.name}}</span><span style="font-size: 12px; color: #555C63">{{m.role}}</span><span style="font-size: 12px; color: #2A3238; line-height: 1.35">{{m.why}}</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; min-width: 48px; padding: 6px; border-radius: 10px; background: #E4ECF8; color: #163A69"><span style="font-size: 18px; font-weight: 800">{{m.score}}</span><span style="font-size: 9px; font-weight: 700">MATCH</span></div>
+</div>
+</sc-for>
+</div>
+
+<div style="background: #E4ECF8; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 12px; font-weight: 700; color: #163A69">RECOMMENDED NEXT ACTION</div>
+<div style="font-size: 14px; line-height: 1.45; color: #16202A">{{biz.next}}</div>
+<button style="min-height: 44px; border: none; border-radius: 10px; background: #1F4E8C; color: #FFFFFF; font-size: 14px; font-weight: 700; cursor: pointer">Draft introduction</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isAsk}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em">Ask</h1>
+<div style="font-size: 13px; color: #555C63">Answers come only from evidence already stored in Referral Bridge</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{questions}}" as="q" hint-placeholder-count="3">
+<button onClick="{{q.pick}}" style="min-height: 44px; padding: 10px 14px; border-radius: 12px; border: 1px solid {{q.border}}; background: {{q.bg}}; color: {{q.fg}}; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer">{{q.text}}</button>
+</sc-for>
+</div>
+<div style="background: #FFFFFF; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; gap: 8px; align-items: center"><span style="font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 6px; background: #FBEBDD; color: #7A3A0C">AI ANSWER</span><span style="font-size: 12px; color: #555C63">cites {{answer.count}} stored records</span></div>
+<div style="font-size: 15px; line-height: 1.5; color: #16202A">{{answer.text}}</div>
+<div style="display: flex; flex-direction: column; gap: 6px; border-top: 1px solid #EEEFEC; padding-top: 10px">
+<div style="font-size: 12px; font-weight: 700; color: #3F4448">EVIDENCE</div>
+<sc-for list="{{answer.cites}}" as="c" hint-placeholder-count="3">
+<div style="display: flex; gap: 10px; align-items: baseline; font-size: 13px"><span style="font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: #1F4E8C; font-weight: 700">{{c.id}}</span><span style="color: #2A3238">{{c.text}}</span></div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isSources}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em">Sources</h1>
+<div style="font-size: 13px; color: #555C63; line-height: 1.4">Every provider plugs into the same connector. Turn any on or off without touching scoring.</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="background: #FFFFFF; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><div style="font-size: 24px; font-weight: 800; color: #1F4E8C">{{srcTotal}}</div><div style="font-size: 12px; color: #3F4448">providers</div></div>
+<div style="background: #FFFFFF; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><div style="font-size: 24px; font-weight: 800; color: #1B5E3A">{{srcFree}}</div><div style="font-size: 12px; color: #3F4448">free or open data</div></div>
+<div style="background: #FFFFFF; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><div style="font-size: 24px; font-weight: 800; color: #7A3A0C">{{srcPaid}}</div><div style="font-size: 12px; color: #3F4448">paid</div></div>
+</div>
+<div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px">
+<sc-for list="{{srcChips}}" as="c" hint-placeholder-count="6">
+<button onClick="{{c.pick}}" style="flex-shrink: 0; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}; font-size: 13px; font-weight: 600; cursor: pointer">{{c.label}} · {{c.n}}</button>
+</sc-for>
+</div>
+<button onClick="{{toggleFree}}" style="align-self: flex-start; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid {{freeBorder}}; background: {{freeBg}}; color: {{freeFg}}; font-size: 13px; font-weight: 600; cursor: pointer">{{freeLabel}}</button>
+<sc-for list="{{srcGroups}}" as="g" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; font-weight: 700; color: #3F4448">{{g.name}}</div>
+<div style="background: #FFFFFF; border-radius: 12px; padding: 2px 14px">
+<sc-for list="{{g.items}}" as="p" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #EEEFEC">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 700">{{p.name}}</span><span style="font-size: 12px; color: #555C63; line-height: 1.35">{{p.detects}}</span></div>
+<span style="flex-shrink: 0; font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 6px; background: {{p.bg}}; color: {{p.fg}}">{{p.access}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+<div style="font-size: 12px; color: #555C63; line-height: 1.45">Not included: LinkedIn scraping and any source whose terms forbid automated collection. LinkedIn data comes only through official partner programs.</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isPipeline}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em">Pipeline</h1>
+<div style="background: #FFFFFF; border-radius: 14px; padding: 16px; font-size: 14px; line-height: 1.5; color: #2A3238">Your existing Pipeline stays as it works today: Suggested, Approved, Introduced, Meeting, Closed and Rejected. The upgrade adds the need and both scores to each match, so "What's working" can learn which signals actually lead to closed introductions.</div>
+</div>
+</sc-if>
+
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E2E4E0; padding: 6px 4px 10px">
+<sc-for list="{{nav}}" as="t" hint-placeholder-count="5">
+<button onClick="{{t.go}}" style="min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: none; background: transparent; color: {{t.fg}}; font-size: 12px; font-weight: {{t.weight}}; cursor: pointer">
+<span style="width: 22px; height: 3px; border-radius: 3px; background: {{t.bar}}"></span>{{t.label}}</button>
+</sc-for>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = { screen: 'today', from: 'today', bizId: 'hp', showWhy: true, chip: 'all', q: 0, srcCat: 'all', freeOnly: false };
+  }
+  renderVals() {
+    const PROV = {
+      'VERIFIED': ['#E3F1E8', '#1B5E3A'],
+      'PROVIDER DATA': ['#E4ECF8', '#1F4E8C'],
+      'AI INFERENCE': ['#FBEBDD', '#7A3A0C'],
+      'USER-ENTERED': ['#ECECEA', '#3F4448']
+    };
+    const pill = (s) => s >= 85 ? ['#1F4E8C', '#FFFFFF'] : s >= 70 ? ['#3A6FB5', '#FFFFFF'] : ['#E4ECF8', '#163A69'];
+    const sig = (date, title, src, prov) => ({ date, title, src, prov, provBg: PROV[prov][0], provFg: PROV[prov][1] });
+    const need = (name, conf, urgency, why, advisors) => ({ name, conf, urgency, why, advisors, urgFg: urgency === 'High' ? '#7A3A0C' : '#3F4448' });
+
+    const BIZ = {
+      hp: { name: 'Harbor Point Family Dental PLLC', tag: 'NEW PRACTICE', industry: 'Dental', place: 'Patchogue, Suffolk County, NY', state: 'NY', score: 94,
+        sources: '5 provider records linked · entity match 97%',
+        reason: 'State filing, new NPI provider, first reviews and hiring, all within three weeks.',
+        top: 'Formation · NPI · Hiring · Reviews · Build-out',
+        breakdown: [
+          { pts: '+24', label: 'New business formation', note: 'NY Dept. of State · 12 days old · decay ×0.92' },
+          { pts: '+18', label: 'New NPI provider registered', note: 'NPI Registry · 8 days old' },
+          { pts: '+14', label: 'Hiring two dental hygienists', note: 'Public job posting · 6 days old' },
+          { pts: '+12', label: 'First Google reviews', note: 'Google Places · 5 days old' },
+          { pts: '+8', label: '"Coming soon" build-out', note: 'AI inference from news item · unverified, half weight' },
+          { pts: '+10', label: 'Corroboration bonus', note: '4 independent sources agree' },
+          { pts: '+8', label: 'Lifecycle: starting out', note: 'Formed under 90 days ago' }
+        ],
+        needs: [
+          need('Practice financing', '86%', 'High', 'New practice with a build-out and first hires usually needs startup or SBA financing.', 'Healthcare banker'),
+          need('Equipment financing', '74%', 'High', 'Operatories and imaging are typically bought before opening.', 'Banker, equipment lender'),
+          need('Payroll and HR', '68%', 'Medium', 'Hiring first clinical staff.', 'Payroll provider, CPA'),
+          need('Malpractice and business insurance', '62%', 'Medium', 'New NPI provider and new entity.', 'Insurance agent')
+        ],
+        signals: [
+          sig('Sep 18', 'LLC formation filed', 'NY Dept. of State', 'VERIFIED'),
+          sig('Sep 22', 'New NPI provider: Elena Ruiz, DDS', 'NPI Registry', 'VERIFIED'),
+          sig('Sep 24', 'Hiring two dental hygienists', 'Public job posting', 'PROVIDER DATA'),
+          sig('Sep 25', 'First Google listing and reviews', 'Google Places', 'PROVIDER DATA'),
+          sig('Sep 27', '"Coming soon" storefront build-out', 'Local news · summarized', 'AI INFERENCE'),
+          sig('Sep 28', 'Owner met at chamber mixer', 'Your note', 'USER-ENTERED')
+        ],
+        matches: [
+          { name: 'Dana Whitfield', role: 'Banker · Healthcare lending', score: 91, why: 'Practice financing fit · serves Suffolk · 4 closed dental intros' },
+          { name: 'Marcus Chen, CPA', role: 'CPA · Dental practices', score: 86, why: 'Startup-stage specialty · same county' },
+          { name: 'Priya Raman', role: 'Insurance · Medical malpractice', score: 78, why: 'Healthcare focus · serves Long Island · no prior intros yet' }
+        ],
+        next: 'Introduce Dr. Ruiz to Dana Whitfield this week. Financing is the most urgent need and the signals are still fresh.' },
+      sr: { name: 'Summit Ridge Physical Therapy', tag: 'EXPANSION', industry: 'Physical therapy', place: 'Scottsdale, Maricopa County, AZ', state: 'AZ', score: 88,
+        sources: '4 provider records linked · entity match 94%',
+        reason: 'Signed lease for a second clinic, build-out permit filed and hiring three therapists.',
+        top: 'Lease · Permit · Hiring',
+        breakdown: [
+          { pts: '+22', label: 'Second-location lease', note: 'Commercial listing marked leased · 4 days old' },
+          { pts: '+20', label: 'Build-out permit filed', note: 'Maricopa County permits · 2 days old' },
+          { pts: '+16', label: 'Hiring three physical therapists', note: 'Public job postings · 3 days old' },
+          { pts: '+10', label: 'Corroboration bonus', note: '3 independent sources agree' },
+          { pts: '+20', label: 'Lifecycle: growing', note: 'Established 2019, adding a location' }
+        ],
+        needs: [
+          need('Commercial real estate loan', '81%', 'High', 'Build-out of a leased second site.', 'Banker, commercial real estate'),
+          need('Equipment financing', '70%', 'Medium', 'Treatment tables and rehab equipment for the new clinic.', 'Banker'),
+          need('Payroll and HR', '64%', 'Medium', 'Staff growing about 40%.', 'Payroll provider, HR consultant')
+        ],
+        signals: [
+          sig('Sep 26', 'Second-location lease signed', 'Commercial listing', 'PROVIDER DATA'),
+          sig('Sep 27', 'Hiring three physical therapists', 'Public job postings', 'PROVIDER DATA'),
+          sig('Sep 28', 'Build-out permit filed', 'Maricopa County permits', 'VERIFIED')
+        ],
+        matches: [
+          { name: 'Luis Ortega', role: 'Banker · Commercial real estate', score: 88, why: 'Owner-occupied expansion lending · serves Maricopa' },
+          { name: 'Hannah Brooks, CPA', role: 'CPA · Healthcare practices', score: 80, why: 'Multi-location practices · Phoenix metro' }
+        ],
+        next: 'Introduce the owner to Luis Ortega before the build-out financing is arranged elsewhere.' },
+      lo: { name: 'Lakeside Orthodontics', tag: 'EXISTING CLIENT', industry: 'Orthodontics', place: 'Naperville, DuPage County, IL', state: 'IL', score: 82,
+        sources: '4 provider records linked · 1 existing relationship',
+        reason: 'An existing client appears to be opening a second office and recently took on equipment financing.',
+        top: 'Second office · UCC filing',
+        breakdown: [
+          { pts: '+22', label: 'Second office announced', note: 'Press release · 3 days old' },
+          { pts: '+18', label: 'UCC filing by equipment lender', note: 'IL Secretary of State · 9 days old' },
+          { pts: '+12', label: 'Hiring front-desk staff', note: 'Public job posting · 5 days old' },
+          { pts: '+10', label: 'Corroboration bonus', note: '3 independent sources agree' },
+          { pts: '+20', label: 'Lifecycle: growing', note: 'Existing relationship since 2024' }
+        ],
+        needs: [
+          need('Business banking for second location', '72%', 'Medium', 'New office usually means new accounts and treasury needs.', 'Banker'),
+          need('Commercial real estate', '66%', 'Medium', 'Second office site not yet confirmed as owned or leased.', 'Commercial real estate')
+        ],
+        signals: [
+          sig('Sep 21', 'UCC filing by equipment lender', 'IL Secretary of State', 'VERIFIED'),
+          sig('Sep 25', 'Hiring front-desk staff', 'Public job posting', 'PROVIDER DATA'),
+          sig('Sep 27', 'Second office announced', 'Press release', 'PROVIDER DATA')
+        ],
+        matches: [
+          { name: 'Rachel Kim', role: 'Commercial real estate · Medical office', score: 84, why: 'Medical office specialist · DuPage County' }
+        ],
+        next: 'Check in with your existing contact about the second office. Another lender already filed a UCC, so move soon.' },
+      bm: { name: 'Blue Mesa Tacos LLC', tag: 'GRAND OPENING', industry: 'Food service', place: 'Austin, Travis County, TX', state: 'TX', score: 71,
+        sources: '3 provider records linked · entity match 89%',
+        reason: 'Ribbon cutting with the chamber and a new online ordering system.',
+        top: 'Grand opening · Ordering launch',
+        breakdown: [
+          { pts: '+30', label: 'Grand opening / ribbon cutting', note: 'Chamber of commerce · 5 days old' },
+          { pts: '+9', label: 'Online ordering launched', note: 'AI inference from website change · half weight' },
+          { pts: '+12', label: 'Corroboration bonus', note: '2 independent sources agree' },
+          { pts: '+20', label: 'Lifecycle: starting out', note: 'Formed 2026' }
+        ],
+        needs: [
+          need('Merchant services', '77%', 'High', 'New online ordering and point of sale.', 'Merchant services'),
+          need('Bookkeeping and tax', '58%', 'Medium', 'First year of operation.', 'CPA, bookkeeper')
+        ],
+        signals: [
+          sig('Sep 23', 'Online ordering system launched', 'Company website change', 'AI INFERENCE'),
+          sig('Sep 25', 'Ribbon cutting', 'Chamber of commerce', 'PROVIDER DATA')
+        ],
+        matches: [
+          { name: 'Omar Haddad', role: 'Merchant services · Restaurants', score: 82, why: 'Restaurant point-of-sale specialist · Austin' }
+        ],
+        next: 'Introduce to Omar Haddad about payments while the new ordering setup is still being settled.' },
+      kh: { name: 'Keystone HVAC Services', tag: 'YOU FOLLOW THIS', industry: 'Construction trades', place: 'Pittsburgh, Allegheny County, PA', state: 'PA', score: 67,
+        sources: '3 provider records linked · entity match 92%',
+        reason: 'Hiring an operations manager while the founder has mentioned retiring.',
+        top: 'Hiring · Succession',
+        breakdown: [
+          { pts: '+18', label: 'Hiring operations manager', note: 'Public job posting · 1 day old' },
+          { pts: '+11', label: 'Founder retirement mentioned', note: 'AI inference from local news · half weight' },
+          { pts: '+10', label: 'Corroboration bonus', note: '2 independent sources agree' },
+          { pts: '+28', label: 'Lifecycle: planning exit', note: 'Established 1998' }
+        ],
+        needs: [
+          need('Succession planning', '63%', 'Medium', 'Founder retirement plus an operations hire suggests a handoff.', 'Attorney, investment advisor'),
+          need('Business valuation', '52%', 'Low', 'Often precedes a sale or family transfer.', 'CPA, M&A advisor')
+        ],
+        signals: [
+          sig('Sep 20', 'Founder retirement mentioned', 'Local news · summarized', 'AI INFERENCE'),
+          sig('Sep 29', 'Hiring operations manager', 'Public job posting', 'PROVIDER DATA')
+        ],
+        matches: [
+          { name: 'Grace Whitman', role: 'Attorney · Business succession', score: 79, why: 'Succession and trusts · serves Allegheny' }
+        ],
+        next: 'Verify the retirement report before reaching out. It is an AI inference from a news story.' }
+    };
+
+    const st = this.state;
+    const open = (id) => () => this.setState({ screen: 'biz', from: st.screen === 'biz' ? st.from : st.screen, bizId: id, showWhy: false });
+    const deco = (id) => { const b = BIZ[id]; const p = pill(b.score); return Object.assign({}, b, { id, open: open(id), pillBg: p[0], pillFg: p[1] }); };
+
+    const FEED = [
+      { cat: 'hiring', title: 'Hiring operations manager', biz: 'kh', when: '1d ago', prov: 'PROVIDER DATA', src: 'Public job posting' },
+      { cat: 'expansion', title: 'Build-out permit filed', biz: 'sr', when: '2d ago', prov: 'VERIFIED', src: 'County permits' },
+      { cat: 'expansion', title: 'Second office announced', biz: 'lo', when: '3d ago', prov: 'PROVIDER DATA', src: 'Press release' },
+      { cat: 'expansion', title: 'Second-location lease signed', biz: 'sr', when: '4d ago', prov: 'PROVIDER DATA', src: 'Commercial listing' },
+      { cat: 'formation', title: 'Grand opening', biz: 'bm', when: '5d ago', prov: 'PROVIDER DATA', src: 'Chamber of commerce' },
+      { cat: 'hiring', title: 'Hiring two dental hygienists', biz: 'hp', when: '6d ago', prov: 'PROVIDER DATA', src: 'Public job posting' },
+      { cat: 'financing', title: 'Online ordering launched', biz: 'bm', when: '7d ago', prov: 'AI INFERENCE', src: 'Website change' },
+      { cat: 'formation', title: 'New NPI provider', biz: 'hp', when: '8d ago', prov: 'VERIFIED', src: 'NPI Registry' },
+      { cat: 'financing', title: 'UCC filing by equipment lender', biz: 'lo', when: '9d ago', prov: 'VERIFIED', src: 'Secretary of State' },
+      { cat: 'succession', title: 'Founder retirement mentioned', biz: 'kh', when: '10d ago', prov: 'AI INFERENCE', src: 'Local news' },
+      { cat: 'formation', title: 'New business formation', biz: 'hp', when: '12d ago', prov: 'VERIFIED', src: 'NY Dept. of State' }
+    ];
+    const MULTI = ['hp', 'sr', 'lo'];
+    const CHIPS = [['all', 'All'], ['expansion', 'Expansion'], ['formation', 'New business'], ['financing', 'Financing'], ['hiring', 'Hiring'], ['succession', 'Succession'], ['multi', 'Multi-signal']];
+    const uniq = (cat) => new Set(FEED.filter((f) => f.cat === cat).map((f) => f.biz)).size;
+
+    const feed = FEED.filter((f) => st.chip === 'all' || (st.chip === 'multi' ? MULTI.indexOf(f.biz) >= 0 : f.cat === st.chip))
+      .map((f) => Object.assign({}, f, { bizName: BIZ[f.biz].name, state: BIZ[f.biz].state, provBg: PROV[f.prov][0], provFg: PROV[f.prov][1], open: open(f.biz) }));
+
+    const QA = [
+      { text: 'Find dental practices opened in the last 90 days',
+        answer: { text: 'One dental practice in your stored data opened in the last 90 days: Harbor Point Family Dental PLLC in Patchogue, NY. Its state filing and new NPI provider are both verified. Lakeside Orthodontics is expanding rather than newly opened, so it is not included.',
+          cites: [{ id: 'SIG-1042', text: 'NY Dept. of State formation filing, Sep 18' }, { id: 'SIG-1051', text: 'NPI Registry new provider, Sep 22' }, { id: 'BIZ-0317', text: 'Lakeside Orthodontics, established 2016' }] } },
+      { text: 'Why is Harbor Point scored 94?',
+        answer: { text: 'Four independent sources show a brand-new practice gearing up in the same three weeks: a verified state filing, a verified NPI registration, job postings and first Google reviews. The build-out signal is only an AI inference, so it counts at half weight.',
+          cites: [{ id: 'SIG-1042', text: 'Formation filing, +24' }, { id: 'SIG-1051', text: 'New NPI provider, +18' }, { id: 'SIG-1063', text: 'Hygienist job postings, +14' }, { id: 'SIG-1066', text: 'Build-out news item, AI inference, +8' }] } },
+      { text: 'Which businesses likely need financing?',
+        answer: { text: 'Three businesses show financing signals: Harbor Point Family Dental (practice and equipment financing, high urgency), Summit Ridge Physical Therapy (build-out lending for a second clinic) and Lakeside Orthodontics, where another lender has already filed a UCC.',
+          cites: [{ id: 'NEED-221', text: 'Harbor Point · practice financing · 86%' }, { id: 'NEED-230', text: 'Summit Ridge · commercial real estate loan · 81%' }, { id: 'SIG-0998', text: 'Lakeside · UCC filing, Sep 21' }] } }
+    ];
+    const cur = QA[st.q];
+
+    const SRC = {
+      'Business registrations': [
+        ['NY Dept. of State daily filings', 'New LLCs, corporations, DBAs', 'Open data'],
+        ['Florida Sunbiz data files', 'New entities, officer changes', 'Open data'],
+        ['Texas franchise tax permit holders', 'Newly registered businesses', 'Open data'],
+        ['Colorado business entities', 'New entities, agents', 'Open data'],
+        ['Connecticut Business Master', 'New entities and principals', 'Open data'],
+        ['Pennsylvania registered businesses', 'New entities', 'Open data'],
+        ['Oregon active businesses', 'New entities', 'Open data'],
+        ['Iowa active business entities', 'New entities', 'Open data'],
+        ['Other Secretary of State portals', 'Bulk files or lookups, state by state', 'Varies'],
+        ['OpenCorporates', 'Entities and officers across all states', 'Paid API'],
+        ['Cobalt Intelligence', 'Secretary of State lookups, all 50 states', 'Paid API'],
+        ['County DBA / fictitious names', 'New trade names', 'Varies'],
+        ['IRS exempt organizations', 'New nonprofits', 'Open data'],
+        ['USPTO trademark filings', 'New brands and product lines', 'Open data']
+      ],
+      'Healthcare': [
+        ['NPPES NPI Registry', 'New providers, new practice addresses', 'Free API'],
+        ['CMS provider data', 'Medicare enrollment, group affiliations, new sites', 'Open data'],
+        ['CMS Open Payments', 'Industry relationships by provider', 'Open data'],
+        ['State medical and dental boards', 'New licenses', 'Varies'],
+        ['Definitive Healthcare', 'Practice and group intelligence', 'Paid'],
+        ['IQVIA OneKey', 'Provider and practice records', 'Paid']
+      ],
+      'Professional licensing': [
+        ['FINRA BrokerCheck', 'Broker and advisor vetting', 'Free lookup'],
+        ['SEC adviser data (IAPD)', 'New registered investment advisers', 'Open data'],
+        ['NMLS Consumer Access', 'Mortgage professionals', 'Free lookup'],
+        ['CPAverify', 'CPA licenses', 'Free lookup'],
+        ['State bar directories', 'Attorney status and admissions', 'Varies'],
+        ['NIPR', 'Insurance producer licenses', 'Paid API'],
+        ['State contractor boards', 'Newly licensed contractors', 'Varies'],
+        ['State liquor authorities', 'New bars, restaurants, stores', 'Open data'],
+        ['State cannabis regulators', 'New licensees', 'Open data'],
+        ['Childcare licensing agencies', 'New centers', 'Varies']
+      ],
+      'Places and reviews': [
+        ['Google Places', 'Listings, first reviews, review velocity', 'Paid API'],
+        ['Yelp Places', 'New listings, reviews', 'Paid API'],
+        ['Foursquare Places', 'New venues, categories', 'API key'],
+        ['Overture Maps', 'Open places dataset, nationwide', 'Open data'],
+        ['OpenStreetMap', 'Business points of interest', 'Open data'],
+        ['Apple Maps Server API', 'Place lookups and geocoding', 'API key'],
+        ['Advan (formerly SafeGraph patterns)', 'Openings, closings, foot traffic', 'Paid']
+      ],
+      'Company and contact enrichment': [
+        ['Apollo', 'Contacts, firmographics', 'Paid API'],
+        ['People Data Labs', 'Person and company records', 'Paid API'],
+        ['ZoomInfo', 'Contacts, org charts, intent', 'Paid API'],
+        ['Data Axle', 'Small-business firmographics', 'Paid API'],
+        ['Dun & Bradstreet', 'DUNS, firmographics, credit signals', 'Paid API'],
+        ['Crunchbase', 'Funding, acquisitions, leadership', 'Paid API'],
+        ['Hunter', 'Email finding and verification', 'Paid API'],
+        ['Lusha', 'Direct contact data', 'Paid API']
+      ],
+      'Websites and technology': [
+        ['Certificate Transparency logs', 'Brand-new websites going live', 'Open data'],
+        ['WhoisXML API', 'Newly registered domains', 'Paid API'],
+        ['BuiltWith', 'Ecommerce, booking, payment tech', 'Paid API'],
+        ['Wappalyzer', 'Technology stack changes', 'Paid API'],
+        ['Common Crawl', 'Website history snapshots', 'Open data'],
+        ['Website change monitor', 'Now open, new services, new locations', 'Built-in']
+      ],
+      'News and search': [
+        ['GDELT', 'Global news events', 'Open data'],
+        ['NewsAPI.ai (Event Registry)', 'News and press coverage', 'Paid API'],
+        ['Brave Search API', 'Web search for research', 'API key'],
+        ['Exa', 'Semantic web search', 'Paid API'],
+        ['Tavily', 'Search built for AI research', 'Paid API'],
+        ['SerpApi', 'Search results incl. Google Jobs', 'Paid API'],
+        ['PR Newswire, Business Wire, GlobeNewswire', 'Press releases', 'RSS'],
+        ['Local business journals', 'Openings, deals, awards', 'RSS']
+      ],
+      'Job postings': [
+        ['Greenhouse, Lever, Ashby boards', 'Public job postings', 'Free API'],
+        ['Adzuna', 'Job postings nationwide', 'API key'],
+        ['TheirStack', 'Jobs plus technology signals', 'Paid API'],
+        ['Coresignal', 'Jobs and headcount trends', 'Paid API']
+      ],
+      'Real estate and construction': [
+        ['City permit portals', 'Build-outs, new locations (NYC, Chicago, Austin, LA, SF, Seattle, more)', 'Open data'],
+        ['Shovels', 'Building permits nationwide', 'Paid API'],
+        ['ATTOM', 'Property sales, owners, mortgages', 'Paid API'],
+        ['Regrid', 'Parcels and owners', 'Paid API'],
+        ['County recorders and assessors', 'Deeds, property purchases', 'Varies'],
+        ['Crexi', 'Commercial listings and leases', 'Partnership']
+      ],
+      'Financing and legal filings': [
+        ['SEC EDGAR', 'Form D raises, 8-K events', 'Free API'],
+        ['State UCC filings', 'Equipment and asset financing', 'Varies'],
+        ['SBA loan data (7(a), 504)', 'SBA-financed businesses', 'Open data'],
+        ['CourtListener / RECAP', 'Bankruptcy, litigation', 'Free API'],
+        ['PACER', 'Federal court filings', 'Paid']
+      ],
+      'Government and public data': [
+        ['SAM.gov', 'New federal contractors, opportunities', 'Free API'],
+        ['USAspending', 'Contract and grant awards', 'Free API'],
+        ['State procurement portals', 'State and local contracts', 'Varies'],
+        ['FMCSA carrier registrations', 'New trucking companies', 'Open data'],
+        ['TTB permits', 'New breweries, wineries, distillers', 'Open data'],
+        ['Restaurant health inspections', 'New restaurants (many cities)', 'Open data'],
+        ['OSHA inspections', 'Workplace events', 'Open data'],
+        ['State WARN notices', 'Layoffs and closures', 'Open data'],
+        ['State franchise registries (CA, WI, MN)', 'Franchise activity', 'Open data'],
+        ['Census Business Formation Statistics', 'Territory hotspots (aggregate)', 'Free API']
+      ],
+      'Chambers and associations': [
+        ['Chambers of commerce', 'Ribbon cuttings, new members', 'Partnership'],
+        ['Industry associations', 'Member directories, events', 'Partnership'],
+        ['BNI and networking groups', 'Member professionals', 'Partnership']
+      ],
+      'Social media (permitted APIs)': [
+        ['Meta Graph API', 'Pages you are authorized to access', 'Restricted'],
+        ['YouTube Data API', 'Business channel announcements', 'API key'],
+        ['Reddit API', 'Local mentions', 'API key'],
+        ['X API', 'Business announcements', 'Paid API'],
+        ['LinkedIn', 'Official partner programs only', 'Partnership']
+      ],
+      'CRM and your own data': [
+        ['Salesforce', 'Accounts, contacts, opportunities', 'Your login'],
+        ['HubSpot', 'Companies, contacts, deals', 'Your login'],
+        ['Microsoft Dynamics 365', 'Accounts and activities', 'Your login'],
+        ['Pipedrive', 'Deals and contacts', 'Your login'],
+        ['Zoho CRM', 'Accounts and contacts', 'Your login'],
+        ['Google Sheets', 'Team lists and trackers', 'Your login'],
+        ['Gmail / Outlook', 'Relationship strength from email history', 'Your login'],
+        ['CSV import', 'Any list you already have', 'Built-in']
+      ]
+    };
+    const ACC = { 'Open data': 'free', 'Free API': 'free', 'Free lookup': 'free', 'RSS': 'free', 'Built-in': 'free', 'API key': 'key', 'Your login': 'key', 'Paid API': 'paid', 'Paid': 'paid' };
+    const ACC_COL = { free: ['#E3F1E8', '#1B5E3A'], key: ['#E4ECF8', '#1F4E8C'], paid: ['#FBEBDD', '#7A3A0C'], other: ['#ECECEA', '#3F4448'] };
+    const allSrc = [];
+    Object.keys(SRC).forEach((g) => SRC[g].forEach((p) => allSrc.push({ g, name: p[0], detects: p[1], access: p[2], kind: ACC[p[2]] || 'other' })));
+    const srcGroups = Object.keys(SRC)
+      .filter((g) => st.srcCat === 'all' || st.srcCat === g)
+      .map((g) => ({ name: g.toUpperCase(), items: allSrc.filter((p) => p.g === g && (!st.freeOnly || p.kind === 'free'))
+        .map((p) => Object.assign({}, p, { bg: ACC_COL[p.kind][0], fg: ACC_COL[p.kind][1] })) }))
+      .filter((g) => g.items.length > 0);
+    const chipStyle = (on) => ({ bg: on ? '#16202A' : '#FFFFFF', fg: on ? '#FFFFFF' : '#16202A', border: on ? '#16202A' : '#D5D8D3' });
+    const srcChips = [['all', 'All', allSrc.length]].concat(Object.keys(SRC).map((g) => [g, g, SRC[g].length]))
+      .map((c) => Object.assign({ label: c[1], n: c[2], pick: () => this.setState({ srcCat: c[0] }) }, chipStyle(st.srcCat === c[0])));
+    const onSrc = st.screen === 'sources';
+
+    const NAV = [['today', 'Today'], ['signals', 'Signals'], ['ask', 'Ask'], ['list', 'Businesses'], ['pipeline', 'Pipeline']];
+    const activeTab = st.screen === 'biz' ? (st.from === 'biz' ? 'today' : st.from) : st.screen;
+
+    return {
+      isToday: st.screen === 'today', isSignals: st.screen === 'signals', isAsk: st.screen === 'ask',
+      isList: st.screen === 'list', isPipeline: st.screen === 'pipeline', isBiz: st.screen === 'biz', isSources: onSrc,
+      goSources: () => this.setState({ screen: 'sources' }),
+      srcBtnBg: onSrc ? '#16202A' : '#FFFFFF', srcBtnFg: onSrc ? '#FFFFFF' : '#16202A', srcBtnBorder: onSrc ? '#16202A' : '#D5D8D3',
+      srcTotal: allSrc.length, srcFree: allSrc.filter((p) => p.kind === 'free').length, srcPaid: allSrc.filter((p) => p.kind === 'paid').length,
+      srcChips, srcGroups,
+      toggleFree: () => this.setState({ freeOnly: !st.freeOnly }),
+      freeLabel: st.freeOnly ? 'Showing free sources only · show all' : 'Show free sources only',
+      freeBg: st.freeOnly ? '#E3F1E8' : '#FFFFFF', freeFg: st.freeOnly ? '#1B5E3A' : '#16202A', freeBorder: st.freeOnly ? '#1B5E3A' : '#D5D8D3',
+      goAsk: () => this.setState({ screen: 'ask' }),
+      back: () => this.setState({ screen: st.from || 'today' }),
+      toggleWhy: () => this.setState({ showWhy: !st.showWhy }),
+      showWhy: st.showWhy,
+      whyLabel: st.showWhy ? 'Hide what produced this score' : 'Tap to see exactly why',
+      feedCount: FEED.length,
+      todayCards: ['hp', 'sr', 'lo'].map(deco),
+      alsoNew: [
+        { text: 'Business you follow began hiring: Keystone HVAC', score: 67, open: open('kh') },
+        { text: 'Grand opening in Austin: Blue Mesa Tacos', score: 71, open: open('bm') }
+      ],
+      allBiz: ['hp', 'sr', 'lo', 'bm', 'kh'].map(deco),
+      biz: deco(st.bizId),
+      chips: CHIPS.map((c) => ({ label: c[1], pick: () => this.setState({ chip: c[0] }),
+        bg: st.chip === c[0] ? '#16202A' : '#FFFFFF', fg: st.chip === c[0] ? '#FFFFFF' : '#16202A', border: st.chip === c[0] ? '#16202A' : '#D5D8D3' })),
+      summaries: [
+        { n: uniq('expansion'), label: 'businesses showing expansion signals' },
+        { n: uniq('formation'), label: 'newly formed or opening businesses' },
+        { n: uniq('financing'), label: 'companies showing financing signals' },
+        { n: MULTI.length, label: 'businesses with 3+ high-intent signals' }
+      ],
+      feed,
+      questions: QA.map((q, i) => ({ text: q.text, pick: () => this.setState({ q: i }),
+        bg: st.q === i ? '#16202A' : '#FFFFFF', fg: st.q === i ? '#FFFFFF' : '#16202A', border: st.q === i ? '#16202A' : '#D5D8D3' })),
+      answer: { text: cur.answer.text, cites: cur.answer.cites, count: cur.answer.cites.length },
+      nav: NAV.map((n) => ({ label: n[1], go: () => this.setState({ screen: n[0] }),
+        fg: activeTab === n[0] ? '#1F4E8C' : '#555C63', weight: activeTab === n[0] ? '700' : '500', bar: activeTab === n[0] ? '#1F4E8C' : 'transparent' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

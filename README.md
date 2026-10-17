@@ -2,13 +2,11 @@
 
 AI-powered business relationship and referral platform.
 
-> **Status:** Early planning / setup
+> **Status:** Working app recovered from Claude (2026-10-17). See [`docs/recovery-report.md`](docs/recovery-report.md).
 
 ## Overview
 
-Referral Bridge helps businesses build, track, and grow referral relationships with partners.
-
-_TODO: Add a 2–3 sentence description of the problem it solves and who it's for._
+Referral Bridge finds businesses that are likely to need help right now (from signals like new formations, expansions, hiring and financing), predicts what they need, and bridges each need to the right specialist: bankers, CPAs, attorneys, insurance agents and other advisors. A business becomes a *lead* once one of its needs is bridged.
 
 ## Goals
 
@@ -33,12 +31,18 @@ AI assistants do **not** share conversations with each other. Anything important
 
 ```
 referral-bridge/
-├── README.md          # This file: project overview
+├── README.md
+├── src/
+│   └── index.html            # The whole app (single file: HTML, CSS, JavaScript)
 ├── docs/
-│   ├── decisions.md   # Log of key decisions and why
-│   ├── roadmap.md     # Planned features and priorities
-│   └── specs/         # Feature specifications
-└── src/               # Application code (once stack is chosen)
+│   ├── recovery-report.md    # What exists, what's missing, next milestone
+│   ├── data-model.md         # Collections and fields (the database schema)
+│   ├── automations/          # Instructions for the scheduled research bots
+│   ├── decisions.md          # Log of key decisions and why
+│   ├── roadmap.md            # Planned work
+│   └── specs/                # Feature specifications
+├── design/                   # Design mockups
+└── archive/                  # Earlier prototypes
 ```
 
 ## Decision log
@@ -51,4 +55,7 @@ Key decisions are recorded in [`docs/decisions.md`](docs/decisions.md).
 
 ## Getting started
 
-_Setup instructions will be added once the tech stack is chosen._
+Open `src/index.html` in any browser. No install or build step.
+
+- Opened as a plain file, it saves data on that device only and the AI "Ask" feature is off.
+- The live version runs inside Claude as an artifact, where data syncs across devices and AI questions work.

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bridgework</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F1F4F3;--surface:#fff;--ink:#12292B;--mute:#5A6E6E;--teal:#1F6F6B;--gold:#9A6407;--line:#D5DDDB;--heat:31,111,107;--bad:#B4442F;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1A1B;--surface:#162527;--ink:#E7F0EE;--mute:#93A8A6;--teal:#5DB8B1;--gold:#E3B04B;--line:#2A3D3F;--heat:93,184,177;--bad:#E07A66}}
+:root[data-theme="dark"]{--bg:#0E1A1B;--surface:#162527;--ink:#E7F0EE;--mute:#93A8A6;--teal:#5DB8B1;--gold:#E3B04B;--line:#2A3D3F;--heat:93,184,177;--bad:#E07A66}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 'Instrument Sans',system-ui,sans-serif;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3{font-family:'Bricolage Grotesque','Instrument Sans',system-ui,sans-serif;margin:0;letter-spacing:-.01em}
+main{max-width:640px;margin:0 auto;padding:16px}
+header h1{font-size:26px;font-weight:700}
+header p{margin:2px 0 14px;color:var(--mute)}
+h2{font-size:20px;font-weight:700;margin:22px 0 8px}
+h3{font-size:16px;font-weight:500}
+.stats{display:flex;margin:4px 0 14px}
+.stats div{flex:1;padding:0 12px;border-left:2px solid var(--line)}
+.stats div:first-child{border-left:0;padding-left:0}
+.stats b{display:block;font:700 22px 'Bricolage Grotesque',system-ui,sans-serif}
+.stats span{color:var(--mute);font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:10px}
+.seg button{border:0;background:transparent;color:var(--ink);padding:7px 14px;font:inherit;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--teal);color:var(--bg)}
+.mx{width:100%;border-collapse:separate;border-spacing:3px;table-layout:fixed}
+.mx th{font-weight:500;font-size:12px;color:var(--mute);padding:4px 0}
+.mx th.r{text-align:left;width:52px}
+.mx button{width:100%;height:46px;border:1px solid transparent;border-radius:6px;font:600 13px 'Instrument Sans',system-ui,sans-serif;cursor:pointer;color:var(--ink)}
+.mx button[aria-pressed="true"]{outline:2px solid var(--gold);outline-offset:1px}
+.hint{color:var(--mute);font-size:13px;margin:6px 0}
+.row{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:8px}
+.row .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.sub{color:var(--mute);font-size:13px}
+.tag{font-size:12px;border:1px solid var(--line);border-radius:99px;padding:1px 8px;color:var(--mute);white-space:nowrap}
+.pos{color:var(--teal);font-weight:600}.neg{color:var(--bad);font-weight:600}
+input,select,button.act{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-height:42px}
+.f{display:grid;gap:8px;margin:8px 0}
+.f.two{grid-template-columns:1fr 1fr}
+button.act{background:var(--teal);color:var(--bg);border-color:var(--teal);font-weight:600;cursor:pointer}
+button.ghost{background:transparent;color:var(--teal)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chips button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--teal);color:var(--bg);border-color:var(--teal)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;border:0;background:transparent;color:var(--mute);font:500 13px 'Instrument Sans',system-ui,sans-serif;padding:14px 4px;cursor:pointer;border-top:3px solid transparent}
+nav button[aria-current="page"]{color:var(--teal);border-top-color:var(--gold)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.ledger{width:100%;border-collapse:collapse;font-size:14px}
+.ledger td,.ledger th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right}
+.ledger th:first-child,.ledger td:first-child{text-align:left}
+.ledger th{font-weight:500;color:var(--mute);font-size:12px}
+</style>
+</head>
+<body>
+<main>
+<header><h1>Bridgework</h1><p>Referrals between the professionals your clients already trust.</p></header>
+<div id="app"></div>
+</main>
+<nav id="nav"></nav>
+<script>
+const TYPES={CPA:'CPA',ATT:'Attorney',CFA:'CFA',CON:'Consultant',BIZ:'Business',PRT:'Partner'};
+const TK=Object.keys(TYPES);
+const STATUS=['Sent','Accepted','Won','Lost'];
+const seed={rate:10,partners:[
+{id:1,status:'partner',name:'Gary Mehta',firm:'Gary Mehta, CPA, EA',t:'CPA',note:'IRS resolution and cross-border tax',loc:'Jersey City, NJ',tags:['tax resolution','IRS representation','offshore disclosure'],ind:['High-net-worth individuals','Small business owners'],svc:['Multi-state tax prep (NY/NJ)','IRS transcript & audit help','FBAR/FATCA voluntary disclosure']},
+{id:2,status:'partner',name:'Hardik Dattani',firm:'Dattani & Partners, CPA',t:'CPA',note:'Individual and business tax filing',loc:'Jersey City, NJ',tags:['tax planning','individual returns','business returns'],ind:['Small business owners','Professional services'],svc:['Individual tax filing','Business tax filing','Tax planning']},
+{id:3,status:'partner',name:'Joseph H. Gruner',firm:'Joseph H. Gruner, P.C.',t:'ATT',note:'Real estate closings and elder matters',loc:'White Plains, NY',tags:['real estate closings','estate planning','elder matters'],ind:['Homeowners','Retirees'],svc:['Real estate closings','Wills & powers of attorney','Elder law guidance']},
+{id:4,status:'partner',name:'Lauren Enea',firm:'Enea, Scanlan & Sirignano, LLP',t:'ATT',note:'Trust, estate and elder law',loc:'White Plains, NY',tags:['estate planning','elder law','trusts & probate'],ind:['High-net-worth individuals','Families with aging parents'],svc:['Trust & estate planning','Elder law & guardianship','Probate administration']},
+{id:5,status:'partner',name:'Peter Hamilton',firm:'Merrill Lynch',t:'CFA',note:'Wealth and investment management',loc:'Stamford, CT',tags:['wealth management','investment management'],ind:['High-net-worth individuals','Business owners'],svc:['Portfolio management','Retirement planning','Wealth transfer strategy']},
+{id:6,status:'partner',name:'Sharon Kaplove',firm:'Ameriprise Financial Services',t:'CFA',note:'Private wealth advisor',loc:'Stamford, CT',tags:['private wealth','retirement planning'],ind:['Retirees','Professionals'],svc:['Retirement income planning','Investment management','Financial planning']},
+{id:7,status:'partner',name:'Ryan Silvestre',firm:'NJ Small Business Development Centers',t:'CON',note:'Free small business advising',loc:'Newark, NJ',tags:['business plans','funding guidance','startup consulting'],ind:['Startups','Small business owners'],svc:['Business plan development','Funding & loan guidance','Startup consulting']},
+{id:8,status:'partner',name:'Cheryl Ade',firm:'Impact Consulting Enterprises',t:'CON',note:'Leadership and team consulting',loc:'Newark, NJ',tags:['leadership development','team consulting'],ind:['Small & mid-size businesses'],svc:['Leadership coaching','Team offsites','Organizational consulting']},
+{id:9,status:'partner',name:'John Cusmano',firm:'Cusmano Agency',t:'PRT',note:'Business, home and auto insurance',loc:'Fairfield, CT',tags:['business insurance','home & auto insurance'],ind:['Small business owners','Homeowners'],svc:['Business insurance','Home & auto insurance','Policy review & savings']},
+{id:10,status:'partner',name:'McLan Accounting',firm:'Business Accountant',t:'CPA',note:'Small business and probate accounting',loc:'Brooklyn, NY',tags:['small business accounting','LLC tax filing','probate accounting'],ind:['Small business owners','Medical practices'],svc:['LLC & business tax filing','Financial statement prep','Probate accounting']}],
+refs:[
+{id:1,f:1,to:4,client:'Patel Family',v:9000,s:'Won'},
+{id:2,f:3,to:1,client:'Ramirez Closing',v:4000,s:'Won'},
+{id:3,f:5,to:4,client:'Whitman Trust',v:15000,s:'Accepted'},
+{id:4,f:7,to:2,client:'Newark Startup Co',v:5000,s:'Won'},
+{id:5,f:9,to:2,client:'Fairfield Contractors',v:6000,s:'Sent'},
+{id:6,f:10,to:6,client:'Brooklyn Medical Clinic',v:20000,s:'Won'},
+{id:7,f:8,to:1,client:'Newark Nonprofit',v:3000,s:'Lost'},
+{id:8,f:4,to:5,client:'Estate wealth transfer',v:25000,s:'Won'},
+{id:9,f:6,to:9,client:'Kaplove client business',v:4000,s:'Won'},
+{id:10,f:2,to:3,client:'Montgomery St Properties',v:7000,s:'Won'}],
+coms:[
+{id:1,title:'Estate & elder law webinar',kind:'Webinar',ids:[3,4,5]},
+{id:2,title:'Small business owners breakfast',kind:'Client event',ids:[1,7,9]}]};
+const KEY='bridgework-v1';
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
+if(!S||!S.partners)S=JSON.parse(JSON.stringify(seed));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const ui={tab:'matrix',mode:'n',sel:null,q:'',ft:'',fl:'',fi:'',fs:'',fst:'all',open:false};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const P=id=>S.partners.find(p=>p.id===id)||{name:'Unknown',t:'PRT',firm:''};
+const money=n=>'$'+(n>=1000?(+(n/1000).toFixed(1))+'K':n);
+const nextId=a=>a.reduce((m,x)=>Math.max(m,x.id),0)+1;
+const tabs=[['matrix','Matrix'],['refs','Referrals'],['dir','Directory'],['co','Co-market']];
+
+function nav(){
+  $('nav').innerHTML=tabs.map(([k,l])=>`<button ${ui.tab===k?'aria-current="page"':''} onclick="go('${k}')">${l}</button>`).join('');
+}
+function go(t){ui.tab=t;ui.open=false;render();window.scrollTo(0,0)}
+
+function matrix(){
+  const m={};TK.forEach(a=>{m[a]={};TK.forEach(b=>m[a][b]={n:0,v:0,l:[]})});
+  S.refs.forEach(r=>{const c=m[P(r.f).t][P(r.to).t];c.n++;c.l.push(r);if(r.s==='Won')c.v+=r.v});
+  return m;
+}
+function ledger(){
+  const L={};S.partners.forEach(p=>L[p.id]={earned:0,owes:0});
+  S.refs.filter(r=>r.s==='Won').forEach(r=>{const fee=r.v*S.rate/100;if(L[r.f])L[r.f].earned+=fee;if(L[r.to])L[r.to].owes+=fee});
+  return L;
+}
+function viewMatrix(){
+  const m=matrix(),won=S.refs.filter(r=>r.s==='Won'),wv=won.reduce((a,r)=>a+r.v,0);
+  let max=1;TK.forEach(a=>TK.forEach(b=>{max=Math.max(max,ui.mode==='n'?m[a][b].n:m[a][b].v)}));
+  const head=TK.map(k=>`<th scope="col">${k}</th>`).join('');
+  const body=TK.map(a=>`<tr><th scope="row" class="r">${a}</th>`+TK.map(b=>{
+    const c=m[a][b],val=ui.mode==='n'?c.n:c.v,al=val?(0.14+0.76*val/max):0.05;
+    const sel=ui.sel&&ui.sel[0]===a&&ui.sel[1]===b;
+    return `<td><button aria-pressed="${!!sel}" aria-label="${TYPES[a]} to ${TYPES[b]}" onclick="pick('${a}','${b}')" style="background:rgba(var(--heat),${al.toFixed(2)});color:${al>.5?'var(--bg)':'var(--ink)'}">${val?(ui.mode==='n'?val:money(val)):''}</button></td>`}).join('')+'</tr>').join('');
+  let detail='<p class="hint">Rows send referrals, columns receive them. Tap a cell to see who is behind it.</p>';
+  if(ui.sel){const l=m[ui.sel[0]][ui.sel[1]].l;
+    detail=`<h3>${TYPES[ui.sel[0]]} to ${TYPES[ui.sel[1]]}</h3>`+(l.length?l.map(refRow).join(''):'<p class="hint">No referrals yet. Log one under Referrals.</p>');}
+  const L=ledger();
+  const lrows=S.partners.map(p=>{const x=L[p.id],net=x.earned-x.owes;
+    return `<tr><td>${esc(p.name)}</td><td>${money(Math.round(x.earned))}</td><td>${money(Math.round(x.owes))}</td><td class="${net>=0?'pos':'neg'}">${net<0?'-':''}${money(Math.abs(Math.round(net)))}</td></tr>`}).join('');
+  return `<div class="stats"><div><b>${S.refs.length}</b><span>Referrals</span></div><div><b>${money(wv)}</b><span>Won value</span></div><div><b>${money(Math.round(wv*S.rate/100))}</b><span>Fees at ${S.rate}%</span></div></div>
+  <div class="seg" role="group" aria-label="Matrix mode"><button aria-pressed="${ui.mode==='n'}" onclick="mode('n')">Count</button><button aria-pressed="${ui.mode==='v'}" onclick="mode('v')">Won value</button></div>
+  <table class="mx"><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table>${detail}
+  <h2>Fee ledger</h2>
+  <div class="f two" style="align-items:center"><span class="sub">Referral fee on won business</span><input id="rate" type="number" min="0" max="50" value="${S.rate}" onchange="setRate(this.value)" aria-label="Referral fee percent"></div>
+  <table class="ledger"><thead><tr><th>Partner</th><th>Earned</th><th>Owes</th><th>Net</th></tr></thead><tbody>${lrows}</tbody></table>
+  <p class="hint">Referral fees are restricted for CPAs, attorneys and some advisors in many places. Check your rules before paying or accepting fees.</p>
+  <button class="act ghost" style="width:auto;padding:6px 0" onclick="resetData()">Reset to sample data</button>`;
+}
+function resetData(){if(!confirm('This replaces everything in the app with the original sample data. Continue?'))return;S=JSON.parse(JSON.stringify(seed));save();ui.sel=null;render();}
+function pick(a,b){ui.sel=(ui.sel&&ui.sel[0]===a&&ui.sel[1]===b)?null:[a,b];render()}
+function mode(x){ui.mode=x;render()}
+function setRate(v){S.rate=Math.max(0,Math.min(50,+v||0));save();render()}
+
+function refRow(r){
+  const f=P(r.f),t=P(r.to);
+  return `<div class="row"><div class="top"><h3>${esc(r.client)}</h3><span class="pos">${money(r.v)}</span></div>
+  <div class="sub">${esc(f.name)} to ${esc(t.name)}</div>
+  <div class="f two"><select aria-label="Status" onchange="setStatus(${r.id},this.value)">${STATUS.map(s=>`<option ${s===r.s?'selected':''}>${s}</option>`).join('')}</select><button class="act ghost" onclick="delRef(${r.id})">Delete</button></div></div>`;
+}
+function setStatus(id,s){S.refs.find(r=>r.id===id).s=s;save();render()}
+function delRef(id){S.refs=S.refs.filter(r=>r.id!==id);save();render()}
+function opts(sel){return S.partners.map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.name)} (${p.t})</option>`).join('')}
+function viewRefs(){
+  const form=ui.open?`<div class="row"><div class="f"><select id="rf" aria-label="From">${opts(S.partners[0]&&S.partners[0].id)}</select><select id="rt" aria-label="To">${opts(S.partners[1]&&S.partners[1].id)}</select><input id="rc" placeholder="Client name"><input id="rv" type="number" min="0" placeholder="Expected annual fee ($)"><button class="act" onclick="addRef()">Log referral</button></div></div>`:'';
+  return `<h2 style="margin-top:4px">Referrals</h2><button class="act" style="margin-bottom:10px" onclick="ui.open=!ui.open;render()">${ui.open?'Cancel':'Log a referral'}</button>${form}`+
+  (S.refs.length?[...S.refs].reverse().map(refRow).join(''):'<p class="hint">No referrals yet. Log the first one to start your matrix.</p>');
+}
+function addRef(){
+  const f=+$('rf').value,to=+$('rt').value,c=$('rc').value.trim(),v=Math.max(0,+$('rv').value||0);
+  if(!c||f===to){alert('Enter a client name and choose two different partners.');return}
+  S.refs.push({id:nextId(S.refs),f,to,client:c,v,s:'Sent'});save();ui.open=false;render();
+}
+
+function hi(text,q){if(!q)return esc(text);const i=text.toLowerCase().indexOf(q.toLowerCase());if(i<0)return esc(text);
+  return esc(text.slice(0,i))+'<mark style="background:rgba(var(--heat),.28);color:inherit;border-radius:3px;padding:0 1px">'+esc(text.slice(i,i+q.length))+'</mark>'+esc(text.slice(i+q.length));}
+function score(p,q){
+  if(!q)return 0.001;
+  let s=0;
+  if(p.name.toLowerCase().includes(q))s+=5;
+  if(p.firm.toLowerCase().includes(q))s+=3;
+  if((p.loc||'').toLowerCase().includes(q))s+=3;
+  if(TYPES[p.t].toLowerCase().includes(q))s+=2;
+  (p.tags||[]).forEach(t=>{const tl=t.toLowerCase();if(tl===q)s+=7;else if(tl.includes(q))s+=4;});
+  (p.svc||[]).forEach(t=>{const tl=t.toLowerCase();if(tl===q)s+=7;else if(tl.includes(q))s+=5;});
+  (p.ind||[]).forEach(t=>{const tl=t.toLowerCase();if(tl===q)s+=6;else if(tl.includes(q))s+=4;});
+  if(p.note.toLowerCase().includes(q))s+=1;
+  if((p.raw||'').toLowerCase().includes(q))s+=2;
+  return s;
+}
+function locations(){return [...new Set(S.partners.filter(p=>!ui.fs||stateOf(p.loc)===ui.fs).map(p=>p.loc).filter(Boolean))].sort()}
+function stateOf(loc){const m=/,\s*([A-Z]{2})$/.exec(loc||'');return m?m[1]:''}
+function industries(){return [...new Set(S.partners.flatMap(p=>p.ind||[]))].sort()}
+function dirList(){
+  const q=ui.q.trim().toLowerCase();
+  let l=S.partners.filter(p=>!ui.ft||p.t===ui.ft).filter(p=>!ui.fs||stateOf(p.loc)===ui.fs).filter(p=>!ui.fl||p.loc===ui.fl).filter(p=>!ui.fi||(p.ind||[]).includes(ui.fi)).filter(p=>ui.fst==='all'||(p.status||'partner')===ui.fst);
+  if(q){l=l.map(p=>({p,s:score(p,q)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>x.p)}
+  if(!l.length)return '<p class="hint">No partners match. Try a different term, or clear a filter.</p>';
+  return l.map(p=>{const s=S.refs.filter(r=>r.f===p.id).length,r=S.refs.filter(r=>r.to===p.id).length;
+    const tags=(p.tags||[]).map(t=>`<span class="tag">${hi(t,q)}</span>`).join(' ');
+    const svc=(p.svc||[]).length?`<div class="sub" style="margin-top:4px"><b style="color:var(--ink);font-weight:600">Services:</b> ${p.svc.map(x=>hi(x,q)).join(', ')}</div>`:'';
+    const ind=(p.ind||[]).length?`<div class="sub"><b style="color:var(--ink);font-weight:600">Works with:</b> ${p.ind.map(x=>hi(x,q)).join(', ')}</div>`:'';
+    const stTag=(p.status||'partner')==='prospect'?'<span class="tag" style="border-color:var(--gold);color:var(--gold)">Prospect</span>':'';
+    const raw=p.raw?`<details style="margin-top:6px"><summary style="color:var(--teal);cursor:pointer;font-size:13px">Research notes</summary><p class="sub" style="white-space:pre-wrap;margin:6px 0 0">${hi(p.raw,q)}</p></details>`:'';
+    return `<div class="row"><div class="top"><h3>${hi(p.name,q)}</h3><span style="display:flex;gap:4px"><span class="tag">${TYPES[p.t]}</span>${stTag}</span></div>
+    <div class="sub">${hi(p.firm,q)}${p.loc?' · '+hi(p.loc,q):''}</div>
+    <div class="sub">${hi(p.note,q)}</div>
+    ${svc}${ind}
+    <div class="chips" style="margin:8px 0 2px">${tags}</div>
+    <div class="sub">Sent ${s}, received ${r}</div>${raw}</div>`}).join('');
+}
+function viewDir(){
+  const form=ui.open?`<div class="row"><div class="f"><input id="pn" placeholder="Name"><input id="pf" placeholder="Firm"><select id="pt">${TK.map(k=>`<option value="${k}">${TYPES[k]}</option>`).join('')}</select><select id="pst"><option value="partner">Partner (vetted, active)</option><option value="prospect">Prospect (not yet vetted)</option></select><input id="pl" placeholder="City, state (NJ, NY, or CT)"><input id="pd" placeholder="Short description"><input id="ptags" placeholder="Specialty tags, comma separated"><input id="psvc" placeholder="Services or products offered, comma separated"><input id="pind" placeholder="Client industries served, comma separated"><textarea id="praw" rows="4" placeholder="Paste anything else you know about them - a bio, LinkedIn summary, website copy, notes from a call. This stays attached to their profile as raw research material." style="font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;resize:vertical"></textarea><button class="act" onclick="addPartner()">Add</button></div></div>`:'';
+  const locOpts=locations().map(l=>`<option value="${esc(l)}" ${ui.fl===l?'selected':''}>${esc(l)}</option>`).join('');
+  const indOpts=industries().map(l=>`<option value="${esc(l)}" ${ui.fi===l?'selected':''}>${esc(l)}</option>`).join('');
+  return `<h2 style="margin-top:4px">Search the directory</h2>
+  <input id="q" placeholder="Search by name, service, industry, or location" value="${esc(ui.q)}" oninput="ui.q=this.value;$('dl').innerHTML=dirList()" aria-label="Search partners">
+  <div class="chips"><button aria-pressed="${!ui.ft}" onclick="ft('')">All types</button>${TK.map(k=>`<button aria-pressed="${ui.ft===k}" onclick="ft('${k}')">${TYPES[k]}</button>`).join('')}</div>
+  <div class="chips"><button aria-pressed="${!ui.fs}" onclick="fs('')">Tri-state</button><button aria-pressed="${ui.fs==='NJ'}" onclick="fs('NJ')">NJ</button><button aria-pressed="${ui.fs==='NY'}" onclick="fs('NY')">NY</button><button aria-pressed="${ui.fs==='CT'}" onclick="fs('CT')">CT</button></div>
+  <div class="chips"><button aria-pressed="${ui.fst==='all'}" onclick="fst('all')">All statuses</button><button aria-pressed="${ui.fst==='partner'}" onclick="fst('partner')">Partners</button><button aria-pressed="${ui.fst==='prospect'}" onclick="fst('prospect')">Prospects</button></div>
+  <div class="f two" style="margin-top:0"><select aria-label="Filter by location" onchange="fl(this.value)"><option value="">Any city</option>${locOpts}</select><select aria-label="Filter by client industry" onchange="fi(this.value)"><option value="">Any industry served</option>${indOpts}</select></div>
+  <button class="act" style="margin-bottom:10px" onclick="ui.open=!ui.open;render()">${ui.open?'Cancel':'Add a partner or prospect'}</button>${form}<div id="dl">${dirList()}</div>`;
+}
+function ft(k){ui.ft=k;render()}
+function fs(k){ui.fs=k;ui.fl='';render()}
+function fl(v){ui.fl=v;render()}
+function fi(v){ui.fi=v;render()}
+function fst(k){ui.fst=k;render()}
+function addPartner(){
+  const n=$('pn').value.trim();if(!n){alert('Enter a name.');return}
+  const tags=$('ptags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const svc=$('psvc').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const ind=$('pind').value.split(',').map(s=>s.trim()).filter(Boolean);
+  S.partners.push({id:nextId(S.partners),name:n,firm:$('pf').value.trim(),t:$('pt').value,status:$('pst').value,loc:$('pl').value.trim(),note:$('pd').value.trim(),tags,svc,ind,raw:$('praw').value.trim()});save();ui.open=false;render();
+}
+
+function viewCo(){
+  const form=ui.open?`<div class="row"><div class="f"><input id="ct" placeholder="Title"><select id="ck"><option>Webinar</option><option>Client event</option><option>Article</option><option>Shared offer</option></select><button class="act" onclick="addCo()">Create</button></div></div>`:'';
+  const items=S.coms.map(c=>{const avail=S.partners.filter(p=>!c.ids.includes(p.id));
+    return `<div class="row"><div class="top"><h3>${esc(c.title)}</h3><span class="tag">${esc(c.kind)}</span></div>
+    <div class="sub">${c.ids.length?c.ids.map(i=>esc(P(i).name)).join(', '):'No partners yet'}</div>
+    ${avail.length?`<div class="f"><select aria-label="Invite partner" onchange="invite(${c.id},this.value)"><option value="">Invite a partner</option>${avail.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></div>`:''}</div>`}).join('');
+  return `<h2 style="margin-top:4px">Co-market</h2><button class="act" style="margin-bottom:10px" onclick="ui.open=!ui.open;render()">${ui.open?'Cancel':'Start a joint project'}</button>${form}`+(items||'<p class="hint">Nothing here yet. Start a webinar, event or shared offer with partners.</p>');
+}
+function invite(id,pid){if(!pid)return;S.coms.find(c=>c.id===id).ids.push(+pid);save();render()}
+function addCo(){const t=$('ct').value.trim();if(!t){alert('Enter a title.');return}S.coms.push({id:nextId(S.coms),title:t,kind:$('ck').value,ids:[]});save();ui.open=false;render()}
+
+function render(){
+  nav();
+  $('app').innerHTML={matrix:viewMatrix,refs:viewRefs,dir:viewDir,co:viewCo}[ui.tab]();
+}
+render();
+</script>
+</body>
+</html>

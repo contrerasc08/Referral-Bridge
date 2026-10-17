@@ -1,0 +1,20 @@
+# Secrets: never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Dependencies
+node_modules/
+
+# Data exports (contain real people's contact details)
+*.csv
+exports/
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
