@@ -53,5 +53,6 @@ Demo mode swaps in made-up sample businesses, specialists, bridges, drafts and b
 
 1. Edit `src/index.html` on a branch and open a pull request.
 2. Before publishing, check the script's syntax: extract the main `<script>` block and run `node --check` on it.
+   - Browser tests for the PR #1 review fixes live in `tests/test_review_fixes.py` (Playwright with a mock database that can be forced to fail). Run `python3 tests/test_review_fixes.py`.
 3. Test at a 390 px width in light and dark mode. Seed `localStorage["rb-data"]`, or use demo mode.
 4. After merging, republish the artifact from `src/index.html` so the live app and the repo stay identical.

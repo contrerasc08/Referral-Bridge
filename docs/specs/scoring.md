@@ -18,7 +18,7 @@ decay  = 0.5 ^ (age / half-life)        (ignored entirely after 4 half-lives)
 | USER-ENTERED | 0.8 |
 | AI INFERENCE | 0.5 |
 
-**Learned multiplier.** Once at least 5 bridges with a given signal type have reached a decision (Introduced, Meeting, Closed or Rejected), that type's weight is scaled between ×0.5 and ×1.5, depending on how its close rate compares with the overall close rate.
+**Learned multiplier.** Only **finished** referrals teach the scoring: status **Closed** (won) or **Rejected** (lost). Introduced and Meeting bridges are still open, so they don't count. Learning switches on once there are at least 10 finished referrals in total. A signal type then needs at least 5 finished referrals of its own, and its weight is scaled between ×0.5 and ×1.5 depending on how its close rate compares with the overall close rate.
 
 ## 2. Opportunity Score (`opportunity`): how worth contacting is this business right now? (0–100)
 
@@ -38,11 +38,15 @@ The result is clamped to 0–100. The business page shows each line under "Tap f
 
 Each active signal adds probability to the needs listed in its type. The probabilities combine as `1 − Π(1 − p)`. The 20 need ids are in `NEED_DEFS`, each mapped to the professions that can meet it. Active news can then move a need by up to ±15 points (`NEWS_CAP`). The app keeps needs at 20% or higher, up to the top 8.
 
-## 4. Match Score (`score(b, c)`): how right is this specialist for this business? (0–100)
+## 4. Match Score (`score(b, c, need?)`): how right is this specialist for this business? (0–100)
+
+- **With a `need`** (used for bridges), the specialist is scored against that one need. If their profession doesn't serve it, the score is 0, and need fit uses that need's own confidence.
+- **Without a `need`** (used for suggestions and search), need fit uses the top predicted need their profession serves.
+- **Flagged specialists score 0.** If the Specialist checker set `profile.vetting.status` to `flag`, the score is 0 and the reason shows the checker's note.
 
 | Dimension | Weight | How |
 |---|---|---|
-| Need fit | 35% | Confidence of the top predicted need this profession serves. A profession that's only a typical need for the industry gets 40. Otherwise the match score is 0. |
+| Need fit | 35% | Confidence of the given need, or of the top need this profession serves. Without a given need, a profession that's only a typical need for the industry gets 40. Otherwise the match score is 0. |
 | Location | 20% | Same county 100, serves the county 85, serves the state 70, same home state 55, other 20 |
 | Expertise | 15% | Healthcare specialist for a healthcare business 100, specialty words matching the industry 55 + 15 per hit, otherwise 40 |
 | Stage fit | 10% | Specialist's `bestStage` equals the business lifecycle 100, any stage 60, mismatch 30 |
@@ -51,7 +55,11 @@ Each active signal adds probability to the needs listed in its type. The probabi
 
 ## 5. Bridges (`bridgesFor`)
 
-For each predicted need, the app finds the best non-sample specialist whose profession serves that need and whose Match Score is at least **50** (`THRESHOLD`). Every need that finds one is a **bridge**. A business with one or more bridges shows as **Lead** / "Bridge ready".
+For each predicted need, the app finds the best specialist whose profession serves that need, scoring each one **against that specific need**, and keeps the best if its Match Score is at least **50** (`THRESHOLD`). Sample and flagged specialists are skipped. Every need that finds one is a **bridge**. A business with one or more bridges shows as **Lead** / "Bridge ready".
+
+So one specialist can carry different scores for different needs. A banker might score 53 for business banking but 50 for commercial real estate.
+
+**Approving a bridge** (`approve`) to a flagged specialist is blocked with a message. Dismissing a suggestion is still allowed.
 
 ## Industry climate
 

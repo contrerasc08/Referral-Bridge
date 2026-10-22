@@ -31,6 +31,7 @@
   --warn:#E0A54A; --danger:#F07A6E; --danger-soft:#3A1D1B; color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:calc(var(--nav-h) + 16px)}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -393,14 +394,21 @@ function strip(o){const c={...o};delete c.id;return JSON.parse(JSON.stringify(c)
 async function put(k,obj){
   obj.updatedAt=new Date().toISOString();
   if(!obj.createdAt)obj.createdAt=obj.updatedAt;
-  const i=S[k].findIndex(x=>x.id===obj.id); if(i>=0)S[k][i]=obj; else S[k].push(obj); invalidate();
-  if(db){try{await db.collection(COL[k]).doc(obj.id).set(strip(obj))}catch(e){toast(e&&e.code==="quota_exceeded"?"Storage is full. Delete some records.":"Couldn't save. Check your connection and try again.")}}
-  else{saveLocal();render()}
+  const i=S[k].findIndex(x=>x.id===obj.id), prev=i>=0?S[k][i]:null; if(i>=0)S[k][i]=obj; else S[k].push(obj); invalidate();
+  if(db){try{await db.collection(COL[k]).doc(obj.id).set(strip(obj));return true}catch(e){
+    /* the write failed: put the previous record back so the screen matches what's actually saved */
+    const j=S[k].findIndex(x=>x.id===obj.id);if(j>=0){if(prev)S[k][j]=prev;else S[k].splice(j,1)}invalidate();render();
+    toast(e&&e.code==="quota_exceeded"?"Storage is full. Delete some records.":"Couldn't save. Your change was undone. Check your connection and try again.");return false}}
+  else{saveLocal();render();return true}
 }
 async function del(k,id){
+  const i=S[k].findIndex(x=>x.id===id), prev=i>=0?S[k][i]:null;
   S[k]=S[k].filter(x=>x.id!==id); invalidate();
-  if(db){try{await db.collection(COL[k]).doc(id).delete()}catch(e){toast("Couldn't delete. Try again.")}}
-  else{saveLocal();render()}
+  if(db){try{await db.collection(COL[k]).doc(id).delete();return true}catch(e){
+    /* the delete failed: restore the record so it doesn't look deleted when it isn't */
+    if(prev&&!S[k].some(x=>x.id===id))S[k].splice(Math.min(i,S[k].length),0,prev);invalidate();render();
+    toast("Couldn't delete. The record is still there. Try again.");return false}}
+  else{saveLocal();render();return true}
 }
 function connect(){
   if(DEMO){$("#demobar").hidden=false;$("#sync").textContent="Demo data";return}
@@ -543,7 +551,7 @@ function opportunity(b){
   for(const {s,e} of active){
     const p=Math.round(e.pts);total+=p;provs.add(s.provider||"user");if(e.age<=30)recent++;
     rows.push({pts:p,label:e.t.l,sig:s,note:[s.providerName||"You",e.age<1?"today":e.age+" days old",e.decay<.99?"decay ×"+e.decay.toFixed(2):"",
-      s.provenance==="VERIFIED"?"verified":s.provenance.toLowerCase()+" ×"+e.pf,e.lm!==1?`learned ×${e.lm.toFixed(2)} from ${e.ln} intros`:""].filter(Boolean).join(" · ")});
+      s.provenance==="VERIFIED"?"verified":s.provenance.toLowerCase()+" ×"+e.pf,e.lm!==1?`learned ×${e.lm.toFixed(2)} from ${e.ln} closed or rejected referrals`:""].filter(Boolean).join(" · ")});
   }
   if(provs.size>1){const c=Math.min(15,(provs.size-1)*5);total+=c;rows.push({pts:c,label:"Corroboration",note:provs.size+" independent sources agree"})}
   if(recent>=3){total+=5;rows.push({pts:5,label:"Change intensity",note:recent+" signals in the last 30 days"})}
@@ -575,11 +583,16 @@ function needsFor(b){
   return M.needs[b.id]=fin;
 }
 /* Match Score: how appropriate is THIS advisor for THIS business. Separate from Opportunity. */
-function score(b,c){
+function isFlagged(c){return!!(c&&c.profile&&c.profile.vetting&&c.profile.vetting.status==="flag")}
+function flagNote(c){const v=(c&&c.profile&&c.profile.vetting)||{};return v.note||"A public record showed an issue."}
+/* need (optional): score this specialist against one specific need, as bridges do. Without it, the top need they serve is used. */
+function score(b,c,need){
+  if(isFlagged(c))return{score:0,why:["Flagged by the Specialist checker: "+flagNote(c)],dims:[],flagged:true};
   const ind=b.industry||"Other", typical=NEEDS[ind]||NEEDS.Other, why=[], needs=needsFor(b);
-  const served=needs.filter(n=>n.profs.includes(c.profession));
+  const served=need?(need.profs.includes(c.profession)?[need]:[]):needs.filter(n=>n.profs.includes(c.profession));
   let nf;
-  if(served.length){nf=served[0].conf;why.push(`Fits predicted need: ${served[0].label.toLowerCase()} (${served[0].conf}%)`)}
+  if(served.length){nf=served[0].conf;why.push(`Fits ${need?"this":"predicted"} need: ${served[0].label.toLowerCase()} (${served[0].conf}%)`)}
+  else if(need)return{score:0,why:[`${c.profession||"This profession"} doesn't serve ${need.label.toLowerCase()}`],dims:[]};
   else if(typical.includes(c.profession)){nf=40;why.push(`${c.profession} is a typical need for ${ind.toLowerCase()} businesses`)}
   else return{score:0,why:["No predicted or typical need for this profession"],dims:[]};
   const cty=(b.county||"").trim().toLowerCase(), home=(c.county||"").trim().toLowerCase();
@@ -819,11 +832,11 @@ async function saveContact(bizId){
 }
 
 /* ---------- Learning loop: signal weights adjust from real outcomes ---------- */
-const MIN_LEARN=5;  /* intros per signal type before it can move */
+const MIN_LEARN=5;  /* closed or rejected referrals per signal type before it can move */
 function sigTypesOfMatch(m){const b=byId("biz",m.bizId);return m.sigTypes||(b?[...new Set(signalsFor(b).map(s=>s.type))]:[])}
 function learnedWeights(){
   const M=memo();if(M.learn)return M.learn;
-  const dec=S.match.filter(m=>["Introduced","Meeting","Closed","Rejected"].includes(m.status));
+  const dec=S.match.filter(m=>["Closed","Rejected"].includes(m.status)); /* only final outcomes teach; Introduced and Meeting are still open */
   const won=dec.filter(m=>m.status==="Closed").length, base=dec.length?won/dec.length:0, agg={}, w={};
   for(const m of dec)for(const t of sigTypesOfMatch(m)){const a=agg[t]=agg[t]||{n:0,won:0};a.n++;if(m.status==="Closed")a.won++}
   const on=!settings().learnOff&&dec.length>=MIN_LEARN*2;
@@ -838,8 +851,8 @@ function learnPanel(){
   const L=learnedWeights(), rows=Object.entries(L.all).sort((a,b)=>b[1].mult-a[1].mult);
   const need=Math.max(0,MIN_LEARN*2-L.dec);
   return`<section class="learn"><h3>How scores are learning</h3>
-  <p class="lede">${L.off?"Learning is off. Signal weights use the defaults.":need?`Learning starts after ${need} more recorded intro${need===1?"":"s"} (Introduced, Meeting, Closed or Rejected). Until then, signal weights use the defaults.`:`Signal types that led to closed intros more often than your average (${Math.round(L.base*100)}%) now count more; ones that didn't count less. Each needs at least ${MIN_LEARN} intros, and changes are capped between ×0.5 and ×1.5.`}</p>
-  ${rows.length?`<div class="tbl-wrap"><table><thead><tr><th>Signal</th><th>Intros</th><th>Closed</th><th>Weight</th></tr></thead><tbody>${rows.map(([t,v])=>`<tr><td>${esc((SIGNAL_TYPES[t]||SIGNAL_TYPES.other).l)}</td><td class="n">${v.n}</td><td class="n">${v.won}</td><td class="n">×${v.mult.toFixed(2)}</td></tr>`).join("")}</tbody></table></div>`:""}
+  <p class="lede">${L.off?"Learning is off. Signal weights use the defaults.":need?`Learning starts after ${need} more finished referral${need===1?"":"s"} (Closed or Rejected). Until then, signal weights use the defaults.`:`Signal types whose referrals closed more often than your average close rate (${Math.round(L.base*100)}%) now count more; ones that didn't count less. Each needs at least ${MIN_LEARN} closed or rejected referrals, and changes are capped between ×0.5 and ×1.5.`}</p>
+  ${rows.length?`<div class="tbl-wrap"><table><thead><tr><th>Signal</th><th>Finished</th><th>Closed</th><th>Weight</th></tr></thead><tbody>${rows.map(([t,v])=>`<tr><td>${esc((SIGNAL_TYPES[t]||SIGNAL_TYPES.other).l)}</td><td class="n">${v.n}</td><td class="n">${v.won}</td><td class="n">×${v.mult.toFixed(2)}</td></tr>`).join("")}</tbody></table></div>`:""}
   <div class="row" style="margin-top:8px"><button class="btn" data-learn="1">${L.off?"Turn learning on":"Turn learning off"}</button></div></section>`;
 }
 
@@ -1123,7 +1136,7 @@ function industryBrief(b){
 /* ---------- Guide: setup checklist, daily routine, labels, commands ---------- */
 function setupSteps(){
   const realBiz=S.biz.filter(b=>!b.sample).length, realCoi=S.coi.filter(c=>!c.sample).length, age=newsAge();
-  const decided=S.match.filter(m=>["Introduced","Meeting","Closed","Rejected"].includes(m.status)&&!(byId("biz",m.bizId)||{}).sample).length;
+  const decided=S.match.filter(m=>["Closed","Rejected"].includes(m.status)&&!(byId("biz",m.bizId)||{}).sample).length;
   const q=researchQueue().length, sample=[...S.biz,...S.coi].some(x=>x.sample);
   return[
     {done:realCoi>=3,t:"Add your real specialists",d:`${realCoi} so far. Matching needs at least 3 bankers, CPAs, attorneys or other specialists you trust, ideally with counties or states served.`,go:"coi",btn:"Add advisors"},
@@ -1131,7 +1144,7 @@ function setupSteps(){
     {done:!sample,t:"Remove the sample records",d:sample?"Sample businesses and advisors still mix into scores and suggestions. Remove them at the bottom of Pipeline.":"Done.",go:"pipeline",btn:"Go to Pipeline"},
     {done:age!==null&&age<=NEWS_STALE,t:"Keep news and industry climate current",d:age===null?"No news yet.":`Last updated ${age} day${age===1?"":"s"} ago. Refresh monthly, right after the jobs report (first Friday).`,go:"climate",btn:"See climate"},
     {done:q<10,t:"Keep the research queue short",d:`${q} business${q===1?"":"es"} waiting for a sourced profile and contact.`,go:"queue",btn:"Open queue"},
-    {done:decided>=10,t:"Record outcomes on 10 introductions",d:`${decided} recorded. Scores start learning what actually closes after 10.`,go:"pipeline",btn:"Open Pipeline"}];
+    {done:decided>=10,t:"Record outcomes on 10 introductions",d:`${decided} closed or rejected so far. Scores start learning what actually closes after 10.`,go:"pipeline",btn:"Open Pipeline"}];
 }
 function viewGuide(){
   const st=setupSteps(), n=st.filter(s=>s.done).length;
@@ -1260,7 +1273,7 @@ function aOrAn(w){return(/^[aeiou]/i.test(w)?"an ":"a ")+w}
 function bridgesFor(b){
   const M=memo();M.br=M.br||{};if(M.br[b.id])return M.br[b.id];
   const out=[];if(!b.sample)for(const n of needsFor(b)){let best=null;
-    for(const c of S.coi){if(c.sample||!n.profs.includes(c.profession))continue;const r=score(b,c);if(r.score>=THRESHOLD&&(!best||r.score>best.score))best={c,score:r.score}}
+    for(const c of S.coi){if(c.sample||isFlagged(c)||!n.profs.includes(c.profession))continue;const r=score(b,c,n);if(r.score>=THRESHOLD&&(!best||r.score>best.score))best={c,score:r.score}}
     if(best)out.push({need:n,c:best.c,score:best.score})}
   return M.br[b.id]=out;
 }
@@ -1636,7 +1649,7 @@ function viewPipeline(){
   return h;
 }
 function learnTable(){
-  const decided=S.match.filter(m=>["Introduced","Meeting","Closed","Rejected"].includes(m.status));
+  const decided=S.match.filter(m=>["Closed","Rejected"].includes(m.status));
   if(!decided.length)return"";
   const rows=[];
   const group=(label,keyFn,list)=>{const g={};for(const m of decided){const k=keyFn(m);if(!k)continue;(g[k]=g[k]||{n:0,won:0,val:0});g[k].n++;if(m.status==="Closed"){g[k].won++;g[k].val+=Number(m.dealValue)||0}}
@@ -1645,7 +1658,7 @@ function learnTable(){
   group("Profession",m=>(byId("coi",m.coiId)||{}).profession);
   {const g={};for(const m of decided)for(const t of sigTypesOfMatch(m)){const k=(SIGNAL_TYPES[t]||SIGNAL_TYPES.other).l;(g[k]=g[k]||{n:0,won:0});g[k].n++;if(m.status==="Closed")g[k].won++}
    Object.entries(g).sort((a,b)=>b[1].won/b[1].n-a[1].won/a[1].n).forEach(([k,v])=>rows.push(`<tr><td>Signal</td><td>${esc(k)}</td><td class="n">${v.n}</td><td class="n">${v.won}</td><td class="n">${Math.round(100*v.won/v.n)}%</td></tr>`))}
-  return `<section class="learn"><h3>What's working</h3><p class="lede">Introductions made, and how many closed, by trigger, advisor profession and signal.</p>
+  return `<section class="learn"><h3>What's working</h3><p class="lede">Finished referrals (closed or rejected), and how many closed, by trigger, advisor profession and signal.</p>
   <div class="tbl-wrap"><table><thead><tr><th>By</th><th>Value</th><th>Intros</th><th>Closed</th><th>Rate</th></tr></thead><tbody>${rows.join("")}</tbody></table></div></section>`;
 }
 function suggestList(list){
@@ -1668,7 +1681,7 @@ function coiList(){
   if(!items.length)return`<div class="empty"><p>No advisors match "${esc(q.coi)}".</p></div>`;
   return items.map(c=>{const mine=S.match.filter(m=>m.coiId===c.id);const won=mine.filter(m=>m.status==="Closed").length;
     return `<button class="card c" data-coi="${c.id}"><div class="name">${esc(c.name)}</div><div class="meta">${esc([c.firm,c.county&&c.county+" County"].filter(Boolean).join(", "))}</div>
-    <span class="tag c">${esc(c.profession||"Other")}</span>${c.healthcare?`<span class="tag c">Healthcare focus</span>`:""}${ratingTags(c)}${mine.length?`<span class="tag s">${won} closed of ${mine.filter(m=>m.status!=="Dismissed").length}</span>`:""}${c.lead?`<span class="tag c">New business</span>`:""}${c.sample?`<span class="tag s">Sample</span>`:""}</button>`}).join("");
+    <span class="tag c">${esc(c.profession||"Other")}</span>${c.healthcare?`<span class="tag c">Healthcare focus</span>`:""}${isFlagged(c)?`<span class="tag due">Flagged</span>`:""}${ratingTags(c)}${mine.length?`<span class="tag s">${won} closed of ${mine.filter(m=>m.status!=="Dismissed").length}</span>`:""}${c.lead?`<span class="tag c">New business</span>`:""}${c.sample?`<span class="tag s">Sample</span>`:""}</button>`}).join("");
 }
 const Q_INDUSTRY=[["Dental practice","Healthcare - dental"],["Medical practice","Healthcare - medical"],["Therapy or rehab","Healthcare - therapy and rehab"],["Mental health practice","Healthcare - behavioral health"],["Veterinary clinic","Veterinary"],["Retail shop","Retail"],["Restaurant or food","Food service"],["Construction or trades","Construction"],["Manufacturing","Manufacturing"],["Trucking or logistics","Transportation and logistics"],["Tech or software","Technology and software"],["Professional services","Professional services"],["Salon, spa or fitness","Personal services"],["Childcare or education","Education and childcare"],["Real estate or holding","Real estate or holding"],["Something else","Other"]];
 const Q_STAGE=[["Just starting","Starting out","New formation"],["Growing or expanding","Growing","Expansion"],["Established and steady","Established",""],["Planning a sale or retirement","Planning exit","Succession"]];
@@ -2055,8 +2068,9 @@ function newMatchSheet(){
   <div class="sheet-foot"><span></span><div class="row"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="createMatch">Add match</button></div></div>`);
 }
 async function approve(bizId,coiId,sc,status="Approved"){
-  const b=byId("biz",bizId), o=b?opportunity(b):null;
-  await put("match",{id:uid(),bizId,coiId,score:Number(sc)||0,status,trigger:b&&b.trigger||"",opp:o?o.score:0,sigTypes:o?[...new Set(o.active.map(s=>s.type))]:[],history:[{status,at:new Date().toISOString()}]});
+  const b=byId("biz",bizId), o=b?opportunity(b):null, c=byId("coi",coiId);
+  if(status==="Approved"&&isFlagged(c)){toast(`${c.name} was flagged by the Specialist checker, so new bridges to them are blocked.`);return false}
+  return await put("match",{id:uid(),bizId,coiId,score:Number(sc)||0,status,trigger:b&&b.trigger||"",opp:o?o.score:0,sigTypes:o?[...new Set(o.active.map(s=>s.type))]:[],history:[{status,at:new Date().toISOString()}]});
 }
 
 /* ---------- CSV import ---------- */
@@ -2269,7 +2283,7 @@ document.addEventListener("click",async e=>{
   if(d.match){matchSheet(byId("match",d.match));return}
   if(d.biz){recordForm("biz",byId("biz",d.biz));return}
   if(d.coi){recordForm("coi",byId("coi",d.coi));return}
-  if(d.approve){const [b,c,s]=d.approve.split("|");await approve(b,c,s);toast("Approved. It's in your pipeline.");if(db)render();return}
+  if(d.approve){const [b,c,s]=d.approve.split("|");if(await approve(b,c,s))toast("Approved. It's in your pipeline.");if(db)render();return}
   if(d.dismiss){const [b,c]=d.dismiss.split("|");await approve(b,c,0,"Dismissed");toast("Dismissed");if(db)render();return}
   if(d.save){const [k,id]=d.save.split("|");saveRecord(k,id);return}
   if(d.del){const [k,id]=d.del.split("|");const noun=k==="biz"?"business":k==="coi"?"advisor":"match";
@@ -2296,7 +2310,7 @@ document.addEventListener("click",async e=>{
     case"newMatch":newMatchSheet();break;
     case"createMatch":{const b=$("#f_mb").value,c=$("#f_mc").value;
       if(S.match.some(m=>m.bizId===b&&m.coiId===c)){$("#err_pair").textContent="This pair is already matched. Open it from the pipeline.";return}
-      const sc=score(byId("biz",b),byId("coi",c)).score;closeSheet();await approve(b,c,sc);stage="Approved";toast("Match added");if(db)render();break}
+      const sc=score(byId("biz",b),byId("coi",c)).score;closeSheet();if(await approve(b,c,sc)){stage="Approved";toast("Match added")}if(db)render();break}
     case"clearSample":{if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to remove";return}
       const sb=new Set(S.biz.filter(x=>x.sample).map(x=>x.id));for(const s of S.signal.filter(s=>sb.has(s.businessId)))await del("signal",s.id);
       for(const k of ["match","biz","coi"])for(const x of S[k].filter(x=>x.sample))await del(k,x.id);stage=null;toast("Sample records removed");if(db)render();break}

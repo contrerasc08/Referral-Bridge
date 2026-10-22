@@ -11,14 +11,16 @@
 - [x] Research queue for finding real contacts
 - [x] Brain tab: unified search, Q&A over stored data, bot dashboard
 - [x] Scheduled bots: News, Prospector, Research, Intro writer, Signal watcher, Specialist checker, Weekly coach, Retiring owners, Permits and expansions
+- [x] Scheduled tasks for the New business filings and Hiring surges lead generators (created 2026-10-22)
+- [x] Review fixes from PR #1: failed saves and deletes restore data; flagged specialists excluded from scoring and new bridges; each bridge scored against its own need; learning only from Closed and Rejected referrals
 - [x] In-app bots: Matchmaker, Scorer, Follow-up watcher, Pipeline nudger, Gap finder, Data cleaner, Duplicate checker
 - [x] Ready-to-send drafts on business pages
 - [x] Demo mode with made-up data
 - [x] Code and specs in GitHub
 
 ## Next
-- [ ] Create the scheduled tasks for the **New business filings** and **Hiring surges** lead generators (they're shown in the app but don't run yet)
-- [ ] Show the Specialist checker's results (clear / flag / unverified) on specialist cards and block bridging to flagged specialists
+- [ ] Turn on automatic approval for the **Research bot** task (its Oct 20 run was abandoned waiting for approval)
+- [ ] Show the Specialist checker's full results (clear / unverified, with the checks and links) on the specialist detail sheet. "Flagged" already shows on cards and blocks bridges.
 - [ ] Show lead generator coverage gaps in the Brain and feed them to the Prospector
 - [ ] Read-only sharing for a partner (view without editing)
 - [ ] Export or sync to Jessica's OliveStone CRM (needs an import format or API from the vendor)

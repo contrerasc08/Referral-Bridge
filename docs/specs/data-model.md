@@ -1,6 +1,8 @@
 # Data model
 
-The app stores everything in its artifact database: a set of document collections, each document with an `id`. The page subscribes to every collection live (`onSnapshot`), so changes from the bots appear without a reload. When the database isn't available (for example a local file preview), the app falls back to `localStorage` under the key `rb-data`. Demo mode uses `rb-demo`.
+The app stores everything in its artifact database: a set of document collections, each document with an `id`. The page subscribes to every collection live (`onSnapshot`), so changes from the bots appear without a reload.
+
+Writes are optimistic: the screen updates first, then the database. If a save or delete fails, the app puts the previous record back (or removes a new one that never saved), says so in a message, and `put` or `del` returns `false`. On success they return `true`. When the database isn't available (for example a local file preview), the app falls back to `localStorage` under the key `rb-data`. Demo mode uses `rb-demo`.
 
 Records with `sample: true` are test data. They are hidden from bridges and from every bot.
 
@@ -46,6 +48,8 @@ Records with `sample: true` are test data. They are hidden from bridges and from
 
 `name, firm, profession, healthcare, specialties, bestStage, languages, county, state, serviceArea, phone, email, notes, source, profile{website, otherListings, checkedAt, verified, vettedAt, vetting{status, checks[], note}}`
 
+- `profile.vetting.status` is set by the Specialist checker to `clear`, `flag` or `unverified`. A `flag` excludes the specialist from Match scoring, bridges and new bridge approvals, and shows a red "Flagged" tag on their card.
+
 - `profession` is one of the 18 values in `PROFS`.
 - `serviceArea` is a comma list of counties, state codes, or `nationwide`.
 - `bestStage` is one of Any stage, Starting out, Growing, Established, Planning exit.
@@ -62,7 +66,7 @@ Records with `sample: true` are test data. They are hidden from bridges and from
 `bizId, coiId, score, status, trigger, opp, sigTypes[], history[{status, at}], reason`
 
 - `status` is one of Approved, Introduced, Meeting, Closed, Rejected, Dismissed.
-- `sigTypes` and the final status feed the learned weights (see scoring).
+- `sigTypes` and the final status feed the learned weights, but only for Closed and Rejected matches (see scoring).
 
 ## outreach
 

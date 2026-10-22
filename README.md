@@ -2,7 +2,7 @@
 
 Business needs, bridged to the right specialists.
 
-> **Status:** Working v1, live as a private claude.ai artifact. 11 scheduled bots and 7 in-app bots.
+> **Status:** Working v1, live as a private claude.ai artifact. 11 scheduled bots (all tasks set up) and 7 in-app bots.
 
 ## What it is
 
@@ -39,6 +39,8 @@ referral-bridge/
     └── bots/
         ├── README.md        # Schedules, outputs, report format
         └── *.md             # Exact instructions for each scheduled bot
+tests/
+└── test_review_fixes.py     # Browser tests (Playwright) for save/delete, flagged specialists, need scoring, learning
 ```
 
 ## How this project is run

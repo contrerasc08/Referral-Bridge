@@ -5,23 +5,36 @@ Referral Bridge has two kinds of bots.
 - **Scheduled bots** run in the cloud as Claude scheduled tasks, even when the app is closed. Each one reads and writes the app's database (never the page code) and leaves a run report in the `botlog` collection, which the Brain tab shows.
 - **In-app bots** are plain JavaScript in `src/index.html`. They recompute every time the app renders, so they're always current.
 
-All times are New York time. Every scheduled bot runs in auto mode (no approval prompts) and uses the owner's Claude usage.
+All times are New York time. Scheduled bots use the owner's Claude usage. All except the Research bot run in auto mode (no approval prompts).
 
 ## Scheduled bots
 
-| Bot | Schedule | What it does | Writes | Report id | Instructions |
-|---|---|---|---|---|---|
-| News bot | Every other day (odd dates), 6:47 AM | Economic and industry headlines that shift needs and industry climate | `news` | `news-YYYY-MM-DD` | [news.md](news.md) |
-| Prospector | Mondays 6:52 AM | New $1M–$100M owner-run businesses, plus specialists who can serve them | `businesses`, `signals`, `cois` | `prospector-…` | [prospector.md](prospector.md) |
-| Research bot | Tue, Thu, Sat 6:42 AM | Owner, phone, email and website for businesses in the research queue | `businesses` (contacts, profile), `contactRequests` | `research-…` | [research.md](research.md) |
-| Intro writer | Weekdays 7:12 AM | Draft owner emails, call scripts, specialist intros and follow-ups. Never sends anything. | `drafts` | `writer-…` | [intro-writer.md](intro-writer.md) |
-| Signal watcher | Mon, Wed, Fri 6:37 AM | New events at followed and top businesses | `signals` | `watcher-…` | [signal-watcher.md](signal-watcher.md) |
-| Specialist checker | Thursdays 6:57 AM | License and disciplinary checks before referring | `cois` (profile.vetting) | `vetting-…` | [specialist-checker.md](specialist-checker.md) |
-| Weekly coach | Fridays 4:07 PM | Week in review and next week's plan (shown on Today) | `botlog` only | `coach-…` | [weekly-coach.md](weekly-coach.md) |
-| Retiring owners | Tuesdays 6:33 AM | Lead generator: owners nearing retirement or exit. Follows Targeting. | `businesses`, `signals` | `succession-…` | [retiring-owners.md](retiring-owners.md) |
-| Permits and expansions | Wednesdays 6:28 AM | Lead generator: permits, IDA/EDC announcements, expansions. Follows Targeting. | `businesses`, `signals` | `permits-…` | [permits-expansions.md](permits-expansions.md) |
-| New business filings | Mon and Thu 6:23 AM | Lead generator shown in the app. **No scheduled task yet.** | — | `filings-…` | — |
-| Hiring surges | Fridays 6:18 AM | Lead generator shown in the app. **No scheduled task yet.** | — | `hiring-…` | — |
+There are **11 scheduled tasks**, one per bot. Status was checked against the Claude scheduler on 2026-10-22.
+
+### Core bots (the nine documented in PR #1)
+
+| Bot | Schedule | What it does | Writes | Report id | Last run | Instructions |
+|---|---|---|---|---|---|---|
+| News bot | Every other day (odd dates), 6:47 AM | Economic and industry headlines (healthcare first) that shift needs and industry climate | `news` | `news-YYYY-MM-DD` | Oct 21 ✅ | [news.md](news.md) |
+| Prospector | Mondays 6:52 AM | New owner-run businesses, plus specialists to fill coverage gaps | `businesses`, `signals`, `cois` | `prospector-…` | Oct 19 ✅ | [prospector.md](prospector.md) |
+| Research bot | Tue, Thu, Sat 6:42 AM | Owner, phone, email and website for businesses in the research queue | `businesses` (contacts, profile), `contactRequests` | `research-…` | Oct 20 ⚠️ abandoned | [research.md](research.md) |
+| Intro writer | Weekdays 7:12 AM | Draft owner emails, call scripts, specialist intros and follow-ups. Never sends anything. | `drafts` | `writer-…` | Oct 21 ✅ | [intro-writer.md](intro-writer.md) |
+| Signal watcher | Mon, Wed, Fri 6:37 AM | New events at followed and top businesses | `signals` | `watcher-…` | Oct 21 ✅ | [signal-watcher.md](signal-watcher.md) |
+| Specialist checker | Thursdays 6:57 AM | License and disciplinary checks. A `flag` result blocks scoring and new bridges. | `cois` (profile.vetting) | `vetting-…` | Not yet run | [specialist-checker.md](specialist-checker.md) |
+| Weekly coach | Fridays 4:07 PM | Week in review and next week's plan (shown on Today) | `botlog` only | `coach-…` | Oct 21 ✅ (manual run) | [weekly-coach.md](weekly-coach.md) |
+| Retiring owners | Tuesdays 6:33 AM | Lead generator: owners nearing retirement or exit. Follows Targeting. | `businesses`, `signals` | `succession-…` | Not yet run | [retiring-owners.md](retiring-owners.md) |
+| Permits and expansions | Wednesdays 6:28 AM | Lead generator: permits, IDA/EDC announcements, expansions. Follows Targeting. | `businesses`, `signals` | `permits-…` | Not yet run | [permits-expansions.md](permits-expansions.md) |
+
+### Lead generators set up on 2026-10-22 (no runs yet)
+
+These two were shown in the app before they had scheduled tasks. Both tasks now exist and are enabled.
+
+| Bot | Schedule | What it does | Writes | Report id | First run | Instructions |
+|---|---|---|---|---|---|---|
+| New business filings | Mon and Thu 6:23 AM | New LLC and corporation filings, NPI and license records in focus states only | `businesses`, `signals` | `filings-…` | Thu Oct 22 | [new-business-filings.md](new-business-filings.md) |
+| Hiring surges | Fridays 6:18 AM | Companies with many open roles or new senior executives. Follows Targeting. | `businesses`, `signals` | `hiring-…` | Fri Oct 23 | [hiring-surges.md](hiring-surges.md) |
+
+**Known issue:** the Research bot is the only task without automatic approval, so its Oct 20 run stalled waiting for an approval nobody saw ("abandoned"). Turn on **Automatically approve** in that task's settings, or ask Claude to recreate it in auto mode.
 
 ## In-app bots
 
