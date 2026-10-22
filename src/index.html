@@ -397,7 +397,7 @@ async function put(k,obj){
   const i=S[k].findIndex(x=>x.id===obj.id), prev=i>=0?S[k][i]:null; if(i>=0)S[k][i]=obj; else S[k].push(obj); invalidate();
   if(db){try{await db.collection(COL[k]).doc(obj.id).set(strip(obj));return true}catch(e){
     /* the write failed: put the previous record back so the screen matches what's actually saved */
-    const j=S[k].findIndex(x=>x.id===obj.id);if(j>=0){if(prev)S[k][j]=prev;else S[k].splice(j,1)}invalidate();render();
+    const j=S[k].findIndex(x=>x.id===obj.id);if(j>=0&&S[k][j]===obj){if(prev)S[k][j]=prev;else S[k].splice(j,1)}invalidate();render(); /* only undo if nothing newer (a later edit or a database update) replaced it */
     toast(e&&e.code==="quota_exceeded"?"Storage is full. Delete some records.":"Couldn't save. Your change was undone. Check your connection and try again.");return false}}
   else{saveLocal();render();return true}
 }
@@ -2162,9 +2162,10 @@ async function importCSV(file){
   }
   if(!toAdd.length){toast("Everything in that file is already in your list");return}
   toast(`Importing ${toAdd.length} businesses…`);
-  if(db){for(let i=0;i<toAdd.length;i++){await put("biz",toAdd[i]);if(i%20===19)toast(`Imported ${i+1} of ${toAdd.length}`)}}
+  let ok=toAdd.length,failed=0;
+  if(db){ok=0;for(let i=0;i<toAdd.length;i++){if(await put("biz",toAdd[i]))ok++;else failed++;if(i%20===19)toast(`Imported ${ok} of ${toAdd.length}`)}}
   else{const now=new Date().toISOString();toAdd.forEach(b=>{b.createdAt=b.updatedAt=now;S.biz.push(b)});saveLocal();render()}
-  toast(`Imported ${toAdd.length} businesses`);
+  toast(failed?`Imported ${ok} of ${toAdd.length} businesses. ${failed} couldn't be saved; import the file again to retry them.`:`Imported ${ok} businesses`);
 }
 
 /* ---------- events ---------- */
