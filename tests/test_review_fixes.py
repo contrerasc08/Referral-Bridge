@@ -95,10 +95,10 @@ async def main():
     # UI smoke
     for t in ["today","people","pipeline","brain"]:
         await pg.click(f"[data-tab={t}]"); await pg.wait_for_timeout(150); await pg.screenshot(path=f"{OUT}/ui-{t}.png", full_page=True)
-    await pg.click("[data-tab=people]"); await pg.click("[data-sub=coi]"); await pg.wait_for_timeout(150)
+    await pg.click("[data-tab=people]"); await pg.click("#view [data-sub=coi]"); await pg.wait_for_timeout(150)
     check("specialist list shows Flagged tag", await pg.locator(".card.c:has-text('Flagged Advisor') .tag.due").count()==1)
     await pg.screenshot(path=f"{OUT}/ui-specialists.png", full_page=True)
-    await pg.click("[data-sub=biz]"); await pg.click("[data-bizview=b1]"); await pg.wait_for_timeout(150)
+    await pg.click("#view [data-sub=biz]"); await pg.click("[data-bizview=b1]"); await pg.wait_for_timeout(150)
     await pg.screenshot(path=f"{OUT}/ui-business.png", full_page=True)
     check("business page doesn't offer Flagged Advisor as a bridge", await pg.locator("#view [data-approve*='|c2|']").count()==0)
     check("demo bar hidden outside demo mode", await E("getComputedStyle(document.querySelector('#demobar')).display")=="none")
