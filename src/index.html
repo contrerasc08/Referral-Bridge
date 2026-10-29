@@ -262,6 +262,39 @@ details.sec2{background:var(--surface);border:1px solid var(--rule);border-radiu
 .gens{padding:0;overflow:hidden}.gens .srow{padding:11px 14px;align-items:center}
 .demobar button{border:1px solid rgba(255,255,255,.6);background:none;color:#fff;border-radius:999px;padding:2px 10px;font-size:.75rem}
 :root:not([data-theme="light"]) .demobar{color:#fff}
+/* Today home page */
+.hero.today{display:grid;gap:14px}
+.hero.today .hd{display:grid;gap:6px}
+.bigdate{font-size:2rem!important;line-height:1.1;margin:2px 0!important;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.bigdate span{font-size:1.05rem;font-weight:600;opacity:.8}
+.hero.today p{margin:0}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpi{border:1px solid color-mix(in srgb,currentColor 25%,transparent);background:color-mix(in srgb,currentColor 6%,transparent);color:inherit;border-radius:12px;padding:8px 10px;text-align:left;display:flex;flex-direction:column}
+.kpi b{font-size:1.45rem;line-height:1.1;font-variant-numeric:tabular-nums}.kpi span{font-size:.76rem;opacity:.8}
+.kpi.warn{border-color:var(--danger);background:color-mix(in srgb,var(--danger) 22%,transparent)}
+.agenda{padding:0;overflow:hidden}
+.arow{display:grid;grid-template-columns:76px 1fr;gap:4px 10px;padding:10px 14px;border-bottom:1px solid var(--rule);align-items:center}.arow:last-child{border-bottom:0}
+.arow .acts{grid-column:2;display:flex;gap:6px;flex-wrap:wrap}
+.arow.over .atime{color:var(--danger)}.arow.call .atime{color:var(--biz)}
+.atime{font-weight:800;font-variant-numeric:tabular-nums;font-size:.92rem}
+.aname{font-weight:650;color:var(--ink);padding:0;text-align:left}
+.btn.small{padding:5px 10px;font-size:.82rem}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wday{border:1px solid var(--rule);background:var(--surface);border-radius:10px;padding:8px 2px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+.wday b{font-size:1.15rem;font-variant-numeric:tabular-nums}.wday .wd{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.wday .wn{font-size:.68rem;color:var(--muted)}.wday .wc{font-size:.66rem;font-weight:700;color:var(--biz)}
+.wday.has{border-color:var(--ink)}
+.tgrid{display:grid;gap:12px;margin-top:16px}
+.ch{font-size:.98rem;margin:0 0 10px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.wnum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.wnum div{display:flex;flex-direction:column}
+.wnum b{font-size:1.4rem;font-variant-numeric:tabular-nums;line-height:1.1}.wnum span{font-size:.78rem;color:var(--muted)}
+.dl{font-size:.72rem!important;font-weight:600}.dl.up{color:var(--biz)!important}.dl.down{color:var(--danger)!important}
+.bars{display:grid;grid-template-columns:repeat(14,1fr);gap:3px;height:84px;align-items:end;margin-bottom:4px}
+.bar{display:flex;flex-direction:column;justify-content:flex-end;height:100%;align-items:center;gap:2px}
+.bar i{display:block;width:100%;min-height:2px;background:var(--rule);border-radius:3px 3px 0 0}.bar span{font-size:.6rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar i{background:color-mix(in srgb,var(--biz) 55%,var(--rule))}.bar.now i{background:var(--biz)}.bar.now span{color:var(--ink);font-weight:700}
+@media (min-width:640px){.kpis{grid-template-columns:repeat(6,1fr)}.arow{grid-template-columns:90px 1fr auto}.arow .acts{grid-column:auto}}
+@media (min-width:900px){.tgrid{grid-template-columns:1.4fr 1fr}.bigdate{font-size:2.5rem!important}}
 /* CRM-style navigation and task commands (modeled on the OliveStone CRM layout) */
 .sidenav{display:none}
 .phead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin:4px 0 12px}
@@ -1435,25 +1468,72 @@ function sec(key,title,body,openDefault,count){
 }
 function greet(){const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"}
 
+/* Today: the home page. Date first, then what's on today, the week ahead, the numbers, and what changed */
+function weekNo(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y0)/864e5+1)/7)}
+function addDays(day,n){const d=new Date(day+"T12:00:00");d.setDate(d.getDate()+n);return localDay(d.toISOString())}
+function agendaFor(day){
+  const today=localDay(), real=S.biz.filter(b=>!b.sample);
+  const calls=S.outreach.filter(o=>o.apptAt===day&&!(byId("biz",o.bizId)||{}).sample).map(o=>({kind:"call",b:byId("biz",o.bizId),o,time:o.apptTime||"",key:"0"+(o.apptTime||"99")}));
+  const fus=real.filter(b=>b.followUpAt&&isOpenStage(b)&&(day===today?b.followUpAt<=day:b.followUpAt===day)).map(b=>({kind:b.followUpAt<today?"over":"fu",b,key:(b.followUpAt<today?"1":"2")+b.followUpAt}));
+  return[...calls.filter(x=>x.b),...fus].sort((x,y)=>x.key.localeCompare(y.key));
+}
+function weekCounts(fromDay,toDay){const inW=t=>{const d=localDay(t);return d>=fromDay&&d<=toDay};
+  const ev=S.outreach.filter(o=>o.at&&inW(o.at)&&!(byId("biz",o.bizId)||{}).sample);
+  return{touches:ev.length,convo:ev.filter(o=>CONVO.has(o.outcome)).length,booked:ev.filter(o=>o.outcome==="booked").length}}
+function delta(a,b){if(a===b)return`<span class="dl">same as last week</span>`;const up=a>b;return`<span class="dl ${up?"up":"down"}">${up?"▲":"▼"} ${Math.abs(a-b)} vs last week</span>`}
 function viewToday(){
+  const now=new Date(), today=localDay();
   const since=PREV_SEEN?Date.parse(PREV_SEEN):Date.now()-7*DAY;
   const isNew=x=>{const t=Date.parse(x.detectedAt||x.createdAt||"");return!isNaN(t)&&t>since};
   const real=S.biz.filter(b=>inRev(b));
   const rows=real.map(b=>{const o=opportunity(b),ms=S.match.filter(m=>m.bizId===b.id);return{b,o,fresh:o.active.filter(isNew),live:ms.some(m=>["Approved","Introduced","Meeting"].includes(m.status)),client:ms.some(m=>m.status==="Closed"),newBiz:isNew(b)}});
-  const newSignals=rows.reduce((a,r)=>a+r.fresh.length,0);
+  const newSignals=rows.reduce((a,r)=>a+r.fresh.length,0), newBiz=rows.filter(r=>r.newBiz&&!r.b.sample).length;
   let top=rows.filter(r=>!r.live&&r.o.score>=25&&(r.fresh.length||r.newBiz)).sort((a,b)=>(bridgesFor(b.b).length>0)-(bridgesFor(a.b).length>0)||b.o.score-a.o.score);
   const fresh=top.length>0;if(!top.length)top=rows.filter(r=>!r.b.sample&&r.o.score>0).sort((a,b)=>b.o.score-a.o.score);
-  const fd=followUps().filter(f=>f.due).length, ready=real.filter(b=>!b.sample&&bridgesFor(b).length).length, rq=researchQueue().length, os=outreachStats("30");
+  const fus=followUps(), over=fus.filter(f=>f.over).length, dueToday=fus.filter(f=>f.d===today).length;
+  const agenda=agendaFor(today), callsToday=agenda.filter(a=>a.kind==="call").length;
+  const ready=real.filter(b=>!b.sample&&bridgesFor(b).length).length, nd=draftsReady().length;
   const stp=setupSteps(), sdone=stp.filter(x=>x.done).length, nage=newsAge();
-  const chip=(n,l,go,warn)=>`<button class="hchip ${warn&&n?"warn":""}" data-go="${go}"><b>${n}</b> ${esc(l)}<span aria-hidden="true">›</span></button>`;
-  let h=`<section class="hero"><div class="hdate">${esc(new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}))}</div><h2>${greet()}</h2>
-  <p>${ready} business${ready===1?" is":"es are"} bridge-ready and ${fd} follow-up${fd===1?" is":"s are"} due. ${os.contacted?`You've contacted ${os.contacted} in the last 30 days (${os.bookRate}% booked a call).`:""}</p>
-  <div class="hchips">${chip(fd,fd===1?"follow-up due":"follow-ups due","followups",true)}${chip(ready,"bridge-ready","biz")}${chip(newSignals,"new signals","signals")}${rq?chip(rq,"to research","queue"):""}</div></section>
+  const q=Math.floor(now.getMonth()/3)+1, dayOfYear=Math.floor((Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())-Date.UTC(now.getFullYear(),0,1))/864e5)+1;
+  const kpi=(n,l,go,cls)=>`<button class="kpi ${cls&&n?cls:""}" data-go="${go}"><b>${n}</b><span>${esc(l)}</span></button>`;
+  let h=`<section class="hero today"><div class="hd"><div class="min"><div class="hdate">${greet()} · Week ${weekNo(now)} · Q${q} · Day ${dayOfYear}</div>
+    <h2 class="bigdate">${esc(now.toLocaleDateString(undefined,{weekday:"long"}))}<span>${esc(now.toLocaleDateString(undefined,{month:"long",day:"numeric",year:"numeric"}))}</span></h2></div>
+    <p>${agenda.length?`${agenda.length} thing${agenda.length===1?"":"s"} on your agenda today${callsToday?`, including ${callsToday} discovery call${callsToday===1?"":"s"}`:""}.`:"Nothing scheduled today."} ${ready} business${ready===1?" is":"es are"} bridge-ready.</p></div>
+    <div class="kpis">${kpi(over,"overdue","followups","warn")}${kpi(dueToday,"due today","followups")}${kpi(callsToday,"calls today","appts")}${kpi(ready,"bridge-ready","biz")}${kpi(newSignals,"new signals","signals")}${kpi(nd,"drafts ready","biz")}</div></section>
   <button class="askbtn" data-go="brain"><span aria-hidden="true">⌕</span> Search or ask the Brain…</button>`;
   if(sdone<stp.length)h+=`<button class="setupline" data-go="guide"><span>Setup ${sdone}/${stp.length} · Next: ${esc((stp.find(x=>!x.done)||{}).t||"")}</span><span aria-hidden="true">›</span></button>`;
   if(nage!==null&&nage>NEWS_STALE)h+=`<button class="setupline warn" data-go="climate"><span>Industry climate is ${nage} days old. Tell Claude "Update my news."</span><span aria-hidden="true">›</span></button>`;
+  /* agenda */
+  const arow=a=>{const b=a.b,st=stageOf(b);
+    const when=a.kind==="call"?(a.time||"Today"):a.kind==="over"?`${Math.round((Date.parse(localDay()+"T12:00:00")-Date.parse(b.followUpAt+"T12:00:00"))/864e5)}d late`:"Today";
+    const what=a.kind==="call"?`Discovery call${a.o.contact?" with "+a.o.contact:""}`:(b.followUpNote||"Follow up");
+    return`<div class="arow ${a.kind}"><span class="atime">${esc(when)}</span><div class="min"><button class="link aname" data-bizview="${b.id}">${esc(b.name)}</button><div class="meta">${esc(what)} · ${esc(st)}</div></div>
+    <div class="acts"><button class="btn small" data-logout="${b.id}">${a.kind==="call"?"Log outcome":"Log call"}</button>${a.kind!=="call"?`<button class="btn small" data-clearfu="${b.id}">Done</button>`:""}</div></div>`};
+  h+=`<div class="shead"><h3>Today's agenda</h3><button class="link" data-go="followups">All follow-ups</button></div>`;
+  h+=agenda.length?`<div class="card agenda">${agenda.map(arow).join("")}</div>`:`<div class="empty"><p>No calls or follow-ups today.${top[0]?` Start with ${esc(top[0].b.name)}.`:""}</p>${top[0]?`<button class="btn primary" data-bizview="${top[0].b.id}">Open ${esc(top[0].b.name)}</button>`:""}</div>`;
+  /* next 7 days */
+  const days=[...Array(7)].map((_,i)=>{const d=addDays(today,i+1),ag=agendaFor(d);return{d,n:ag.length,calls:ag.filter(a=>a.kind==="call").length}});
+  h+=`<div class="shead"><h3>Next 7 days</h3><button class="link" data-go="appts">Appointments</button></div><div class="week">${days.map(x=>{const dt=new Date(x.d+"T12:00:00");
+    return`<button class="wday ${x.n?"has":""}" data-go="followups"><span class="wd">${esc(dt.toLocaleDateString(undefined,{weekday:"short"}))}</span><b>${dt.getDate()}</b><span class="wn">${x.n?`${x.n} item${x.n===1?"":"s"}`:"—"}</span>${x.calls?`<span class="wc">${x.calls} call${x.calls===1?"":"s"}</span>`:""}</button>`}).join("")}</div>`;
+  /* numbers + activity */
+  const mon=addDays(today,-((now.getDay()+6)%7)), tw=weekCounts(mon,today), lw=weekCounts(addDays(mon,-7),addDays(today,-7));
+  const act=[...Array(14)].map((_,i)=>{const d=addDays(today,i-13);return{d,n:S.outreach.filter(o=>o.at&&localDay(o.at)===d&&!(byId("biz",o.bizId)||{}).sample).length}}), mx=Math.max(1,...act.map(a=>a.n));
+  const open=["Approved","Introduced","Meeting"].map(st=>[st,S.match.filter(m=>m.status===st).length]);
+  const stuck=S.match.filter(m=>["Approved","Introduced","Meeting"].includes(m.status)&&daysSince(m.updatedAt||m.createdAt)>14).length;
+  h+=`<div class="tgrid"><section class="card"><h3 class="ch">This week <span class="meta">since ${esc(fmtDate(mon))}</span></h3>
+    <div class="wnum"><div><b>${tw.touches}</b><span>touches</span>${delta(tw.touches,lw.touches)}</div><div><b>${tw.convo}</b><span>conversations</span>${delta(tw.convo,lw.convo)}</div><div><b>${tw.booked}</b><span>calls booked</span>${delta(tw.booked,lw.booked)}</div></div>
+    <div class="bars" role="img" aria-label="Outreach per day, last 14 days">${act.map(a=>`<div class="bar ${a.d===today?"now":""}" title="${esc(fmtDate(a.d))}: ${a.n}"><i style="height:${Math.round(100*a.n/mx)}%"></i><span>${new Date(a.d+"T12:00:00").getDate()}</span></div>`).join("")}</div>
+    <div class="meta">Outreach per day, last 14 days</div></section>
+  <section class="card"><h3 class="ch">Bridges in motion</h3>${open.map(([st,n])=>`<div class="srow"><span>${st}</span><b>${n}</b></div>`).join("")}
+    <div class="srow"><span>${stuck?`<span class="tag due">No update in 14+ days</span>`:"Stuck for 14+ days"}</span><b>${stuck}</b></div>
+    <button class="btn small" style="margin-top:8px" data-go="pipeline">Open Bridges</button></section></div>`;
+  /* since last visit */
+  const runs=S.botlog.slice().sort((a,b)=>(b.ranAt||"").localeCompare(a.ranAt||"")).filter(r=>Date.parse(r.ranAt||"")>since).slice(0,4);
+  h+=`<div class="shead"><h3>Since your last visit</h3><span class="meta">${PREV_SEEN?esc(fmtDate(PREV_SEEN)):"last 7 days"}</span></div>
+  <div class="card"><div class="srow"><span>New signals</span><b>${newSignals}</b></div><div class="srow"><span>New businesses</span><b>${newBiz}</b></div><div class="srow"><span>Drafts ready to send</span><b>${nd}</b></div>
+  ${runs.map(r=>`<div class="srow"><span><b>${esc((BOTS.find(x=>x.id===r.bot)||{}).name||r.bot)}</b> <span class="meta">${esc(agoLabel(r.ranAt))}</span><br><span class="meta">${esc(r.summary||"")}</span></span></div>`).join("")}</div>`;
   {const cr=botRuns("coach")[0];if(cr&&(cr.plan||[]).length&&daysSince(cr.ranAt)<=8)h+=`<div class="shead"><h3>This week's plan</h3><button class="link" data-bot="coach">From your coach</button></div><div class="card"><ol class="plan" style="margin:0">${cr.plan.slice(0,5).map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`;}
-  {const nd=draftsReady().length;if(nd)h+=`<button class="setupline" data-blf="drafts" data-go="biz"><span>${nd} draft${nd===1?"":"s"} ready to send from the Intro writer</span><span aria-hidden="true">›</span></button>`;}
+  if(nd)h+=`<button class="setupline" data-blf="drafts" data-go="biz" style="margin-top:12px"><span>${nd} draft${nd===1?"":"s"} ready to send from the Intro writer</span><span aria-hidden="true">›</span></button>`;
   h+=`<div class="shead"><h3>${fresh?"Contact these first":"Your top businesses"}</h3><button class="link" data-go="biz">See all</button></div>`;
   h+=top.length?`<div class="list">${top.slice(0,5).map(r=>bizCard(r.b)).join("")}</div>`:`<div class="empty"><p>No businesses yet.</p><button class="btn primary" data-go="leads">Find businesses</button></div>`;
   const fav=climateRank().filter(r=>r.score>0).slice(0,4);
@@ -2124,7 +2204,7 @@ const GROUPS={
 };
 const SUB_ALIAS={bizview:"biz",ask:"brain",more:"today"};
 /* Wide screens get a left sidebar with one named item per job, like the OliveStone CRM */
-const SIDENAV=[["Work",[["today","My dashboard"],["biz","Businesses"],["prospects","Prospect pipeline"],["outreach","Outreach history"],["followups","Follow-up tasks"],["appts","Appointments"],["queue","Research queue"]]],
+const SIDENAV=[["Work",[["today","Today"],["biz","Businesses"],["prospects","Prospect pipeline"],["outreach","Outreach history"],["followups","Follow-up tasks"],["appts","Appointments"],["queue","Research queue"]]],
   ["Referrals",[["pipeline","Bridges"],["coi","Specialists"],["leads","Find businesses"],["find","Match a specialist"]]],
   ["Intelligence",[["brain","Search & ask"],["signals","Signals"],["news","News"],["climate","Industry climate"],["target","Targeting"]]]];
 function sidenav(cur){cur=SUB_ALIAS[cur]||cur;return SIDENAV.map(([g,items])=>`<div class="grp">${esc(g)}</div>`+items.map(([k,l])=>`<button data-sub="${k}" aria-current="${k===cur?"page":"false"}">${esc(l)}</button>`).join("")).join("")}
@@ -2146,7 +2226,7 @@ function render(){
   const active=document.activeElement&&document.activeElement.id;
   const V={today:viewToday,brain:viewBrain,signals:viewSignals,pipeline:viewPipeline,research:viewResearch,find:viewFind,leads:viewLeads,biz:viewBiz,coi:viewCoi,more:viewMore,sources:viewSources,bizview:viewBizIntel,ask:viewAsk,queue:viewQueue,news:viewNews,climate:viewClimate,guide:viewGuide,outreach:viewOutreach,target:viewTarget,prospects:viewProspects,followups:viewFollowups,appts:viewAppts};
   $("#view").innerHTML=(navTab?subnav(navTab,tab):"")+(V[tab]||viewToday)();
-  $("#view").classList.toggle("wide",["prospects","outreach"].includes(tab));
+  $("#view").classList.toggle("wide",["prospects","outreach","today"].includes(tab));
   $("#sidenav").innerHTML=sidenav(tab==="bizview"?(BV.from||"biz"):tab);
   if(["qbrain","qbiz","qcoi","findq","qres","lcounty","lnotes","qoh","qpb"].includes(active)){const el=$("#"+active);if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}}
 }

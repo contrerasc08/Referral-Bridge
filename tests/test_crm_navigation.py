@@ -61,7 +61,7 @@ async def main():
     check("wide screen shows the sidebar", await vis("#sidenav"))
     check("wide screen hides the bottom tabs", not await vis(".tabs"))
     nav = await pg.inner_text("#sidenav")
-    check("sidebar lists the CRM sections", all(x in nav for x in ["My dashboard", "Businesses", "Prospect pipeline", "Outreach history", "Follow-up tasks", "Appointments", "Bridges", "Specialists"]))
+    check("sidebar lists the CRM sections", all(x in nav for x in ["Today", "Businesses", "Prospect pipeline", "Outreach history", "Follow-up tasks", "Appointments", "Bridges", "Specialists"]))
     # 2. prospect pipeline
     await pg.click("#sidenav [data-sub=prospects]"); await pg.wait_for_timeout(150)
     check("sidebar marks the current page", await E("document.querySelector('#sidenav [data-sub=prospects]').getAttribute('aria-current')") == "page")
@@ -120,8 +120,18 @@ async def main():
     check("appointments list upcoming discovery calls", "Summit Builders" in await pg.inner_text("#view") and "10:00" in await pg.inner_text("#view"))
     # Today's follow-up chip opens the task list
     await pg.click("#sidenav [data-sub=today]"); await pg.wait_for_timeout(100)
-    await pg.click(".hchip[data-go=followups]"); await pg.wait_for_timeout(100)
+    await pg.click(".kpi[data-go=followups] >> nth=0"); await pg.wait_for_timeout(100)
     check("Today's follow-ups chip opens Follow-up tasks", await E("tab") == "followups")
+    # Today home page
+    await pg.click("#sidenav [data-sub=today]"); await pg.wait_for_timeout(150)
+    hero = await pg.inner_text(".hero.today")
+    check("Today leads with the date and week number", "week " in hero.lower() and str(today.day) in hero, hero.splitlines()[:3])
+    ag = await pg.inner_text(".agenda") if await pg.locator(".agenda").count() else ""
+    check("Today's agenda lists today's follow-up", "Harbor Point" in ag, ag)
+    check("Next 7 days strip has 7 days", await pg.locator(".week .wday").count() == 7)
+    check("upcoming discovery call shows on its day", "1 call" in await pg.inner_text(".week"))
+    check("this-week numbers and 14-day activity bars render", await pg.locator(".wnum b").count() == 3 and await pg.locator(".bars .bar").count() == 14)
+    await pg.screenshot(path=f"{OUT}/crm-today-wide.png", full_page=True)
     # phone layout
     ph = await br.new_page(viewport={"width": 390, "height": 844}); ph.on("pageerror", lambda e: errs.append(str(e)))
     await ph.add_init_script(MOCK); await ph.goto(APP); await ph.wait_for_timeout(500)

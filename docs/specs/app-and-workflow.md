@@ -21,7 +21,7 @@ On phones, the bottom tabs are **Today**, **People**, **Bridges** and **Brain**.
 | Bridges | Bridges (pipeline) |
 | Brain | Search & ask, Targeting, Signals, News, Industry climate |
 
-On screens 1024 px and wider, a left sidebar (`SIDENAV`) replaces the bottom tabs and pills, with one named item per job in three groups: **Work** (My dashboard, Businesses, Prospect pipeline, Outreach history, Follow-up tasks, Appointments, Research queue), **Referrals** (Bridges, Specialists, Find businesses, Match a specialist) and **Intelligence** (Search & ask, Signals, News, Industry climate, Targeting). The layout follows Jessica's OliveStone CRM (see [decisions](../decisions.md)).
+On screens 1024 px and wider, a left sidebar (`SIDENAV`) replaces the bottom tabs and pills, with one named item per job in three groups: **Work** (Today, Businesses, Prospect pipeline, Outreach history, Follow-up tasks, Appointments, Research queue), **Referrals** (Bridges, Specialists, Find businesses, Match a specialist) and **Intelligence** (Search & ask, Signals, News, Industry climate, Targeting). The layout follows Jessica's OliveStone CRM (see [decisions](../decisions.md)).
 
 The ☰ menu in the header holds Targeting, Data sources, How to use, and Demo mode (show, reset, exit).
 
@@ -31,7 +31,7 @@ Demo mode swaps in made-up sample businesses, specialists, bridges, drafts and b
 
 ## Screens
 
-- **Today:** a greeting and summary, quick chips (follow-ups due, bridge-ready, new signals, to research), the Weekly coach's plan, how many drafts are ready, the top 5 businesses to contact, favored industries, and 3 headlines.
+- **Today (home page):** leads with the date (weekday, full date, week number, quarter, day of year) and six numbers you can tap: overdue, due today, calls today, bridge-ready, new signals, drafts ready. Below that: today's agenda (discovery calls by time, then overdue and due follow-ups with Log call and Done), the next 7 days with items and calls per day, this week's touches, conversations and calls booked against last week, outreach per day for the last 14 days, bridges in motion and stuck ones, what changed since your last visit (including bot runs), the Weekly coach's plan, the top 5 businesses to contact, favored industries, and 3 headlines.
 - **Businesses:** search, filter chips, and the revenue range.
   - Filters: All, Bridge ready, Follow-up due, Needs a specialist, Not contacted, Fits targeting, one per lead generator, and Drafts ready.
   - Each card shows the score, "Why now", the top need, up to 3 tags and one industry headline.
