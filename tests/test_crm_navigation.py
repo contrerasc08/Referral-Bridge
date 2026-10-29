@@ -2,7 +2,7 @@
 
 Runs src/index.html in headless Chromium against a mock artifact database and checks:
   1. wide screens get a left sidebar; phones keep the bottom tabs and section pills
-  2. Prospect pipeline: a column per stage with counts, "No next step" flags,
+  2. Prospect pipeline: a column per stage with counts, "Needs a next step" flags,
      moving a business by its menu and by drag and drop, and list view
   3. Outreach history: summary numbers, outcome chips, search, logging from the header, export
   4. Follow-up tasks: overdue / today / upcoming groups, Done, and businesses with no next step
@@ -61,20 +61,20 @@ async def main():
     check("wide screen shows the sidebar", await vis("#sidenav"))
     check("wide screen hides the bottom tabs", not await vis(".tabs"))
     nav = await pg.inner_text("#sidenav")
-    check("sidebar lists the CRM sections", all(x in nav for x in ["Today", "Businesses", "Prospect pipeline", "Outreach history", "Follow-up tasks", "Appointments", "Bridges", "Specialists"]))
+    check("sidebar lists the CRM sections", all(x in nav for x in ["Today", "Businesses", "Pipeline", "Touch log", "Next steps", "Discovery calls", "Bridges", "Specialists", "Scout"]))
     # 2. prospect pipeline
     await pg.click("#sidenav [data-sub=prospects]"); await pg.wait_for_timeout(150)
     check("sidebar marks the current page", await E("document.querySelector('#sidenav [data-sub=prospects]').getAttribute('aria-current')") == "page")
     cols = await E("[...document.querySelectorAll('[data-kcol]')].map(c=>c.dataset.kcol+':'+c.querySelector('.khead b').textContent)")
     check("board has a column per stage with counts", cols[:5] == ["Prospect:1", "Qualified:1", "Contacted:1", "Engaged:1", "Discovery call:1"] and len(cols) == 9, cols)
     check("sample records stay off the board", await pg.locator("[data-kid=b6]").count() == 0)
-    check("worked prospect with no follow-up shows No next step", await pg.locator("[data-kid=b3] .tag.due:has-text('No next step')").count() == 1)
-    check("prospect with a follow-up doesn't", await pg.locator("[data-kid=b5]:has-text('No next step')").count() == 0)
+    check("worked prospect with no follow-up shows Needs a next step", await pg.locator("[data-kid=b3] .tag.due:has-text('Needs a next step')").count() == 1)
+    check("prospect with a follow-up doesn't", await pg.locator("[data-kid=b5]:has-text('Needs a next step')").count() == 0)
     check("card shows contact info completeness", "2/4" in await pg.inner_text("[data-kid=b2]"))
     await pg.screenshot(path=f"{OUT}/crm-prospects-wide.png", full_page=True)
     await pg.click("[data-kid=b3] [data-lmenu]"); await pg.wait_for_timeout(100)
     menu = await pg.inner_text("#sheetBody")
-    check("card menu offers the task commands", all(x in menu for x in ["Log call or email", "Set follow-up", "Open business page", "Move to stage"]))
+    check("card menu offers the task commands", all(x in menu for x in ["Record a touch", "Set follow-up", "Open business page", "Move to stage"]))
     await pg.click("#sheetBody [data-pstage='b3|Engaged']"); await pg.wait_for_timeout(150)
     check("moving by menu saves the stage and closes the menu", await E("window.__store.businesses.b3.prospectStage") == "Engaged" and not await E("document.querySelector('#sheet').open"))
     check("moved card shows in its new column", await pg.locator("[data-kcol=Engaged] [data-kid=b3]").count() == 1)
@@ -89,7 +89,7 @@ async def main():
     # 3. outreach history
     await pg.click("#sidenav [data-sub=outreach]"); await pg.wait_for_timeout(150)
     st = await pg.inner_text(".ostats")
-    check("outreach summary: logged, with an outcome, interested or spoke", "4\nlogged" in st and "75%" in st and "2\ninterested or spoke" in st, st)
+    check("outreach summary: logged, with an outcome, interested or spoke", "4\ntouches" in st and "75%" in st and "2\nreal conversations" in st, st)
     check("outreach table lists every touch", await pg.locator("#ohBody tbody tr").count() == 4)
     check("outcome chips show counts", "1" in await pg.inner_text("[data-ohf=interested] small"))
     await pg.click("[data-ohf=interested]"); await pg.wait_for_timeout(100)
@@ -107,13 +107,32 @@ async def main():
     async with pg.expect_download() as dl: await pg.click("[data-act=exportOut]")
     d = await dl.value; path = await d.path(); txt = open(path, encoding="utf-8-sig").read()
     check("Export downloads the outreach log as CSV", txt.startswith("Business,Industry,Channel,Outcome") and txt.count("\n") == 5, txt.splitlines()[:2])
-    # 4. follow-up tasks
+    # 4. next steps: your list, suggestions, and working a task
     await pg.click("#sidenav [data-sub=followups]"); await pg.wait_for_timeout(150)
-    body = await pg.inner_text("#view")
-    check("follow-ups grouped as overdue, today, upcoming", all(x in body for x in ["Overdue", "Today", "Upcoming"]) and body.index("Long Island") < body.index("Harbor Point") < body.index("Summit"))
-    check("no-next-step list shows worked prospects without a date", "No next step" in body and "Central Jersey" in body)
-    await pg.click("[data-clearfu=b2]"); await pg.wait_for_timeout(150)
-    check("Done clears the follow-up", await E("window.__store.businesses.b2.followUpAt") == "")
+    lst = await pg.inner_text(".tlist")
+    check("your list is grouped overdue, today, coming up in date order", all(x in lst.lower() for x in ["overdue", "today", "coming up"]) and lst.index("Long Island") < lst.index("Harbor Point") < lst.index("Summit"), lst[:200])
+    check("suggestions panel renders", await pg.locator(".sugs").count() == 1)
+    nn = await E("document.querySelector('details.sec2') ? document.querySelector('details.sec2').textContent : ''")
+    check("needs-a-next-step list holds worked prospects without a date", "Needs a next step" in nn and "Central Jersey" in nn)
+    await pg.click("[data-tdone='biz|b2']"); await pg.wait_for_timeout(150)
+    check("ticking a follow-up clears it", await E("window.__store.businesses.b2.followUpAt") == "")
+    await pg.click("[data-act=newtask]"); await pg.wait_for_timeout(100)
+    await pg.fill("#tk_t", "Send Dr. Ruiz the CPA bio"); await pg.select_option("#tk_b", "b4"); await pg.click("[data-when='tk_d|1']")
+    await pg.click("[data-act=savetask]"); await pg.wait_for_timeout(150)
+    tasks = await E("Object.values(window.__store.tasks||{})")
+    check("New task saves with a date picked by chip", len(tasks) == 1 and tasks[0]["dueAt"] == D(1) and tasks[0]["status"] == "open", tasks)
+    tid = tasks[0]["id"] if tasks else ""
+    await pg.click(f"[data-tfocus='task|{tid}'] >> nth=0"); await pg.wait_for_timeout(100)
+    fx = await pg.inner_text("#sheetBody")
+    check("opening a task pulls up the client, history and quick actions", "Harbor Point Dental" in fx and "Called them" in fx and "They emailed me" in fx and "Wants pricing" in fx, fx[:200])
+    await pg.click("[data-qlog='b4|email|in']"); await pg.wait_for_timeout(100)
+    check("quick log presets channel and direction", await E("document.querySelector('#sheetBody').dataset.ch") == "email" and await E("document.querySelector('#sheetBody').dataset.dir") == "in" and await pg.locator("#lo_done").is_checked())
+    await pg.select_option("#lo_out", "spoke"); await pg.click("[data-when='lo_fu|7']"); await pg.click("[data-saveout=b4]"); await pg.wait_for_timeout(200)
+    check("saving the touch records it, finishes the task and sets the next follow-up",
+          await E(f"window.__store.tasks['{tid}'].status") == "done" and await E("Object.values(window.__store.outreach).some(o=>o.bizId==='b4'&&o.dir==='in'&&o.channel==='email')") and await E("window.__store.businesses.b4.followUpAt") == D(7))
+    await pg.click("[data-tfocus='biz|b5'] >> nth=0"); await pg.wait_for_timeout(100)
+    await pg.click("[data-tnext='14']"); await pg.wait_for_timeout(150)
+    check("Done + next follow-up chip reschedules in one tap", await E("window.__store.businesses.b5.followUpAt") == D(14))
     await pg.screenshot(path=f"{OUT}/crm-followups-wide.png", full_page=True)
     # 5. appointments
     await pg.click("#sidenav [data-sub=appts]"); await pg.wait_for_timeout(150)
@@ -126,18 +145,34 @@ async def main():
     await pg.click("#sidenav [data-sub=today]"); await pg.wait_for_timeout(150)
     hero = await pg.inner_text(".hero.today")
     check("Today leads with the date and week number", "week " in hero.lower() and str(today.day) in hero, hero.splitlines()[:3])
+    await E("put('task',{id:'tt1',kind:'task',title:'Call the bank about Summit',status:'open',dueAt:localDay()}).then(render)"); await pg.wait_for_timeout(150)
     ag = await pg.inner_text(".agenda") if await pg.locator(".agenda").count() else ""
-    check("Today's agenda lists today's follow-up", "Harbor Point" in ag, ag)
-    check("Next 7 days strip has 7 days", await pg.locator(".week .wday").count() == 7)
-    check("upcoming discovery call shows on its day", "1 call" in await pg.inner_text(".week"))
-    check("this-week numbers and 14-day activity bars render", await pg.locator(".wnum b").count() == 3 and await pg.locator(".bars .bar").count() == 14)
+    check("Today's agenda includes tasks due today", "Call the bank about Summit" in ag, ag)
+    check("upcoming discovery call shows under Coming up", "Summit Builders" in ag.lower().split("coming up")[-1].title() if "coming up" in ag.lower() else False, ag)
+    tp = await pg.inner_text(".tps")
+    check("talking points render", await pg.locator(".tps").count() == 1 and len(tp) > 10, tp[:120])
+    check("industry briefing renders", await pg.locator(".brief").count() == 1)
     await pg.screenshot(path=f"{OUT}/crm-today-wide.png", full_page=True)
+    # Find businesses: search-engine layout
+    await pg.click("#sidenav [data-sub=leads]"); await pg.wait_for_timeout(150)
+    check("Find businesses opens on a search bar, not a wall of links", await pg.locator("#leadForm").count() == 1 and await pg.locator(".res").count() == 0)
+    await pg.select_option("#lwhat", "Healthcare - therapy and rehab"); await pg.select_option("#lstate", "NJ")
+    await pg.click("#leadForm button[type=submit]"); await pg.wait_for_timeout(150)
+    meta = await pg.inner_text(".rmeta")
+    check("search shows ranked results with a summary line", "physical therapy clinics" in meta and "New Jersey" in meta and await pg.locator(".res").count() > 5, meta)
+    g0 = await pg.inner_text(".rgrp >> nth=0"); check("matches already in your list come first", "already in your list" in g0.lower() and (await pg.locator(".res").first.inner_text()).startswith(("Riverview", "Long Island", "Central Jersey")))
+    await pg.fill("#lq", "now open"); await pg.press("#lq", "Enter"); await pg.wait_for_timeout(150)
+    hrefs = await E("[...document.querySelectorAll('.res a.rt')].map(a=>a.href)")
+    check("web results carry the keywords", any("now%20open" in h or "now+open" in h for h in hrefs[:8]))
+    await pg.click("[data-rtab=off]"); await pg.wait_for_timeout(100)
+    check("Official records tab shows only official sources", "NJ license verification" in await pg.inner_text("#view .rmain") and "Across the web" not in await pg.inner_text("#view .rmain"))
+    await pg.screenshot(path=f"{OUT}/crm-find-wide.png", full_page=True)
     # phone layout
     ph = await br.new_page(viewport={"width": 390, "height": 844}); ph.on("pageerror", lambda e: errs.append(str(e)))
     await ph.add_init_script(MOCK); await ph.goto(APP); await ph.wait_for_timeout(500)
     check("phone hides the sidebar and keeps bottom tabs", not await ph.locator("#sidenav").is_visible() and await ph.locator(".tabs").is_visible())
     pills = await ph.inner_text("#view .subnav")
-    check("phone Today pills include the CRM pages", all(x in pills for x in ["Prospects", "Outreach history", "Follow-up tasks", "Appointments"]), pills)
+    check("phone Today pills include the CRM pages", all(x in pills for x in ["Pipeline", "Next steps", "Discovery calls", "Touch log"]), pills)
     for sub in ["prospects", "outreach", "followups", "appts"]:
         await ph.click(f"#view [data-sub={sub}]"); await ph.wait_for_timeout(150)
         check(f"no horizontal page scroll at 390px on {sub}", await ph.evaluate("document.documentElement.scrollWidth") <= 390)

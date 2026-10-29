@@ -20,6 +20,7 @@ Records with `sample: true` are test data. They are hidden from bridges and from
 | `creq` | `contactRequests` | "Find a real contact" requests for the Research bot |
 | `req` | `leadRequests` | Requests for new businesses |
 | `usage` | `providerUsage` | Daily data-source usage counters |
+| `task` | `tasks` | Your tasks and the suggestions you added or dismissed |
 
 ## businesses
 
@@ -90,3 +91,14 @@ See [../bots/README.md](../bots/README.md#run-report-format-botlog).
 
 - `providers`: `revMin`, `revMax`, `revUnknown`, `quotaDefault`, `autoResearch`, `newsOff`, `climateFocus` (`growth` | `both` | `off`), plus provider toggles.
 - `targeting`: `focusStates[]`, `states[]`, `counties`, `industries[]`, `excludeIndustries[]`, `empMin`, `empMax`, `yearsMin`, `ownerRun`, `keywords`, `excludeWords`, `targetOnly`, `perRun`, `gens{succession, permits, filings, hiring}`.
+
+## tasks
+
+`title, why, kind (strategy|intro|connect|checkin|followup|coach|task), bizId, coiId, matchId, dueAt (YYYY-MM-DD), status (open|done|dismissed), source (suggested|you), key, doneAt`
+
+- Suggestions are computed in the app (`suggestedTasks`) from industry climate, news, bridge-ready businesses, coverage gaps, stalled introductions and the Weekly coach. Each has a stable `key`. Adding one to your list or choosing "Not now" stores a task with that key, so the suggestion doesn't come back.
+- Business follow-ups still live on the business (`followUpAt`, `followUpNote`) and show in the same list.
+
+## outreach direction
+
+`outreach.dir` is `out` (you reached out) or `in` (they reached out). Older records have no `dir` and count as `out`.

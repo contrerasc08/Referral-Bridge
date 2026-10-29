@@ -16,12 +16,12 @@ On phones, the bottom tabs are **Today**, **People**, **Bridges** and **Brain**.
 
 | Tab | Sub-sections |
 |---|---|
-| Today | Today, Prospects, Outreach history, Follow-up tasks, Appointments, Research queue |
-| People | Businesses, Specialists, Find businesses, Match a specialist, Look up info |
+| Today | Today, Pipeline, Next steps, Discovery calls, Touch log, Research queue |
+| People | Businesses, Specialists, Scout, Match a specialist, Look up info |
 | Bridges | Bridges (pipeline) |
 | Brain | Search & ask, Targeting, Signals, News, Industry climate |
 
-On screens 1024 px and wider, a left sidebar (`SIDENAV`) replaces the bottom tabs and pills, with one named item per job in three groups: **Work** (Today, Businesses, Prospect pipeline, Outreach history, Follow-up tasks, Appointments, Research queue), **Referrals** (Bridges, Specialists, Find businesses, Match a specialist) and **Intelligence** (Search & ask, Signals, News, Industry climate, Targeting). The layout follows Jessica's OliveStone CRM (see [decisions](../decisions.md)).
+On screens 1024 px and wider, a left sidebar (`SIDENAV`) replaces the bottom tabs and pills, in four groups: **Your day** (Today, Next steps, Discovery calls), **Prospecting** (Pipeline, Businesses, Scout, Touch log, Research queue), **Referrals** (Bridges, Specialists, Match a specialist) and **Insight** (Ask the Brain, Signals, News, Industry climate, Targeting). Labels and layout are Referral Bridge's own; Jessica's OliveStone CRM was a reference for the kind of pages, not a template.
 
 The ☰ menu in the header holds Targeting, Data sources, How to use, and Demo mode (show, reset, exit).
 
@@ -31,7 +31,9 @@ Demo mode swaps in made-up sample businesses, specialists, bridges, drafts and b
 
 ## Screens
 
-- **Today (home page):** leads with the date (weekday, full date, week number, quarter, day of year) and six numbers you can tap: overdue, due today, calls today, bridge-ready, new signals, drafts ready. Below that: today's agenda (discovery calls by time, then overdue and due follow-ups with Log call and Done), the next 7 days with items and calls per day, this week's touches, conversations and calls booked against last week, outreach per day for the last 14 days, bridges in motion and stuck ones, what changed since your last visit (including bot runs), the Weekly coach's plan, the top 5 businesses to contact, favored industries, and 3 headlines.
+- **Today (home page):** the date (weekday, full date, week, quarter) and four numbers: on today's agenda, overdue, discovery calls, bridge-ready. Then the **Agenda** (today's calls, follow-ups and tasks, then what's coming up), **Talking points** for this week's sales conversations (industry tailwinds and headwinds, news that raises a need with named businesses, quiet introductions, the coach's plan), and an **Industry briefing** (climate, headlines with the needs they raise, and updates since your last visit).
+- **Next steps:** your list (business follow-ups and tasks, grouped overdue, today, coming up) and **Suggested for you** (introductions, sales strategy, check-ins on quiet introductions, specialists to find, coach items) with Add to my list, Not now, or Make the introduction. Tapping a task opens the client: contact details, recent history, quick log (Called them, They called me, Emailed them, They emailed me) and one-tap "done, follow up in…". Recording a touch from a task can finish it and set the next follow-up.
+- **Scout:** a sentence to complete ("Show me … in … that are …"), then results from your list, across the web and public records, with a panel to have Claude do the search.
 - **Businesses:** search, filter chips, and the revenue range.
   - Filters: All, Bridge ready, Follow-up due, Needs a specialist, Not contacted, Fits targeting, one per lead generator, and Drafts ready.
   - Each card shows the score, "Why now", the top need, up to 3 tags and one industry headline.
