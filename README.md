@@ -29,11 +29,11 @@ referral-bridge/
 ├── README.md
 ├── src/
 │   └── index.html           # The whole app (single file, vanilla JS)
-├── web/                     # Private sign-in portal (Supabase Auth + MFA), deployed to Cloudflare Pages
+├── web/                     # Private sign-in portal (Supabase Auth + MFA), served by Cloudflare (see docs/deploy.md)
 └── docs/
     ├── decisions.md         # Why things are the way they are
     ├── roadmap.md           # Done, next, later
-    ├── deploy.md            # Putting the portal on a private Cloudflare Pages address
+    ├── deploy.md            # Putting the portal on a private Cloudflare address
     ├── specs/
     │   ├── app-and-workflow.md
     │   ├── data-model.md
@@ -50,6 +50,7 @@ tests/
 supabase/
 ├── migrations/              # Tables, roles and row-level security
 └── bootstrap_owner.sql      # One-time owner setup, run by hand
+wrangler.jsonc               # Cloudflare settings for the portal
 scripts/
 └── write-config.mjs         # Writes web/config.js from environment variables at deploy time
 ```

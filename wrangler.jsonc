@@ -1,0 +1,9 @@
+// Cloudflare Workers (static assets only): serves the sign-in portal in web/.
+// Cloudflare builds it from GitHub: build command "node scripts/write-config.mjs", deploy command "npx wrangler deploy".
+{
+  "name": "referral-bridge",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./web" },
+  "workers_dev": true,
+  "preview_urls": true
+}

@@ -1,2 +1,3 @@
 # Generated at deploy time from environment variables
 web/config.js
+.wrangler/

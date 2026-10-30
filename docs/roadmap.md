@@ -23,7 +23,7 @@
 ## Next
 - [x] Supabase tables, roles and row-level security (applied to the Supabase project on 2026-10-30)
 - [x] Sign-in portal (`web/`): email and password, authenticator-app MFA for everyone, password reset, invite codes
-- [ ] Put the portal on a private Cloudflare Pages address (`docs/deploy.md`), then create the owner account
+- [ ] Put the portal on a private Cloudflare address (`docs/deploy.md`), then create the owner account
 - [ ] Storage layer: the CRM reads and writes Supabase instead of the artifact database, plus a screen for company admins to create invite codes
 - [ ] Move existing records from the artifact database into Supabase (Supabase Pro before real data)
 - [ ] Show the Specialist checker's full results (clear / unverified, with the checks and links) on the specialist detail sheet. "Flagged" already shows on cards and blocks bridges.
