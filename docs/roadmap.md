@@ -21,7 +21,11 @@
 - [x] CRM-style navigation from Jessica's OliveStone screenshots: sidebar on wide screens, prospect pipeline board with drag and ⌄ task menus, outreach history with outcome filters and export, follow-up tasks, appointments
 
 ## Next
-- [ ] Turn on automatic approval for the **Research bot** task (its Oct 20 run was abandoned waiting for approval)
+- [x] Supabase tables, roles and row-level security (applied to the Supabase project on 2026-10-30)
+- [x] Sign-in portal (`web/`): email and password, authenticator-app MFA for everyone, password reset, invite codes
+- [ ] Put the portal on a private Cloudflare address (`docs/deploy.md`), then create the owner account
+- [ ] Storage layer: the CRM reads and writes Supabase instead of the artifact database, plus a screen for company admins to create invite codes
+- [ ] Move existing records from the artifact database into Supabase (Supabase Pro before real data)
 - [ ] Show the Specialist checker's full results (clear / unverified, with the checks and links) on the specialist detail sheet. "Flagged" already shows on cards and blocks bridges.
 - [ ] Show lead generator coverage gaps in the Brain and feed them to the Prospector
 - [ ] Read-only sharing for a partner (view without editing)
