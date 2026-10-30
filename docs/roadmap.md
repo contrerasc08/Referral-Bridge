@@ -17,6 +17,7 @@
 - [x] Ready-to-send drafts on business pages
 - [x] Demo mode with made-up data
 - [x] Code and specs in GitHub
+- [x] CRM-style navigation from Jessica's OliveStone screenshots: sidebar on wide screens, prospect pipeline board with drag and ⌄ task menus, outreach history with outcome filters and export, follow-up tasks, appointments
 
 ## Next
 - [ ] Turn on automatic approval for the **Research bot** task (its Oct 20 run was abandoned waiting for approval)

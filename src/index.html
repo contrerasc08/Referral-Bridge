@@ -262,6 +262,79 @@ details.sec2{background:var(--surface);border:1px solid var(--rule);border-radiu
 .gens{padding:0;overflow:hidden}.gens .srow{padding:11px 14px;align-items:center}
 .demobar button{border:1px solid rgba(255,255,255,.6);background:none;color:#fff;border-radius:999px;padding:2px 10px;font-size:.75rem}
 :root:not([data-theme="light"]) .demobar{color:#fff}
+/* Today home page */
+.hero.today{display:grid;gap:14px}
+.hero.today .hd{display:grid;gap:6px}
+.bigdate{font-size:2rem!important;line-height:1.1;margin:2px 0!important;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.bigdate span{font-size:1.05rem;font-weight:600;opacity:.8}
+.hero.today p{margin:0}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpi{border:1px solid color-mix(in srgb,currentColor 25%,transparent);background:color-mix(in srgb,currentColor 6%,transparent);color:inherit;border-radius:12px;padding:8px 10px;text-align:left;display:flex;flex-direction:column}
+.kpi b{font-size:1.45rem;line-height:1.1;font-variant-numeric:tabular-nums}.kpi span{font-size:.76rem;opacity:.8}
+.kpi.warn{border-color:var(--danger);background:color-mix(in srgb,var(--danger) 22%,transparent)}
+.agenda{padding:0;overflow:hidden}
+.arow{display:grid;grid-template-columns:76px 1fr;gap:4px 10px;padding:10px 14px;border-bottom:1px solid var(--rule);align-items:center}.arow:last-child{border-bottom:0}
+.arow .acts{grid-column:2;display:flex;gap:6px;flex-wrap:wrap}
+.arow.over .atime{color:var(--danger)}.arow.call .atime{color:var(--biz)}
+.atime{font-weight:800;font-variant-numeric:tabular-nums;font-size:.92rem}
+.aname{font-weight:650;color:var(--ink);padding:0;text-align:left}
+.btn.small{padding:5px 10px;font-size:.82rem}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wday{border:1px solid var(--rule);background:var(--surface);border-radius:10px;padding:8px 2px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+.wday b{font-size:1.15rem;font-variant-numeric:tabular-nums}.wday .wd{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.wday .wn{font-size:.68rem;color:var(--muted)}.wday .wc{font-size:.66rem;font-weight:700;color:var(--biz)}
+.wday.has{border-color:var(--ink)}
+.tgrid{display:grid;gap:12px;margin-top:16px}
+.ch{font-size:.98rem;margin:0 0 10px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.wnum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.wnum div{display:flex;flex-direction:column}
+.wnum b{font-size:1.4rem;font-variant-numeric:tabular-nums;line-height:1.1}.wnum span{font-size:.78rem;color:var(--muted)}
+.dl{font-size:.72rem!important;font-weight:600}.dl.up{color:var(--biz)!important}.dl.down{color:var(--danger)!important}
+.bars{display:grid;grid-template-columns:repeat(14,1fr);gap:3px;height:84px;align-items:end;margin-bottom:4px}
+.bar{display:flex;flex-direction:column;justify-content:flex-end;height:100%;align-items:center;gap:2px}
+.bar i{display:block;width:100%;min-height:2px;background:var(--rule);border-radius:3px 3px 0 0}.bar span{font-size:.6rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar i{background:color-mix(in srgb,var(--biz) 55%,var(--rule))}.bar.now i{background:var(--biz)}.bar.now span{color:var(--ink);font-weight:700}
+@media (min-width:640px){.kpis{grid-template-columns:repeat(6,1fr)}.arow{grid-template-columns:90px 1fr auto}.arow .acts{grid-column:auto}}
+@media (min-width:900px){.tgrid{grid-template-columns:1.4fr 1fr}.bigdate{font-size:2.5rem!important}}
+/* CRM-style navigation and task commands (modeled on the OliveStone CRM layout) */
+.sidenav{display:none}
+.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin:4px 0 12px}
+.phead .pt{display:flex;gap:10px;align-items:center;min-width:0}
+.phead .pic{flex:none;width:40px;height:40px;border-radius:10px;background:var(--biz);color:#fff;display:grid;place-items:center;font-size:1.1rem}
+:root:not([data-theme="light"]) .phead .pic{color:#0B1A16}
+.phead .crumb{font-size:.8rem;color:var(--muted)}
+.phead h2{margin:0}
+.phead .pa{display:flex;gap:0}
+.phead .pa .btn{border-radius:0;margin-left:-1px}.phead .pa .btn:first-child{border-radius:10px 0 0 10px;margin-left:0}.phead .pa .btn:last-child{border-radius:0 10px 10px 0}.phead .pa .btn:only-child{border-radius:10px}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.toolbar .meta{font-size:.84rem;color:var(--muted);flex:1;min-width:140px}
+.ostats{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px}.ostats div b{display:block;font-size:1.3rem;line-height:1.1;font-variant-numeric:tabular-nums}.ostats div span{font-size:.8rem;color:var(--muted)}
+.otag{display:inline-block;font-size:.76rem;font-weight:600;border-radius:999px;padding:2px 9px;background:var(--rule);color:var(--ink);white-space:nowrap}
+.otag.good{background:var(--biz-soft);color:var(--biz)}.otag.bad{background:var(--danger-soft);color:var(--danger)}.otag.mid{background:var(--coi-soft);color:var(--coi)}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(236px,1fr);gap:10px;overflow-x:auto;padding-bottom:10px;align-items:start}
+.kcol{background:var(--paper);border-radius:12px;min-height:120px}
+.kcol.over{outline:2px dashed var(--biz);outline-offset:-2px}
+.khead{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:10px;font-weight:700;font-size:.9rem;color:#1E1A10;margin-bottom:8px}
+.khead b{background:rgba(255,255,255,.75);border-radius:999px;padding:0 8px;font-size:.8rem;font-variant-numeric:tabular-nums}
+.kbody{display:grid;gap:8px}
+.kcard{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:10px 12px}
+.kcard[draggable="true"]{cursor:grab}
+.kcard .meta{font-size:.82rem;color:var(--muted)}
+.kcard .oc-top .btn{padding:2px 8px}
+.kcard .name{font-weight:650;line-height:1.3;border:0;background:none;padding:0;text-align:left;width:100%}
+.kempty{border:1px dashed var(--rule);border-radius:12px;padding:16px;text-align:center;font-size:.84rem;color:var(--muted)}
+.ftask{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.ftask .acts{display:flex;gap:4px;flex-wrap:wrap}
+@media (min-width:1024px){
+  body{padding-bottom:24px}
+  .sidenav{display:block;position:fixed;top:72px;left:0;bottom:0;width:224px;padding:8px 12px 16px;background:var(--surface);border-right:1px solid var(--rule);overflow-y:auto;z-index:4}
+  .sidenav button{display:block;width:100%;text-align:left;border:0;background:none;border-radius:10px;padding:9px 12px;font-weight:600;font-size:.93rem;color:var(--muted)}
+  .sidenav button[aria-current="page"]{background:var(--biz);color:#fff}
+  :root:not([data-theme="light"]) .sidenav button[aria-current="page"]{color:#0B1A16}
+  .sidenav .grp{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:14px 12px 4px}
+  main{margin-left:240px;margin-right:auto}
+  main.wide{max-width:1180px}
+  .tabs,.subnav{display:none}
+}
 </style>
 </head>
 <body>
@@ -273,6 +346,7 @@ details.sec2{background:var(--surface);border:1px solid var(--rule);border-radiu
   <div class="topr"><div class="sync" id="sync">Saved on this device</div><button class="menubtn" data-act="menu" aria-label="Menu">☰</button></div>
 </header>
 <div class="demobar" id="demobar" hidden>Demo · sample data <button data-act="demoreset">Reset</button><button data-act="demoexit">Exit demo</button></div>
+<nav class="sidenav" id="sidenav" aria-label="Sections"></nav>
 <main id="view" aria-live="polite"></main>
 <nav class="tabs" aria-label="Sections">
   <button data-tab="today"><i></i>Today</button>
@@ -1233,21 +1307,98 @@ function followUpSheet(bizId){const b=byId("biz",bizId);if(!b)return;
   openSheet(`<h3>Follow-up</h3><p class="lede">${esc(b.name)}</p><div class="field"><label for="fu_d">Date</label><input id="fu_d" type="date" value="${esc(b.followUpAt||localDay())}"></div>
   <div class="field"><label for="fu_n">What to do</label><input id="fu_n" type="text" value="${esc(b.followUpNote||"")}" placeholder="e.g. Call back after Thursday"></div>
   <div class="sheet-foot"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-savefu="${b.id}">Save</button></div>`)}
+/* ---------- CRM pages: prospect pipeline, outreach history, follow-up tasks, appointments ---------- */
+function phead(icon,crumb,title,acts){return`<div class="phead"><div class="pt"><span class="pic" aria-hidden="true">${icon}</span><div class="min"><div class="crumb">${esc(crumb)}</div><h2>${title}</h2></div></div>${acts?`<div class="pa">${acts}</div>`:""}</div>`}
+function upcomingAppt(b){const today=localDay();return S.outreach.filter(o=>o.bizId===b.id&&o.apptAt&&o.apptAt>=today).sort((x,y)=>x.apptAt.localeCompare(y.apptAt))[0]}
+function isOpenStage(b){return!["Won","Lost"].includes(stageOf(b))}
+/* An open prospect with no follow-up date and no discovery call booked has no next step */
+function noNextStep(b){return isOpenStage(b)&&!b.followUpAt&&!upcomingAppt(b)}
+function infoScore(b){const cs=b.contacts||[],p=b.profile||{};return[b.contact||p.principal||cs.some(c=>c.name),b.phone||cs.some(c=>c.phone),b.email||cs.some(c=>c.email),p.website||cs.some(c=>c.website)].filter(Boolean).length}
+const OTAG={interested:"good",booked:"good",spoke:"mid",notint:"bad",bad:"bad"};
+const otag=k=>`<span class="otag ${OTAG[k]||""}">${esc(oLabel(k))}</span>`;
+const stag=b=>{const st=stageOf(b);return`<span class="otag ${st==="Won"?"good":st==="Lost"?"bad":["Engaged","Discovery call","Proposal sent","Negotiation"].includes(st)?"mid":""}">${esc(st)}</span>`};
+const lmenuBtn=id=>`<button class="btn" data-lmenu="${id}" aria-label="Actions">⌄</button>`;
+function leadMenu(id){
+  const b=byId("biz",id);if(!b)return;const st=stageOf(b), ap=upcomingAppt(b);
+  const row=(attr,l,dsc)=>`<button class="mrow" ${attr}><span><b>${esc(l)}</b><span class="meta">${esc(dsc)}</span></span><span aria-hidden="true">›</span></button>`;
+  openSheet(`<h3>${esc(b.name)}</h3><p class="lede">${esc(st)} · ${b.followUpAt?"Follow-up "+esc(fmtDate(b.followUpAt)):ap?"Discovery call "+esc(fmtDate(ap.apptAt)):isOpenStage(b)?"No next step":"Closed out"}</p>
+  <div class="card menu">${row(`data-logout="${id}"`,"Log call or email","Record a touch and its outcome")}${row(`data-setfu="${id}"`,b.followUpAt?"Change follow-up":"Set follow-up","Pick a date and what to do")}${b.followUpAt?row(`data-clearfu="${id}"`,"Mark follow-up done","Clears the date"):""}${row(`data-bizview="${id}"`,"Open business page","Needs, bridges, contacts and signals")}</div>
+  <h3 class="sec">Move to stage</h3><div class="seg">${PSTAGES.map(p=>`<button data-pstage="${id}|${p}" aria-pressed="${p===st}">${p}</button>`).join("")}</div>
+  <div class="sheet-foot"><span></span><button class="btn" data-act="close">Close</button></div>`);
+}
+function pickBizSheet(){
+  const list=S.biz.filter(b=>!b.sample).sort((a,b)=>a.name.localeCompare(b.name));
+  if(!list.length){toast("Add a business first");return}
+  openSheet(`<h3>Log call or email</h3><div class="field"><label for="pk_biz">Business</label><select id="pk_biz">${list.map(b=>`<option value="${b.id}">${esc(b.name)}${b.city||b.state?" · "+esc([b.city,b.state].filter(Boolean).join(", ")):""}</option>`).join("")}</select></div>
+  <div class="sheet-foot"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="pickbiz">Next</button></div>`);
+}
+const PB={q:"",list:false};
+function viewProspects(){
+  const q=PB.q.trim().toLowerCase(), all=S.biz.filter(b=>!b.sample&&inRev(b));
+  const items=all.filter(b=>!q||[b.name,b.city,b.state,b.industry,b.contact].join(" ").toLowerCase().includes(q));
+  const COLORS=["#F3D27A","#F0B24A","#EC9A45","#E67F3C","#DE6B3A","#D45A3A","#C84E3B","#7CC79A","#C9CDD4"];
+  const card=b=>{const nn=noNextStep(b), inf=infoScore(b), ap=upcomingAppt(b);
+    return`<div class="kcard" draggable="true" data-kid="${b.id}"><div class="oc-top"><button class="name" data-bizview="${b.id}">${esc(b.name)}</button>${lmenuBtn(b.id)}</div>
+    <div class="meta">${esc([b.city,b.state].filter(Boolean).join(", ")||shortInd(b.industry))}</div>
+    <div class="tags"><span class="tag s" title="Contact info on file: owner, phone, email, website">${inf}/4</span>${nn?`<span class="tag due">No next step</span>`:b.followUpAt?`<span class="tag ${b.followUpAt<=localDay()?"due":"c"}">Follow-up ${esc(fmtDate(b.followUpAt))}</span>`:ap?`<span class="tag b">Call ${esc(fmtDate(ap.apptAt))}</span>`:""}</div></div>`};
+  let h=phead("▥","Prospect pipeline",`Prospects (${items.length})`,`<button class="btn" data-act="addBiz">New business</button><button class="btn" data-act="pblist">${PB.list?"Board view":"List view"}</button>`);
+  h+=`<div class="toolbar"><span class="meta">${items.length} item${items.length===1?"":"s"} · Grouped by stage · ${PB.list?"Use ⌄ to act on a row":"Drag a card to move it, or use its ⌄ menu"}</span><input class="search" id="qpb" type="search" placeholder="Search this pipeline…" value="${esc(PB.q)}" style="max-width:280px"></div>`;
+  if(!all.length)return h+`<div class="empty"><p>No businesses yet.</p><button class="btn primary" data-go="leads">Find businesses</button></div>`;
+  if(PB.list){
+    const rows=items.slice().sort((a,b)=>PSTAGES.indexOf(stageOf(a))-PSTAGES.indexOf(stageOf(b))||a.name.localeCompare(b.name));
+    return h+`<div class="tbl-wrap"><table><thead><tr><th>Business</th><th>Stage</th><th>Next step</th><th>Info</th><th></th></tr></thead><tbody>${rows.map(b=>{const ap=upcomingAppt(b);return`<tr><td><button class="btn ghost" style="padding:0;font-weight:650;color:var(--ink)" data-bizview="${b.id}">${esc(b.name)}</button><div class="meta">${esc([b.city,b.state].filter(Boolean).join(", "))}</div></td><td>${stag(b)}</td><td>${noNextStep(b)?`<span class="tag due">No next step</span>`:b.followUpAt?esc(fmtDate(b.followUpAt)):ap?"Call "+esc(fmtDate(ap.apptAt)):"—"}</td><td class="n">${infoScore(b)}/4</td><td>${lmenuBtn(b.id)}</td></tr>`}).join("")}</tbody></table></div>`;
+  }
+  return h+`<div class="board">${PSTAGES.map((p,i)=>{const col=items.filter(b=>stageOf(b)===p);
+    return`<section class="kcol" data-kcol="${p}" aria-label="${esc(p)}"><div class="khead" style="background:${COLORS[i]}"><span>${esc(p)}</span><b>${col.length}</b></div><div class="kbody">${col.length?col.map(card).join(""):`<div class="kempty">Drop here</div>`}</div></section>`}).join("")}</div>`;
+}
+const OH={f:"all",q:""};
+function ohRows(){const q=OH.q.trim().toLowerCase();
+  return S.outreach.filter(o=>{const b=byId("biz",o.bizId);if(b&&b.sample)return false;if(OH.f!=="all"&&(o.outcome||"none")!==OH.f)return false;
+    return!q||[b&&b.name,b&&b.industry,o.contact,o.note,cLabel(o.channel)].join(" ").toLowerCase().includes(q)}).sort((x,y)=>(y.at||"").localeCompare(x.at||""))}
+function ohTable(){const rows=ohRows();
+  if(!rows.length)return`<div class="empty"><p>${S.outreach.length?"No outreach matches these filters.":"No outreach logged yet. Use Log call or email after every touch."}</p></div>`;
+  return`<div class="tbl-wrap"><table><thead><tr><th>Business</th><th>Channel</th><th>Outcome</th><th>Stage</th><th>With</th><th>Notes</th><th>When</th><th></th></tr></thead><tbody>${rows.slice(0,200).map(o=>{const b=byId("biz",o.bizId);
+    return`<tr><td>${b?`<button class="btn ghost" style="padding:0;font-weight:650;color:var(--ink)" data-bizview="${b.id}">${esc(b.name)}</button><div class="meta">${esc(shortInd(b.industry))}</div>`:"Removed"}</td><td>${esc(cLabel(o.channel))}</td><td>${otag(o.outcome||"none")}</td><td>${b?stag(b):""}</td><td>${esc(o.contact||"")}</td><td style="white-space:normal;min-width:160px">${esc((o.note||"").slice(0,140))}</td><td>${esc(fmtDate(o.at))}</td><td>${b?lmenuBtn(b.id):""}</td></tr>`}).join("")}</tbody></table></div>`}
 function viewOutreach(){
-  const s=outreachStats(OV.days), fus=followUps(), real=S.biz.filter(b=>!b.sample);
+  const s=outreachStats(OV.days), real=S.biz.filter(b=>!b.sample);
+  const ev=S.outreach.filter(o=>!(byId("biz",o.bizId)||{}).sample), withOut=ev.filter(o=>o.outcome&&o.outcome!=="none").length, talked=ev.filter(o=>["spoke","interested","booked"].includes(o.outcome)).length;
   const counts=PSTAGES.map(p=>[p,real.filter(b=>stageOf(b)===p).length]);
   const tile=(n,l)=>`<div class="tile" style="cursor:default"><b>${n}</b><span>${l}</span></div>`;
-  const appts=S.outreach.filter(o=>o.apptAt&&o.apptAt>=localDay()).sort((x,y)=>(x.apptAt+(x.apptTime||"")).localeCompare(y.apptAt+(y.apptTime||"")));
-  return`<h2>Outreach</h2><p class="lede">Track every call, email and visit you make, your follow-ups and discovery calls, and how well your outreach converts.</p>
+  return phead("✆","Outreach history",`All outreach (${ev.length})`,`<button class="btn" data-act="logpick">Log call or email</button><button class="btn" data-act="exportOut">Export</button>`)+
+  `<div class="ostats"><div><b>${ev.length}</b><span>logged</span></div><div><b>${ev.length?Math.round(100*withOut/ev.length):0}%</b><span>with an outcome</span></div><div><b>${talked}</b><span>interested or spoke</span></div></div>
+  <div class="chips" role="group" aria-label="Outcome"><button class="chip" data-ohf="all" aria-pressed="${OH.f==="all"}">All<small>${ev.length}</small></button>${OUTCOMES.map(([k,l])=>`<button class="chip" data-ohf="${k}" aria-pressed="${OH.f===k}">${l}<small>${ev.filter(o=>(o.outcome||"none")===k).length}</small></button>`).join("")}</div>
+  <div class="toolbar"><span class="meta">${ohRows().length} items · Sorted by latest activity</span><input class="search" id="qoh" type="search" placeholder="Search businesses, people or notes" value="${esc(OH.q)}" style="max-width:300px"></div>
+  <div id="ohBody">${ohTable()}</div>
+  <details class="sec2" style="margin-top:16px"><summary><span>Conversion and export</span></summary><div class="secbody">
   <div class="chips">${[["7","Last 7 days"],["30","Last 30 days"],["90","Last 90 days"],["all","All time"]].map(([k,l])=>`<button class="chip" data-ovd="${k}" aria-pressed="${OV.days===k}">${l}</button>`).join("")}</div>
   <div class="tiles">${tile(s.discovered,"businesses discovered")}${tile(s.contacted,"prospects contacted")}${tile(s.convo,"conversations")}${tile(s.hot,"interested")}${tile(s.booked,"discovery calls booked")}${tile(s.bookRate+"%","booking rate")}</div>
-  <div class="card"><div class="srow"><span><b>Close rate</b></span><b>${s.closeRate===null?"—":s.closeRate+"%"}</b></div><div class="meta">${s.won} won, ${s.lost} lost. Mark a business Won or Lost on its page.</div></div>
-  <h3 class="sec">Follow-ups</h3>${fus.length?`<div class="list">${fus.slice(0,20).map(f=>`<button class="card" data-bizview="${f.b.id}" style="${f.over?"border-color:var(--danger)":""}"><div class="oc-top"><span class="name">${esc(f.b.name)}</span><span class="meta" style="font-weight:700;color:${f.over?"var(--danger)":f.due?"var(--warn)":"var(--muted)"}">${f.over?"Overdue · ":f.due?"Today · ":""}${esc(fmtDate(f.d))}</span></div><div class="meta">${esc(f.b.followUpNote||stageOf(f.b))}</div></button>`).join("")}</div>`:`<div class="empty"><p>No follow-ups scheduled.</p></div>`}
-  <h3 class="sec">Upcoming discovery calls</h3>${appts.length?`<div class="list">${appts.map(o=>{const b=byId("biz",o.bizId);return`<button class="card" data-bizview="${o.bizId}"><div class="name">${esc(b?b.name:"Removed")}</div><div class="meta">${esc(fmtDate(o.apptAt))}${o.apptTime?" at "+esc(o.apptTime):""}${o.contact?" · "+esc(o.contact):""}</div></button>`}).join("")}</div>`:`<p class="meta">None booked.</p>`}
+  <div class="card"><div class="srow"><span><b>Close rate</b></span><b>${s.closeRate===null?"—":s.closeRate+"%"}</b></div><div class="meta">${s.won} won, ${s.lost} lost. Mark a business Won or Lost from its ⌄ menu.</div></div>
   <h3 class="sec">Pipeline by stage</h3><div class="card">${counts.map(([p,n])=>`<div class="srow"><span>${p}</span><span><b>${n}</b> <span class="meta">${real.length?Math.round(100*n/real.length):0}%</span></span></div>`).join("")}</div>
-  <h3 class="sec">Recent outreach</h3>${s.ev.length?`<div class="tbl-wrap"><table><thead><tr><th>Prospect</th><th>Channel</th><th>Outcome</th><th>Date</th></tr></thead><tbody>${s.ev.slice().sort((x,y)=>(y.at||"").localeCompare(x.at||"")).slice(0,25).map(o=>{const b=byId("biz",o.bizId);return`<tr><td><button class="btn ghost" style="padding:0" data-bizview="${o.bizId}">${esc(b?b.name:"Removed")}</button></td><td>${esc(cLabel(o.channel))}</td><td>${esc(oLabel(o.outcome))}</td><td>${esc(fmtDate(o.at))}</td></tr>`}).join("")}</tbody></table></div>`:`<p class="meta">No outreach in this period.</p>`}
-  <h3 class="sec">Export</h3><div class="card"><p class="meta" style="margin:0 0 8px">Download your real businesses as a spreadsheet (CSV) to import into another CRM such as OliveStone, or to share. Includes owner, phone, email, address, industry, stage, scores and why each is worth bridging.</p>
-  <div class="row"><button class="btn primary" data-export="all">Export all real businesses</button><button class="btn" data-export="open">Export open prospects only</button></div></div>`;
+  <h3 class="sec">Export businesses</h3><div class="card"><p class="meta" style="margin:0 0 8px">Download your real businesses as a spreadsheet (CSV) to import into another CRM such as OliveStone, or to share. Includes owner, phone, email, address, industry, stage, scores and why each is worth bridging.</p>
+  <div class="row"><button class="btn primary" data-export="all">Export all real businesses</button><button class="btn" data-export="open">Export open prospects only</button></div></div></div></details>`;
+}
+function viewFollowups(){
+  const fus=followUps(), today=localDay(), over=fus.filter(f=>f.over), tod=fus.filter(f=>f.d===today), up=fus.filter(f=>f.d>today);
+  const nn=S.biz.filter(b=>!b.sample&&inRev(b)&&noNextStep(b)&&stageOf(b)!=="Prospect").sort((a,b)=>PSTAGES.indexOf(stageOf(b))-PSTAGES.indexOf(stageOf(a)));
+  const task=f=>`<div class="card ftask" style="${f.over?"border-color:var(--danger)":""}"><div class="min"><button class="btn ghost" style="padding:0;font-weight:650;color:var(--ink)" data-bizview="${f.b.id}">${esc(f.b.name)}</button>
+    <div class="meta"><span style="font-weight:700;color:${f.over?"var(--danger)":f.d===today?"var(--warn)":"var(--muted)"}">${f.over?"Overdue":f.d===today?"Today":"Upcoming"} · ${esc(fmtDate(f.d))}</span>${f.b.followUpNote?" · "+esc(f.b.followUpNote):""} · ${esc(stageOf(f.b))}</div></div>
+    <div class="acts"><button class="btn" data-logout="${f.b.id}">Log call</button><button class="btn" data-setfu="${f.b.id}">Change</button><button class="btn primary" data-clearfu="${f.b.id}">Done</button></div></div>`;
+  const grp=(t,l)=>l.length?`<h3 class="sec">${t} <span class="meta">${l.length}</span></h3><div class="list">${l.map(task).join("")}</div>`:"";
+  let h=phead("✓","Follow-up tasks",`Follow-ups (${fus.length})`,`<button class="btn" data-act="logpick">Log call or email</button>`);
+  h+=`<div class="ostats"><div><b style="color:${over.length?"var(--danger)":"inherit"}">${over.length}</b><span>overdue</span></div><div><b>${tod.length}</b><span>due today</span></div><div><b>${up.length}</b><span>upcoming</span></div><div><b>${nn.length}</b><span>with no next step</span></div></div>`;
+  h+=fus.length?grp("Overdue",over)+grp("Today",tod)+grp("Upcoming",up):`<div class="empty"><p>No follow-ups set. Set one from any business's ⌄ menu or when you log a call.</p></div>`;
+  if(nn.length)h+=`<h3 class="sec">No next step <span class="meta">${nn.length}</span></h3><p class="lede">Prospects you've worked that have no follow-up date and no discovery call booked.</p><div class="list">${nn.slice(0,25).map(b=>`<div class="card ftask"><div class="min"><button class="btn ghost" style="padding:0;font-weight:650;color:var(--ink)" data-bizview="${b.id}">${esc(b.name)}</button><div class="meta">${esc(stageOf(b))}${lastTouch(b)?" · last touch "+esc(fmtDate(lastTouch(b).at)):""}</div></div><div class="acts"><button class="btn" data-setfu="${b.id}">Set follow-up</button>${lmenuBtn(b.id)}</div></div>`).join("")}</div>`;
+  return h;
+}
+function viewAppts(){
+  const today=localDay(), since=localDay(new Date(Date.now()-30*DAY).toISOString());
+  const all=S.outreach.filter(o=>o.apptAt&&!(byId("biz",o.bizId)||{}).sample), key=o=>o.apptAt+(o.apptTime||"");
+  const up=all.filter(o=>o.apptAt>=today).sort((x,y)=>key(x).localeCompare(key(y))), past=all.filter(o=>o.apptAt<today&&o.apptAt>=since).sort((x,y)=>key(y).localeCompare(key(x)));
+  const row=o=>{const b=byId("biz",o.bizId);return`<div class="card ftask"><div class="min">${b?`<button class="btn ghost" style="padding:0;font-weight:650;color:var(--ink)" data-bizview="${b.id}">${esc(b.name)}</button>`:"<b>Removed</b>"}<div class="meta">${esc(fmtDate(o.apptAt))}${o.apptTime?" at "+esc(o.apptTime):""}${o.contact?" · with "+esc(o.contact):""}${b?" · "+esc(stageOf(b)):""}</div></div>${b?`<div class="acts"><button class="btn" data-logout="${b.id}">Log outcome</button>${lmenuBtn(b.id)}</div>`:""}</div>`};
+  return phead("◷","Appointments",`Discovery calls (${up.length} upcoming)`,`<button class="btn" data-act="logpick">Book from a call</button>`)+
+    `<p class="lede">Log a call with the outcome "Discovery call booked" to add it here.</p>`+
+    (up.length?`<div class="list">${up.map(row).join("")}</div>`:`<div class="empty"><p>No discovery calls booked.</p></div>`)+
+    (past.length?`<h3 class="sec">Last 30 days</h3><div class="list">${past.map(row).join("")}</div>`:"");
 }
 function csvCell(v){v=String(v??"");return/[",\n\r]/.test(v)?`"${v.replace(/"/g,'""')}"`:v}
 function buildCSV(kind){
@@ -1260,12 +1411,20 @@ function buildCSV(kind){
       lt?`${cLabel(lt.channel)} · ${oLabel(lt.outcome)} · ${localDay(lt.at)}`:"",b.followUpAt||"",b.source||""].map(csvCell).join(","))}
   return{csv:lines.join("\r\n"),n:rows.length};
 }
+async function exportOutreachCSV(){
+  const rows=ohRows();if(!rows.length){toast("No outreach to export");return}
+  const lines=[["Business","Industry","Channel","Outcome","Stage","With","Notes","Date","Discovery call"].join(",")];
+  for(const o of rows){const b=byId("biz",o.bizId)||{};lines.push([b.name||"Removed",b.industry||"",cLabel(o.channel),oLabel(o.outcome||"none"),b.id?stageOf(b):"",o.contact||"",o.note||"",localDay(o.at),o.apptAt?(o.apptAt+(o.apptTime?" "+o.apptTime:"")):""].map(csvCell).join(","))}
+  await saveCSVFile(`referral-bridge-outreach-${localDay()}.csv`,lines.join("\r\n"),`Exported ${rows.length} outreach record${rows.length===1?"":"s"}`);
+}
 async function exportCSV(kind){
   const {csv,n}=buildCSV(kind);if(!n){toast("No real businesses to export yet");return}
-  const name=`referral-bridge-businesses-${localDay()}.csv`;
+  await saveCSVFile(`referral-bridge-businesses-${localDay()}.csv`,csv,`Exported ${n} business${n===1?"":"es"}`);
+}
+async function saveCSVFile(name,csv,okMsg){
   let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use("downloads"):null}catch(e){}
-  if(dl){try{await dl.save({filename:name,data:"﻿"+csv});toast(`Exported ${n} business${n===1?"":"es"}`)}catch(e){if(e&&e.code!=="declined")toast("Couldn't save the file here.")}return}
-  try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv"}));a.download=name;document.body.appendChild(a);a.click();a.remove();toast(`Exported ${n} business${n===1?"":"es"}`)}catch(e){toast("Downloads aren't available in this view.")}
+  if(dl){try{await dl.save({filename:name,data:"﻿"+csv});toast(okMsg)}catch(e){if(e&&e.code!=="declined")toast("Couldn't save the file here.")}return}
+  try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv"}));a.download=name;document.body.appendChild(a);a.click();a.remove();toast(okMsg)}catch(e){toast("Downloads aren't available in this view.")}
 }
 
 /* ---------- Bridges: a business becomes a lead when a need is bridged to a specialist's solution ---------- */
@@ -1309,25 +1468,72 @@ function sec(key,title,body,openDefault,count){
 }
 function greet(){const h=new Date().getHours();return h<12?"Good morning":h<17?"Good afternoon":"Good evening"}
 
+/* Today: the home page. Date first, then what's on today, the week ahead, the numbers, and what changed */
+function weekNo(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y0)/864e5+1)/7)}
+function addDays(day,n){const d=new Date(day+"T12:00:00");d.setDate(d.getDate()+n);return localDay(d.toISOString())}
+function agendaFor(day){
+  const today=localDay(), real=S.biz.filter(b=>!b.sample);
+  const calls=S.outreach.filter(o=>o.apptAt===day&&!(byId("biz",o.bizId)||{}).sample).map(o=>({kind:"call",b:byId("biz",o.bizId),o,time:o.apptTime||"",key:"0"+(o.apptTime||"99")}));
+  const fus=real.filter(b=>b.followUpAt&&isOpenStage(b)&&(day===today?b.followUpAt<=day:b.followUpAt===day)).map(b=>({kind:b.followUpAt<today?"over":"fu",b,key:(b.followUpAt<today?"1":"2")+b.followUpAt}));
+  return[...calls.filter(x=>x.b),...fus].sort((x,y)=>x.key.localeCompare(y.key));
+}
+function weekCounts(fromDay,toDay){const inW=t=>{const d=localDay(t);return d>=fromDay&&d<=toDay};
+  const ev=S.outreach.filter(o=>o.at&&inW(o.at)&&!(byId("biz",o.bizId)||{}).sample);
+  return{touches:ev.length,convo:ev.filter(o=>CONVO.has(o.outcome)).length,booked:ev.filter(o=>o.outcome==="booked").length}}
+function delta(a,b){if(a===b)return`<span class="dl">same as last week</span>`;const up=a>b;return`<span class="dl ${up?"up":"down"}">${up?"▲":"▼"} ${Math.abs(a-b)} vs last week</span>`}
 function viewToday(){
+  const now=new Date(), today=localDay();
   const since=PREV_SEEN?Date.parse(PREV_SEEN):Date.now()-7*DAY;
   const isNew=x=>{const t=Date.parse(x.detectedAt||x.createdAt||"");return!isNaN(t)&&t>since};
   const real=S.biz.filter(b=>inRev(b));
   const rows=real.map(b=>{const o=opportunity(b),ms=S.match.filter(m=>m.bizId===b.id);return{b,o,fresh:o.active.filter(isNew),live:ms.some(m=>["Approved","Introduced","Meeting"].includes(m.status)),client:ms.some(m=>m.status==="Closed"),newBiz:isNew(b)}});
-  const newSignals=rows.reduce((a,r)=>a+r.fresh.length,0);
+  const newSignals=rows.reduce((a,r)=>a+r.fresh.length,0), newBiz=rows.filter(r=>r.newBiz&&!r.b.sample).length;
   let top=rows.filter(r=>!r.live&&r.o.score>=25&&(r.fresh.length||r.newBiz)).sort((a,b)=>(bridgesFor(b.b).length>0)-(bridgesFor(a.b).length>0)||b.o.score-a.o.score);
   const fresh=top.length>0;if(!top.length)top=rows.filter(r=>!r.b.sample&&r.o.score>0).sort((a,b)=>b.o.score-a.o.score);
-  const fd=followUps().filter(f=>f.due).length, ready=real.filter(b=>!b.sample&&bridgesFor(b).length).length, rq=researchQueue().length, os=outreachStats("30");
+  const fus=followUps(), over=fus.filter(f=>f.over).length, dueToday=fus.filter(f=>f.d===today).length;
+  const agenda=agendaFor(today), callsToday=agenda.filter(a=>a.kind==="call").length;
+  const ready=real.filter(b=>!b.sample&&bridgesFor(b).length).length, nd=draftsReady().length;
   const stp=setupSteps(), sdone=stp.filter(x=>x.done).length, nage=newsAge();
-  const chip=(n,l,go,warn)=>`<button class="hchip ${warn&&n?"warn":""}" data-go="${go}"><b>${n}</b> ${esc(l)}<span aria-hidden="true">›</span></button>`;
-  let h=`<section class="hero"><div class="hdate">${esc(new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}))}</div><h2>${greet()}</h2>
-  <p>${ready} business${ready===1?" is":"es are"} bridge-ready and ${fd} follow-up${fd===1?" is":"s are"} due. ${os.contacted?`You've contacted ${os.contacted} in the last 30 days (${os.bookRate}% booked a call).`:""}</p>
-  <div class="hchips">${chip(fd,fd===1?"follow-up due":"follow-ups due","outreach",true)}${chip(ready,"bridge-ready","biz")}${chip(newSignals,"new signals","signals")}${rq?chip(rq,"to research","queue"):""}</div></section>
+  const q=Math.floor(now.getMonth()/3)+1, dayOfYear=Math.floor((Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())-Date.UTC(now.getFullYear(),0,1))/864e5)+1;
+  const kpi=(n,l,go,cls)=>`<button class="kpi ${cls&&n?cls:""}" data-go="${go}"><b>${n}</b><span>${esc(l)}</span></button>`;
+  let h=`<section class="hero today"><div class="hd"><div class="min"><div class="hdate">${greet()} · Week ${weekNo(now)} · Q${q} · Day ${dayOfYear}</div>
+    <h2 class="bigdate">${esc(now.toLocaleDateString(undefined,{weekday:"long"}))}<span>${esc(now.toLocaleDateString(undefined,{month:"long",day:"numeric",year:"numeric"}))}</span></h2></div>
+    <p>${agenda.length?`${agenda.length} thing${agenda.length===1?"":"s"} on your agenda today${callsToday?`, including ${callsToday} discovery call${callsToday===1?"":"s"}`:""}.`:"Nothing scheduled today."} ${ready} business${ready===1?" is":"es are"} bridge-ready.</p></div>
+    <div class="kpis">${kpi(over,"overdue","followups","warn")}${kpi(dueToday,"due today","followups")}${kpi(callsToday,"calls today","appts")}${kpi(ready,"bridge-ready","biz")}${kpi(newSignals,"new signals","signals")}${kpi(nd,"drafts ready","biz")}</div></section>
   <button class="askbtn" data-go="brain"><span aria-hidden="true">⌕</span> Search or ask the Brain…</button>`;
   if(sdone<stp.length)h+=`<button class="setupline" data-go="guide"><span>Setup ${sdone}/${stp.length} · Next: ${esc((stp.find(x=>!x.done)||{}).t||"")}</span><span aria-hidden="true">›</span></button>`;
   if(nage!==null&&nage>NEWS_STALE)h+=`<button class="setupline warn" data-go="climate"><span>Industry climate is ${nage} days old. Tell Claude "Update my news."</span><span aria-hidden="true">›</span></button>`;
+  /* agenda */
+  const arow=a=>{const b=a.b,st=stageOf(b);
+    const when=a.kind==="call"?(a.time||"Today"):a.kind==="over"?`${Math.round((Date.parse(localDay()+"T12:00:00")-Date.parse(b.followUpAt+"T12:00:00"))/864e5)}d late`:"Today";
+    const what=a.kind==="call"?`Discovery call${a.o.contact?" with "+a.o.contact:""}`:(b.followUpNote||"Follow up");
+    return`<div class="arow ${a.kind}"><span class="atime">${esc(when)}</span><div class="min"><button class="link aname" data-bizview="${b.id}">${esc(b.name)}</button><div class="meta">${esc(what)} · ${esc(st)}</div></div>
+    <div class="acts"><button class="btn small" data-logout="${b.id}">${a.kind==="call"?"Log outcome":"Log call"}</button>${a.kind!=="call"?`<button class="btn small" data-clearfu="${b.id}">Done</button>`:""}</div></div>`};
+  h+=`<div class="shead"><h3>Today's agenda</h3><button class="link" data-go="followups">All follow-ups</button></div>`;
+  h+=agenda.length?`<div class="card agenda">${agenda.map(arow).join("")}</div>`:`<div class="empty"><p>No calls or follow-ups today.${top[0]?` Start with ${esc(top[0].b.name)}.`:""}</p>${top[0]?`<button class="btn primary" data-bizview="${top[0].b.id}">Open ${esc(top[0].b.name)}</button>`:""}</div>`;
+  /* next 7 days */
+  const days=[...Array(7)].map((_,i)=>{const d=addDays(today,i+1),ag=agendaFor(d);return{d,n:ag.length,calls:ag.filter(a=>a.kind==="call").length}});
+  h+=`<div class="shead"><h3>Next 7 days</h3><button class="link" data-go="appts">Appointments</button></div><div class="week">${days.map(x=>{const dt=new Date(x.d+"T12:00:00");
+    return`<button class="wday ${x.n?"has":""}" data-go="followups"><span class="wd">${esc(dt.toLocaleDateString(undefined,{weekday:"short"}))}</span><b>${dt.getDate()}</b><span class="wn">${x.n?`${x.n} item${x.n===1?"":"s"}`:"—"}</span>${x.calls?`<span class="wc">${x.calls} call${x.calls===1?"":"s"}</span>`:""}</button>`}).join("")}</div>`;
+  /* numbers + activity */
+  const mon=addDays(today,-((now.getDay()+6)%7)), tw=weekCounts(mon,today), lw=weekCounts(addDays(mon,-7),addDays(today,-7));
+  const act=[...Array(14)].map((_,i)=>{const d=addDays(today,i-13);return{d,n:S.outreach.filter(o=>o.at&&localDay(o.at)===d&&!(byId("biz",o.bizId)||{}).sample).length}}), mx=Math.max(1,...act.map(a=>a.n));
+  const open=["Approved","Introduced","Meeting"].map(st=>[st,S.match.filter(m=>m.status===st).length]);
+  const stuck=S.match.filter(m=>["Approved","Introduced","Meeting"].includes(m.status)&&daysSince(m.updatedAt||m.createdAt)>14).length;
+  h+=`<div class="tgrid"><section class="card"><h3 class="ch">This week <span class="meta">since ${esc(fmtDate(mon))}</span></h3>
+    <div class="wnum"><div><b>${tw.touches}</b><span>touches</span>${delta(tw.touches,lw.touches)}</div><div><b>${tw.convo}</b><span>conversations</span>${delta(tw.convo,lw.convo)}</div><div><b>${tw.booked}</b><span>calls booked</span>${delta(tw.booked,lw.booked)}</div></div>
+    <div class="bars" role="img" aria-label="Outreach per day, last 14 days">${act.map(a=>`<div class="bar ${a.d===today?"now":""}" title="${esc(fmtDate(a.d))}: ${a.n}"><i style="height:${Math.round(100*a.n/mx)}%"></i><span>${new Date(a.d+"T12:00:00").getDate()}</span></div>`).join("")}</div>
+    <div class="meta">Outreach per day, last 14 days</div></section>
+  <section class="card"><h3 class="ch">Bridges in motion</h3>${open.map(([st,n])=>`<div class="srow"><span>${st}</span><b>${n}</b></div>`).join("")}
+    <div class="srow"><span>${stuck?`<span class="tag due">No update in 14+ days</span>`:"Stuck for 14+ days"}</span><b>${stuck}</b></div>
+    <button class="btn small" style="margin-top:8px" data-go="pipeline">Open Bridges</button></section></div>`;
+  /* since last visit */
+  const runs=S.botlog.slice().sort((a,b)=>(b.ranAt||"").localeCompare(a.ranAt||"")).filter(r=>Date.parse(r.ranAt||"")>since).slice(0,4);
+  h+=`<div class="shead"><h3>Since your last visit</h3><span class="meta">${PREV_SEEN?esc(fmtDate(PREV_SEEN)):"last 7 days"}</span></div>
+  <div class="card"><div class="srow"><span>New signals</span><b>${newSignals}</b></div><div class="srow"><span>New businesses</span><b>${newBiz}</b></div><div class="srow"><span>Drafts ready to send</span><b>${nd}</b></div>
+  ${runs.map(r=>`<div class="srow"><span><b>${esc((BOTS.find(x=>x.id===r.bot)||{}).name||r.bot)}</b> <span class="meta">${esc(agoLabel(r.ranAt))}</span><br><span class="meta">${esc(r.summary||"")}</span></span></div>`).join("")}</div>`;
   {const cr=botRuns("coach")[0];if(cr&&(cr.plan||[]).length&&daysSince(cr.ranAt)<=8)h+=`<div class="shead"><h3>This week's plan</h3><button class="link" data-bot="coach">From your coach</button></div><div class="card"><ol class="plan" style="margin:0">${cr.plan.slice(0,5).map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`;}
-  {const nd=draftsReady().length;if(nd)h+=`<button class="setupline" data-blf="drafts" data-go="biz"><span>${nd} draft${nd===1?"":"s"} ready to send from the Intro writer</span><span aria-hidden="true">›</span></button>`;}
+  if(nd)h+=`<button class="setupline" data-blf="drafts" data-go="biz" style="margin-top:12px"><span>${nd} draft${nd===1?"":"s"} ready to send from the Intro writer</span><span aria-hidden="true">›</span></button>`;
   h+=`<div class="shead"><h3>${fresh?"Contact these first":"Your top businesses"}</h3><button class="link" data-go="biz">See all</button></div>`;
   h+=top.length?`<div class="list">${top.slice(0,5).map(r=>bizCard(r.b)).join("")}</div>`:`<div class="empty"><p>No businesses yet.</p><button class="btn primary" data-go="leads">Find businesses</button></div>`;
   const fav=climateRank().filter(r=>r.score>0).slice(0,4);
@@ -1991,12 +2197,17 @@ function findResults(){
     <div class="row">${c.phone?`<a class="btn" href="tel:${esc(c.phone)}">Call</a>`:""}${c.email?`<a class="btn" href="mailto:${esc(c.email)}">Email</a>`:""}<button class="btn ghost" data-coi="${c.id}">View details</button>${b?(matched?`<span class="tag s">Already in pipeline</span>`:`<button class="btn primary" data-approve="${b.id}|${c.id}|${s}">Add to pipeline</button>`):""}</div></div>`}).join("")}</div>`;
 }
 const GROUPS={
-  today:[["today","Today"],["outreach","Outreach"],["queue","Research queue"]],
+  today:[["today","Today"],["prospects","Prospects"],["outreach","Outreach history"],["followups","Follow-up tasks"],["appts","Appointments"],["queue","Research queue"]],
   people:[["biz","Businesses"],["coi","Specialists"],["leads","Find businesses"],["find","Match a specialist"],["research","Look up info"]],
   pipeline:[["pipeline","Bridges"]],
   brain:[["brain","Search & ask"],["target","Targeting"],["signals","Signals"],["news","News"],["climate","Industry climate"]]
 };
 const SUB_ALIAS={bizview:"biz",ask:"brain",more:"today"};
+/* Wide screens get a left sidebar with one named item per job, like the OliveStone CRM */
+const SIDENAV=[["Work",[["today","Today"],["biz","Businesses"],["prospects","Prospect pipeline"],["outreach","Outreach history"],["followups","Follow-up tasks"],["appts","Appointments"],["queue","Research queue"]]],
+  ["Referrals",[["pipeline","Bridges"],["coi","Specialists"],["leads","Find businesses"],["find","Match a specialist"]]],
+  ["Intelligence",[["brain","Search & ask"],["signals","Signals"],["news","News"],["climate","Industry climate"],["target","Targeting"]]]];
+function sidenav(cur){cur=SUB_ALIAS[cur]||cur;return SIDENAV.map(([g,items])=>`<div class="grp">${esc(g)}</div>`+items.map(([k,l])=>`<button data-sub="${k}" aria-current="${k===cur?"page":"false"}">${esc(l)}</button>`).join("")).join("")}
 const LAST={};
 function groupOf(v){v=SUB_ALIAS[v]||v;for(const g in GROUPS)if(GROUPS[g].some(([k])=>k===v))return g;return null}
 function subnav(g,cur){const items=GROUPS[g];if(!items||items.length<2)return"";cur=SUB_ALIAS[cur]||cur;
@@ -2013,9 +2224,11 @@ function render(){
   if(navTab&&tab!=="bizview")LAST[navTab]=SUB_ALIAS[tab]||tab;
   document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===navTab?"page":"false"));
   const active=document.activeElement&&document.activeElement.id;
-  const V={today:viewToday,brain:viewBrain,signals:viewSignals,pipeline:viewPipeline,research:viewResearch,find:viewFind,leads:viewLeads,biz:viewBiz,coi:viewCoi,more:viewMore,sources:viewSources,bizview:viewBizIntel,ask:viewAsk,queue:viewQueue,news:viewNews,climate:viewClimate,guide:viewGuide,outreach:viewOutreach,target:viewTarget};
+  const V={today:viewToday,brain:viewBrain,signals:viewSignals,pipeline:viewPipeline,research:viewResearch,find:viewFind,leads:viewLeads,biz:viewBiz,coi:viewCoi,more:viewMore,sources:viewSources,bizview:viewBizIntel,ask:viewAsk,queue:viewQueue,news:viewNews,climate:viewClimate,guide:viewGuide,outreach:viewOutreach,target:viewTarget,prospects:viewProspects,followups:viewFollowups,appts:viewAppts};
   $("#view").innerHTML=(navTab?subnav(navTab,tab):"")+(V[tab]||viewToday)();
-  if(["qbrain","qbiz","qcoi","findq","qres","lcounty","lnotes"].includes(active)){const el=$("#"+active);if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}}
+  $("#view").classList.toggle("wide",["prospects","outreach","today"].includes(tab));
+  $("#sidenav").innerHTML=sidenav(tab==="bizview"?(BV.from||"biz"):tab);
+  if(["qbrain","qbiz","qcoi","findq","qres","lcounty","lnotes","qoh","qpb"].includes(active)){const el=$("#"+active);if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}}
 }
 
 /* ---------- forms ---------- */
@@ -2169,6 +2382,12 @@ async function importCSV(file){
 }
 
 /* ---------- events ---------- */
+$("#view").addEventListener("dragstart",e=>{const k=e.target.closest&&e.target.closest("[data-kid]");if(!k)return;e.dataTransfer.setData("text/plain",k.dataset.kid);e.dataTransfer.effectAllowed="move"});
+$("#view").addEventListener("dragover",e=>{const c=e.target.closest&&e.target.closest("[data-kcol]");if(!c)return;e.preventDefault();document.querySelectorAll(".kcol.over").forEach(x=>x!==c&&x.classList.remove("over"));c.classList.add("over")});
+$("#view").addEventListener("dragleave",e=>{const c=e.target.closest&&e.target.closest("[data-kcol]");if(c&&!c.contains(e.relatedTarget))c.classList.remove("over")});
+$("#view").addEventListener("drop",async e=>{const c=e.target.closest&&e.target.closest("[data-kcol]");if(!c)return;e.preventDefault();c.classList.remove("over");
+  const id=e.dataTransfer.getData("text/plain"), b0=byId("biz",id), st=c.dataset.kcol;if(!b0||stageOf(b0)===st)return;
+  const b={...b0};b.prospectStage=st;if(["Won","Lost"].includes(st))b.followUpAt="";await put("biz",b);toast(b.name+" → "+st);render()});
 document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const g=b.dataset.tab,first=GROUPS[g][0][0];
   tab=groupOf(tab)===g?first:(LAST[g]||first);render();window.scrollTo(0,0)});
 $("#view").addEventListener("keydown",e=>{if(e.target.id==="qbrain"&&e.key==="Enter"&&BR.q.trim()){e.preventDefault();ask(BR.q)}if(e.target.id==="askq"&&e.key==="Enter"&&!e.shiftKey){e.preventDefault();ask(e.target.value)}});
@@ -2179,6 +2398,8 @@ $("#view").addEventListener("input",e=>{
   if(e.target.id==="lcounty"){LS.county=e.target.value.trim();const w=$("#webSrcs");if(w)w.innerHTML=srcLinks(webSearches())}
   if(e.target.id==="lnotes"){LS.notes=e.target.value}
   if(e.target.id==="qres"){RS.q=e.target.value;$("#listRes").innerHTML=researchList()}
+  if(e.target.id==="qoh"){OH.q=e.target.value;$("#ohBody").innerHTML=ohTable()}
+  if(e.target.id==="qpb"){PB.q=e.target.value;render()}
   if(e.target.id==="findq"){F.text=e.target.value;$("#findResults").innerHTML=findResults()}
 });
 $("#view").addEventListener("change",async e=>{
@@ -2229,7 +2450,9 @@ document.addEventListener("click",async e=>{
   if(d.bq!==undefined){BR.q=d.bq;BR.more={};tab="brain";render();const el=$("#qbrain");if(el&&!d.bq)el.focus();return}
   if(d.brmore){BR.more[d.brmore]=!BR.more[d.brmore];$("#brainBody").innerHTML=brainBody();return}
   if(d.brainask){ask(BR.q);return}
-  if(d.bizview){if(d.bizview!==BV.id)BV.open={};BV.from=tab==="bizview"?(BV.from||"biz"):tab;BV.id=d.bizview;BV.why=false;tab="bizview";render();window.scrollTo(0,0);return}
+  if(d.lmenu){leadMenu(d.lmenu);return}
+  if(d.ohf){OH.f=d.ohf;render();return}
+  if(d.bizview){if($("#sheet").open)closeSheet();if(d.bizview!==BV.id)BV.open={};BV.from=tab==="bizview"?(BV.from||"biz"):tab;BV.id=d.bizview;BV.why=false;tab="bizview";render();window.scrollTo(0,0);return}
   if(d.oppwhy){BV.why=!BV.why;render();return}
   if(d.follow){const b={...byId("biz",d.follow)};b.followed=!b.followed;await put("biz",b);toast(b.followed?"Following. New signals will show on Today.":"Unfollowed");render();return}
   if(d.notdup){const b={...byId("biz",d.notdup)};b.possibleDupOf="";await put("biz",b);toast("Marked as a separate business");render();return}
@@ -2245,14 +2468,14 @@ document.addEventListener("click",async e=>{
   if(d.revp!==undefined){const [a,b]=d.revp.split("|");await saveRev({revMin:parseMoney(a),revMax:parseMoney(b)});return}
   if(d.climf){await put("settings",{...settings(),climateFocus:d.climf});toast(d.climf==="off"?"Climate no longer changes scores":"Scores updated for the economic climate");render();return}
   if(d.climlead){LS.kind="biz";LS.industry=d.climlead;tab="leads";render();window.scrollTo(0,0);toast("Industry set. Fill in the area and send the business request.");return}
-  if(d.pstage){const [id,st]=d.pstage.split("|");const b={...byId("biz",id)};b.prospectStage=st;if(["Won","Lost"].includes(st))b.followUpAt="";await put("biz",b);toast("Stage: "+st);render();return}
+  if(d.pstage){const [id,st]=d.pstage.split("|");const b={...byId("biz",id)};b.prospectStage=st;if(["Won","Lost"].includes(st))b.followUpAt="";if($("#sheet").open)closeSheet();await put("biz",b);toast("Stage: "+st);render();return}
   if(d.logout){logOutreachSheet(d.logout);return}
   if(d.lopick){const [k,v]=d.lopick.split("|");$("#sheetBody").dataset[k]=v;t.parentElement.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===t));return}
   if(d.saveout){saveOutreach(d.saveout);return}
   if(d.delout){if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to remove";return}await del("outreach",d.delout);render();return}
   if(d.setfu){followUpSheet(d.setfu);return}
   if(d.savefu){const b={...byId("biz",d.savefu)};b.followUpAt=$("#fu_d").value;b.followUpNote=$("#fu_n").value.trim();closeSheet();await put("biz",b);toast("Follow-up saved");render();return}
-  if(d.clearfu){const b={...byId("biz",d.clearfu)};b.followUpAt="";b.followUpNote="";await put("biz",b);toast("Follow-up done");render();return}
+  if(d.clearfu){if($("#sheet").open)closeSheet();const b={...byId("biz",d.clearfu)};b.followUpAt="";b.followUpNote="";await put("biz",b);toast("Follow-up done");render();return}
   if(d.ovd){OV.days=d.ovd;render();return}
   if(d.export){exportCSV(d.export);return}
   if(d.newsf){NV.f=d.newsf;render();return}
@@ -2308,6 +2531,10 @@ document.addEventListener("click",async e=>{
     case"addBiz":recordForm("biz");break;
     case"addCoi":recordForm("coi");break;
     case"import":$("#csvInput").click();break;
+    case"logpick":pickBizSheet();break;
+    case"pickbiz":{const id=$("#pk_biz").value;if(id)logOutreachSheet(id);break}
+    case"exportOut":exportOutreachCSV();break;
+    case"pblist":PB.list=!PB.list;render();break;
     case"newMatch":newMatchSheet();break;
     case"createMatch":{const b=$("#f_mb").value,c=$("#f_mc").value;
       if(S.match.some(m=>m.bizId===b&&m.coiId===c)){$("#err_pair").textContent="This pair is already matched. Open it from the pipeline.";return}

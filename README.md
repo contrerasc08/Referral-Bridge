@@ -14,7 +14,7 @@ It focuses on owner-run US businesses with roughly $1M–$100M in revenue.
 
 ## What's built
 
-- **CRM:** businesses, specialists, bridges (Suggested → Approved → Introduced → Meeting → Closed), outreach logging with prospect stages, follow-ups and CSV export.
+- **CRM:** businesses, specialists, bridges (Suggested → Approved → Introduced → Meeting → Closed), a prospect pipeline board, outreach history, follow-up tasks, appointments and CSV export. Wide screens get a left sidebar modeled on Jessica's OliveStone CRM.
 - **Scoring:** an Opportunity Score (why contact this business now), predicted needs, and a Match Score (how right this specialist is). It learns from closed and rejected bridges. See [docs/specs/scoring.md](docs/specs/scoring.md).
 - **Market awareness:** news headlines adjust needs, and industry climate favors growing sectors.
 - **Targeting:** focus states, industries, employee range, owner-run only, and excluded words.
@@ -40,7 +40,8 @@ referral-bridge/
         ├── README.md        # Schedules, outputs, report format
         └── *.md             # Exact instructions for each scheduled bot
 tests/
-└── test_review_fixes.py     # Browser tests (Playwright) for save/delete, flagged specialists, need scoring, learning
+├── test_review_fixes.py     # Browser tests (Playwright) for save/delete, flagged specialists, need scoring, learning
+└── test_crm_navigation.py   # Browser tests for the sidebar, prospect board, outreach history, follow-ups, appointments
 ```
 
 ## How this project is run

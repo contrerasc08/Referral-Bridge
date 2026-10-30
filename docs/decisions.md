@@ -55,3 +55,9 @@ Format: date, decision, why, and who decided.
 - **Decision:** Demos use made-up data in a separate storage key. This repo contains code and docs only.
 - **Why:** The database holds real people's contact details and a private pipeline.
 - **Decided by:** @contrerasc08
+
+## 2026-10-24: CRM navigation follows Jessica's OliveStone CRM
+
+- **Decision:** On wide screens, use a left sidebar with one named item per job (dashboard, businesses, prospect pipeline, outreach history, follow-up tasks, appointments) and put each page's main commands at top right, with a ⌄ menu on every business row or card. Phones keep the bottom tabs and pills.
+- **Why:** Jessica's CRM is the workflow people already use for outreach. Matching its layout and commands makes moving between the two tools easy. The screenshots stay out of this repo because they show client and lead names.
+- **Decided by:** @contrerasc08 (asked for it), built by Claude
