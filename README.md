@@ -41,7 +41,8 @@ referral-bridge/
         └── *.md             # Exact instructions for each scheduled bot
 tests/
 ├── test_review_fixes.py     # Browser tests (Playwright) for save/delete, flagged specialists, need scoring, learning
-└── test_crm_navigation.py   # Browser tests for the sidebar, prospect board, outreach history, follow-ups, appointments
+├── test_crm_navigation.py   # Browser tests for the sidebar, prospect board, outreach history, follow-ups, appointments
+└── test_save_failures.py    # Browser tests: a failed save never shows a success message
 ```
 
 ## How this project is run

@@ -2,7 +2,7 @@
 
 The app stores everything in its artifact database: a set of document collections, each document with an `id`. The page subscribes to every collection live (`onSnapshot`), so changes from the bots appear without a reload.
 
-Writes are optimistic: the screen updates first, then the database. If a save or delete fails, the app puts the previous record back (or removes a new one that never saved), says so in a message, and `put` or `del` returns `false`. On success they return `true`. When the database isn't available (for example a local file preview), the app falls back to `localStorage` under the key `rb-data`. Demo mode uses `rb-demo`.
+Writes are optimistic: the screen updates first, then the database. If a save or delete fails, the app puts the previous record back (or removes a new one that never saved), says so in a message, and `put` or `del` returns `false`. On success they return `true`. Every action checks that result and shows its success message only when the save worked; actions that save several records (deleting a business, bulk removes, quiz matches) say how many failed. When the database isn't available (for example a local file preview), the app falls back to `localStorage` under the key `rb-data`. Demo mode uses `rb-demo`.
 
 Records with `sample: true` are test data. They are hidden from bridges and from every bot.
 
