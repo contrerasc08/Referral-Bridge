@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!doctype html>
 <html lang="en">
 <head>
@@ -398,6 +399,88 @@ details.sec2{background:var(--surface);border:1px solid var(--rule);border-radiu
   main.wide{max-width:1180px}
   .tabs,.subnav{display:none}
 }
+
+/* ---- Bridge depth: two pillars, an arch between them, a deck rail underneath ---- */
+:root{--lift:0 1px 0 rgba(24,32,46,.04),0 10px 24px -14px rgba(24,32,46,.35);--lift-hi:0 2px 0 rgba(24,32,46,.05),0 18px 32px -16px rgba(24,32,46,.45);--stage-live:var(--coi);--stage-won:var(--biz)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--lift:0 1px 0 rgba(0,0,0,.4),0 12px 26px -14px rgba(0,0,0,.8);--lift-hi:0 2px 0 rgba(0,0,0,.45),0 20px 34px -14px rgba(0,0,0,.9)}}
+:root[data-theme="dark"]{--lift:0 1px 0 rgba(0,0,0,.4),0 12px 26px -14px rgba(0,0,0,.8);--lift-hi:0 2px 0 rgba(0,0,0,.45),0 20px 34px -14px rgba(0,0,0,.9)}
+.bridge{box-shadow:var(--lift);transition:transform .18s ease,box-shadow .18s ease;position:relative}
+button.bridge:hover{transform:translateY(-2px);box-shadow:var(--lift-hi)}
+button.bridge:active{transform:translateY(0)}
+.bridge .side{position:relative;z-index:1}
+.bridge .side.b{background:linear-gradient(90deg,var(--biz-soft),transparent 85%)}
+.bridge .side.c{background:linear-gradient(270deg,var(--coi-soft),transparent 85%)}
+.bridge .side .lbl{display:block;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.bridge .side.b .lbl{color:var(--biz)}.bridge .side.c .lbl{color:var(--coi)}
+.bridge .span::before{display:none}
+.bridge .span{min-width:88px;padding:6px 2px 8px}
+.arch{position:absolute;left:-6px;right:-6px;top:6px;height:44px;width:calc(100% + 12px);overflow:visible;pointer-events:none}
+.arch path{fill:none;stroke-linecap:round}
+.arch .a1{stroke:url(#rbArch);stroke-width:2.5}
+.arch .a2{stroke:var(--rule);stroke-width:1;stroke-dasharray:2 4}
+.bridge .dial{margin-top:14px;box-shadow:0 0 0 4px var(--surface),var(--lift)}
+.bridge .need{grid-column:1/-1;display:flex;gap:8px;align-items:center;justify-content:center;font-size:.78rem;color:var(--muted);padding:0 12px 8px;margin-top:-4px}
+.bridge .need b{color:var(--ink);font-weight:600}
+.deck{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:3px;padding:0 12px 10px}
+.deck i{height:4px;border-radius:2px;background:var(--rule)}
+.deck i.on{background:var(--stage-live)}
+.deck.won i.on{background:var(--stage-won)}
+.deck.lost i{background:var(--danger-soft)}
+.decklbl{grid-column:1/-1;display:flex;justify-content:space-between;font-size:.66rem;color:var(--muted);padding:0 12px 10px;margin-top:-6px;letter-spacing:.02em}
+/* view switch */
+.vswitch{display:inline-grid;grid-template-columns:1fr 1fr;background:var(--rule);border-radius:10px;padding:3px;gap:3px;margin-bottom:12px}
+.vswitch button{border:0;background:transparent;border-radius:8px;padding:6px 14px;font-size:.85rem;font-weight:600;color:var(--muted)}
+.vswitch button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--lift)}
+/* network */
+.net{background:var(--surface);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--lift);padding:10px 4px 6px;overflow-x:auto}
+.net svg{display:block;width:100%;min-width:340px;height:auto}
+.net text{font-family:Figtree,system-ui,sans-serif;fill:var(--ink)}
+.net .colh{font-size:9px;font-weight:700;letter-spacing:.1em;fill:var(--muted)}
+.net .nd{cursor:pointer;outline:none}
+.net .nd text{font-size:11.5px}
+.net .nd .sub{font-size:9.5px;fill:var(--muted)}
+.net .nd:focus-visible circle{stroke:var(--ink);stroke-width:2}
+.net .eg{cursor:pointer}
+.net .eg .hit{stroke:transparent;stroke-width:14;fill:none}
+.net .eg .ln{fill:none;transition:opacity .2s}
+.net.focused .dim{opacity:.12}
+.netleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.76rem;color:var(--muted);margin:10px 2px 4px}
+.netleg span{display:inline-flex;align-items:center;gap:6px}
+.netleg i{display:inline-block;width:18px;height:0;border-top:3px solid}
+.netsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.netsum div{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:10px 12px}
+.netsum b{display:block;font-size:1.2rem;font-variant-numeric:tabular-nums}.netsum span{font-size:.75rem;color:var(--muted)}
+.netfocus{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--coi-soft);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:.88rem}
+/* detail sheet */
+.bhero{position:relative;display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch;margin:4px 0 14px;padding:14px 0 0}
+.bhero .pil{border-radius:12px;padding:10px 12px;min-width:0;box-shadow:var(--lift)}
+.bhero .pil.b{background:var(--biz-soft);border-bottom:4px solid var(--biz)}
+.bhero .pil.c{background:var(--coi-soft);border-bottom:4px solid var(--coi);text-align:right}
+.bhero .pil .lbl{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.bhero .pil.b .lbl{color:var(--biz)}.bhero .pil.c .lbl{color:var(--coi)}
+.bhero .pil .name{font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+.bhero .pil .meta{font-size:.78rem;color:var(--muted)}
+.bhero .mid{position:relative;width:96px;display:grid;justify-items:center;align-self:stretch}
+.bhero .arch{top:0;height:56px}
+.bhero .dial{width:62px;height:62px;margin-top:20px;box-shadow:0 0 0 5px var(--surface),var(--lift)}
+.bhero .dial b{font-size:1.2rem}
+.needline{text-align:center;font-size:.85rem;color:var(--muted);margin:-4px 0 14px}
+.needline b{color:var(--ink)}
+.journey{display:grid;gap:0;margin:0 0 6px;padding-left:4px}
+.journey .st{display:grid;grid-template-columns:16px 1fr auto;gap:10px;align-items:start;position:relative;padding-bottom:12px}
+.journey .st::before{content:"";position:absolute;left:7px;top:14px;bottom:0;border-left:2px solid var(--rule)}
+.journey .st:last-child::before{display:none}
+.journey .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--rule);background:var(--surface);margin-top:2px}
+.journey .st.done .dot{background:var(--coi);border-color:var(--coi)}
+.journey .st.won .dot{background:var(--biz);border-color:var(--biz)}
+.journey .st.lost .dot{background:var(--danger);border-color:var(--danger)}
+.journey .st.now .dot{box-shadow:0 0 0 4px var(--coi-soft)}
+.journey .st span{font-weight:600;font-size:.9rem}.journey .st.todo span{color:var(--muted);font-weight:500}
+.journey .st small{font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.alts{display:grid;gap:8px}
+.alt{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--rule);border-radius:10px;padding:9px 12px;background:var(--paper)}
+.alt .name{font-weight:600;font-size:.92rem}.alt .meta{font-size:.78rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.bridge,button.bridge:hover{transition:none;transform:none}}
 </style>
 </head>
 <body>
@@ -410,6 +493,7 @@ details.sec2{background:var(--surface);border:1px solid var(--rule);border-radiu
 </header>
 <div class="demobar" id="demobar" hidden>Demo · sample data <button data-act="demoreset">Reset</button><button data-act="demoexit">Exit demo</button></div>
 <nav class="sidenav" id="sidenav" aria-label="Sections"></nav>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="rbArch" x1="0" x2="1" y1="0" y2="0"><stop offset="0" style="stop-color:var(--biz)"/><stop offset="1" style="stop-color:var(--coi)"/></linearGradient></defs></svg>
 <main id="view" aria-live="polite"></main>
 <nav class="tabs" aria-label="Sections">
   <button data-tab="today"><i></i>Today</button>
@@ -1945,10 +2029,20 @@ function viewSources(){
 }
 
 /* ---------- views ---------- */
-function bridge(b,c,sc,label,extra=""){
-  return `<div class="side b"><div class="name">${esc(b?b.name:"Removed business")}</div><div class="meta">${esc(b?[b.industry,b.county].filter(Boolean).join(", "):"")}</div></div>
-  <div class="span"><div class="dial" style="--v:${sc}"><b>${sc}</b></div><small>${esc(label)}</small></div>
-  <div class="side c"><div class="name">${esc(c?c.name:"Removed advisor")}</div><div class="meta">${esc(c?[c.profession,c.firm].filter(Boolean).join(", "):"")}</div></div>${extra}`;
+const ARCH=`<svg class="arch" viewBox="0 0 100 44" preserveAspectRatio="none" aria-hidden="true"><path class="a2" d="M0 42 L100 42"/><path class="a1" d="M0 42 Q50 -6 100 42" vector-effect="non-scaling-stroke"/></svg>`;
+function pairNeed(b,c){if(!b||!c)return null;return needsFor(b).find(n=>n.profs.includes(c.profession))||null}
+function deckHtml(status){
+  const steps=["Approved","Introduced","Meeting","Closed"], i=steps.indexOf(status);
+  if(status==="Rejected")return`<div class="deck lost">${steps.map(()=>"<i></i>").join("")}</div><div class="decklbl"><span>Rejected</span><span></span></div>`;
+  if(i<0)return"";
+  return`<div class="deck ${status==="Closed"?"won":""}">${steps.map((s,k)=>`<i class="${k<=i?"on":""}"></i>`).join("")}</div><div class="decklbl">${steps.map((s,k)=>`<span style="${k===i?"color:var(--ink);font-weight:700":""}">${s}</span>`).join("")}</div>`;
+}
+function bridge(b,c,sc,label,extra="",status){
+  const n=pairNeed(b,c);
+  return `<div class="side b"><span class="lbl">Business</span><div class="name">${esc(b?b.name:"Removed business")}</div><div class="meta">${esc(b?[shortInd(b.industry),b.county||b.city].filter(Boolean).join(", "):"")}</div></div>
+  <div class="span">${ARCH}<div class="dial" style="--v:${sc}"><b>${sc}</b></div><small>${esc(label)}</small></div>
+  <div class="side c"><span class="lbl">Specialist</span><div class="name">${esc(c?c.name:"Removed advisor")}</div><div class="meta">${esc(c?[c.profession,c.firm].filter(Boolean).join(", "):"")}</div></div>
+  ${n?`<div class="need">Bridging <b>${esc(n.label)}</b> · ${n.conf}% likely need</div>`:""}${status?deckHtml(status):""}${extra}`;
 }
 function viewPipeline(){
   const sug=suggestions();
@@ -1961,7 +2055,9 @@ function viewPipeline(){
   const hasSample=[...S.biz,...S.coi,...S.match].some(x=>x.sample);
   let h=`<h2>Bridges</h2><p class="lede">Each bridge is a business introduced to a specialist. Move it from approved to closed so scores learn what works.</p><button class="card" data-go="outreach" style="margin-bottom:12px"><div class="oc-top"><span class="name">Your outreach to businesses</span><span class="meta">Open</span></div><div class="meta">Calls, follow-ups, discovery calls, booking and close rates, export</div></button>
   <div class="stats"><div class="stat"><b>${active}</b><span>In progress</span></div><div class="stat"><b>${counts.Closed}</b><span>Closed</span></div><div class="stat"><b>${money(closedVal)}</b><span>Closed value</span></div></div>
-  <div class="chips" role="group" aria-label="Stage">${ALL.map(s=>`<button class="chip" data-stage="${s}" aria-pressed="${s===stage}">${s}<small>${counts[s]}</small></button>`).join("")}</div>`;
+  <div class="vswitch" role="group" aria-label="View"><button data-bmode="cards" aria-pressed="${NET.mode!=="net"}">Cards</button><button data-bmode="net" aria-pressed="${NET.mode==="net"}">Network</button></div>`;
+  if(NET.mode==="net"){h+=netView(sug)}
+  else{h+=`<div class="chips" role="group" aria-label="Stage">${ALL.map(s=>`<button class="chip" data-stage="${s}" aria-pressed="${s===stage}">${s}<small>${counts[s]}</small></button>`).join("")}</div>`;
   if(stage==="Suggested"){
     h+=`<p class="lede">Advisor pairs with a Match Score of ${THRESHOLD} or higher, ordered by Match plus the business's Opportunity Score.</p>`+suggestList(sug);
   }else if(!items.length){
@@ -1970,13 +2066,82 @@ function viewPipeline(){
     h+=`<div class="list">${items.map(m=>{const b=byId("biz",m.bizId),c=byId("coi",m.coiId);
       const sc=b&&c?score(b,c).score:(m.score||0);
       const lab=m.status==="Closed"&&m.dealValue?money(m.dealValue):m.status==="Rejected"&&m.reason?m.reason:(m.trigger||"match");
-      return `<button class="bridge" data-match="${m.id}">${bridge(b,c,sc,lab)}</button>`}).join("")}</div>`;
+      return `<button class="bridge" data-match="${m.id}" aria-label="Open bridge: ${esc(b?b.name:"")} and ${esc(c?c.name:"")}">${bridge(b,c,sc,lab,"",m.status)}</button>`}).join("")}</div>`;
+  }
   }
   h+=`<div class="row" style="margin-top:12px"><button class="btn" data-act="newMatch">Add a match manually</button></div>`;
   h+=learnTable()+learnPanel();
   if(hasSample)h+=`<p class="hint">You're looking at sample records. <button class="btn ghost" data-act="clearSample">Remove sample records</button></p>`;
   return h;
 }
+/* ---------- Network: every business and specialist, with bridges drawn as arches between them ---------- */
+let NET={mode:"cards",focus:null};try{if(localStorage.getItem("rb-bmode")==="net")NET.mode="net"}catch(e){}
+const STAGE_STROKE={Suggested:"var(--muted)",Approved:"var(--coi)",Introduced:"var(--coi)",Meeting:"var(--coi)",Closed:"var(--biz)",Rejected:"var(--danger)"};
+function netEdges(sug){
+  const E=S.match.filter(m=>m.status!=="Dismissed").map(m=>{const b=byId("biz",m.bizId),c=byId("coi",m.coiId);return b&&c?{b,c,sc:score(b,c).score,st:m.status,id:m.id}:null}).filter(Boolean);
+  for(const x of sug.slice(0,12))E.push({b:x.b,c:x.c,sc:x.score,st:"Suggested",id:x.b.id+"|"+x.c.id+"|"+x.score});
+  return E;
+}
+function netView(sug){
+  const E=netEdges(sug);
+  if(!E.length)return`<div class="empty"><p>No bridges yet. Approve a suggestion or add a match, and the network fills in.</p></div>`;
+  const rank=(list,key)=>{const m=new Map();for(const e of list){const o=e[key];const r=m.get(o.id)||{o,n:0,w:0};r.n++;r.w+=e.sc+(e.st==="Suggested"?0:40);m.set(o.id,r)}return[...m.values()].sort((a,b)=>b.w-a.w)};
+  let B=rank(E,"b"),C=rank(E,"c");const MAX=14;B=B.slice(0,MAX);C=C.slice(0,MAX);
+  const bi=new Map(B.map((r,i)=>[r.o.id,i])),ci=new Map(C.map((r,i)=>[r.o.id,i]));
+  const edges=E.filter(e=>bi.has(e.b.id)&&ci.has(e.c.id));
+  const rows=Math.max(B.length,C.length),RH=40,TOP=30,W=380,H=TOP+rows*RH+8,XL=150,XR=230;
+  const yB=i=>TOP+i*RH+RH/2+((rows-B.length)*RH)/2, yC=i=>TOP+i*RH+RH/2+((rows-C.length)*RH)/2;
+  const f=NET.focus, lit=e=>!f||e.b.id===f||e.c.id===f;
+  const cut=(t,n)=>t.length>n?t.slice(0,n-1)+"…":t;
+  const order={Suggested:0,Rejected:1,Approved:2,Introduced:3,Meeting:4,Closed:5};
+  const eg=edges.sort((a,b)=>order[a.st]-order[b.st]).map(e=>{const y1=yB(bi.get(e.b.id)),y2=yC(ci.get(e.c.id)),mx=(XL+XR)/2,lift=Math.min(22,Math.abs(y2-y1)*.15+8);
+    const d=`M${XL} ${y1} C${mx-10} ${y1-lift} ${mx+10} ${y2-lift} ${XR} ${y2}`;
+    const w=(1+e.sc/28).toFixed(2), dash=e.st==="Suggested"?' stroke-dasharray="3 4"':e.st==="Rejected"?' stroke-dasharray="1 3"':"";
+    return`<g class="eg ${lit(e)?"":"dim"}" data-nedge="${esc(e.st==="Suggested"?"s:"+e.id:"m:"+e.id)}" role="button" tabindex="0" aria-label="${esc(e.b.name)} to ${esc(e.c.name)}, ${e.st}, match ${e.sc}"><path class="hit" d="${d}"/><path class="ln" d="${d}" stroke="${STAGE_STROKE[e.st]}" stroke-width="${w}" stroke-opacity="${e.st==="Suggested"?.7:.9}"${dash}/></g>`}).join("");
+  const node=(r,i,side)=>{const o=r.o,y=side==="b"?yB(i):yC(i),x=side==="b"?XL:XR,on=!f||f===o.id||edges.some(e=>(e.b.id===f||e.c.id===f)&&(e.b.id===o.id||e.c.id===o.id));
+    const col=side==="b"?"var(--biz)":"var(--coi)",tx=side==="b"?x-12:x+12,anc=side==="b"?"end":"start";
+    const sub=side==="b"?shortInd(o.industry):(o.profession||"");
+    return`<g class="nd ${on?"":"dim"}" data-nfocus="${o.id}" role="button" tabindex="0" aria-pressed="${f===o.id}" aria-label="${esc(o.name)}, ${r.n} connection${r.n===1?"":"s"}"><rect x="${side==="b"?0:x}" y="${y-RH/2}" width="${side==="b"?x:W-x}" height="${RH}" fill="transparent"/>
+      <circle cx="${x}" cy="${y}" r="${4+Math.min(5,r.n*1.4)}" fill="${f===o.id?col:"var(--surface)"}" stroke="${col}" stroke-width="2.5"/>
+      <text x="${tx}" y="${y-1}" text-anchor="${anc}" font-weight="${f===o.id?700:600}">${esc(cut(o.name,20))}</text><text class="sub" x="${tx}" y="${y+12}" text-anchor="${anc}">${esc(cut(sub,24))}</text></g>`};
+  const live=edges.filter(e=>["Approved","Introduced","Meeting"].includes(e.st)).length, won=edges.filter(e=>e.st==="Closed").length;
+  const fo=f?(byId("biz",f)||byId("coi",f)):null, fk=f&&byId("biz",f)?"biz":"coi";
+  let h=`<div class="netsum"><div><b>${B.length}</b><span>Businesses</span></div><div><b>${C.length}</b><span>Specialists</span></div><div><b>${live}<span style="font-size:.8rem;color:var(--biz);font-weight:700"> +${won}</span></b><span>Live · closed</span></div></div>`;
+  h+=fo?`<div class="netfocus"><span>Showing bridges for <b>${esc(fo.name)}</b></span><span class="row" style="flex:none"><button class="btn ghost" data-${fk==="biz"?"bizview":"coi"}="${fo.id}">Open</button><button class="btn" data-nclear="1">Show all</button></span></div>`
+       :`<p class="lede" style="margin:0 0 10px">Tap a name to isolate its bridges. Tap a line to open that bridge. Thicker lines are stronger matches.</p>`;
+  h+=`<div class="net ${f?"focused":""}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Network of businesses and specialists"><text class="colh" x="${XL-12}" y="14" text-anchor="end">BUSINESSES</text><text class="colh" x="${XR+12}" y="14">SPECIALISTS</text>${eg}${B.map((r,i)=>node(r,i,"b")).join("")}${C.map((r,i)=>node(r,i,"c")).join("")}</svg></div>`;
+  h+=`<div class="netleg"><span><i style="border-color:var(--coi)"></i>In progress</span><span><i style="border-color:var(--biz)"></i>Closed</span><span><i style="border-color:var(--muted);border-top-style:dashed"></i>Suggested</span><span><i style="border-color:var(--danger);border-top-style:dotted"></i>Rejected</span></div>`;
+  if(E.length>edges.length)h+=`<p class="hint">Showing the ${MAX} most connected on each side.</p>`;
+  return h;
+}
+function suggestSheet(bid,cid,sc){
+  const b=byId("biz",bid),c=byId("coi",cid);if(!b||!c)return;const r=score(b,c);
+  openSheet(bridgeHero(b,c,r.score)+whyHtml(r)+altHtml(b,c)+`<div class="sheet-foot"><button class="btn ghost" data-dismiss="${b.id}|${c.id}">Dismiss</button><div class="row"><button class="btn" data-act="close">Close</button><button class="btn primary" data-approve="${b.id}|${c.id}|${r.score}">Approve bridge</button></div></div>`);
+}
+function bridgeHero(b,c,sc){
+  const n=pairNeed(b,c),o=b?opportunity(b):null;
+  return`<div class="bhero"><div class="pil b"><div class="lbl">Business${o?` · opp ${o.score}`:""}</div><div class="name">${esc(b?b.name:"Removed")}</div><div class="meta">${esc(b?[shortInd(b.industry),[b.city,b.state].filter(Boolean).join(", ")].filter(Boolean).join(" · "):"")}</div></div>
+  <div class="mid">${ARCH}<div class="dial" style="--v:${sc}"><b>${sc}</b></div></div>
+  <div class="pil c"><div class="lbl">Specialist</div><div class="name">${esc(c?c.name:"Removed")}</div><div class="meta">${esc(c?[c.profession,c.firm].filter(Boolean).join(" · "):"")}</div></div></div>
+  ${n?`<p class="needline">Bridging <b>${esc(n.label)}</b> · ${n.conf}% likely need</p>`:`<p class="needline">Match score ${sc} of 100</p>`}`;
+}
+function whyHtml(r){
+  return(r.dims&&r.dims.length?`<div class="sec">What the score is made of</div><div class="dims">${r.dims.map(([k,v])=>`<span>${esc(k)}</span><span class="bar"><i style="width:${v}%"></i></span><span class="v">${v}</span>`).join("")}</div>`:"")
+   +(r.why.length?`<ul class="reasons">${r.why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`:"");
+}
+function altHtml(b,c){
+  if(!b||!c)return"";const alts=S.coi.filter(x=>x.id!==c.id&&!x.sample).map(x=>({x,sc:score(b,x).score})).filter(a=>a.sc>=THRESHOLD).sort((a,b)=>b.sc-a.sc).slice(0,3);
+  if(!alts.length)return"";const taken=new Set(S.match.filter(m=>m.bizId===b.id).map(m=>m.coiId));
+  return`<div class="sec">Other specialists for ${esc(b.name)}</div><div class="alts">${alts.map(a=>`<div class="alt"><div class="min"><div class="name">${esc(a.x.name)}</div><div class="meta">${esc([a.x.profession,a.x.firm].filter(Boolean).join(" · "))}</div></div><div class="row" style="flex:none"><span class="fit">${a.sc}</span>${taken.has(a.x.id)?`<span class="tag s">In pipeline</span>`:`<button class="btn" data-approve="${b.id}|${a.x.id}|${a.sc}">Bridge</button>`}</div></div>`).join("")}</div>`;
+}
+function journeyHtml(m){
+  const steps=["Approved","Introduced","Meeting","Closed"],hist=m.history||[],when=s=>{const h=hist.filter(x=>x.status===s).pop();return h?fmtDate(h.at):""};
+  const lost=m.status==="Rejected",cur=steps.indexOf(m.status);
+  const list=lost?[...steps.filter(s=>when(s)),"Rejected"]:steps;
+  return`<div class="sec">Journey</div><div class="journey">${list.map((s,k)=>{const idx=steps.indexOf(s);const done=lost?true:idx<=cur;const cls=s==="Rejected"?"lost":s==="Closed"&&done?"won":done?"done":"todo";const now=s===m.status;
+    return`<div class="st ${cls} ${now?"now":""}"><i class="dot"></i><span>${s}${now&&m.status==="Closed"&&m.dealValue?` · ${money(m.dealValue)}`:""}${now&&lost&&m.reason?` · ${esc(m.reason)}`:""}</span><small>${when(s)||(done?"":"")}</small></div>`}).join("")}</div>`;
+}
+
 function learnTable(){
   const decided=S.match.filter(m=>["Closed","Rejected"].includes(m.status));
   if(!decided.length)return"";
@@ -2418,8 +2583,9 @@ async function saveRecord(kind,id){
 function matchSheet(m){
   const b=byId("biz",m.bizId),c=byId("coi",m.coiId),r=b&&c?score(b,c):{score:m.score||0,why:[]};
   const card=(x,k)=>x?`<div class="card ${k}"><div class="name">${esc(x.name)}</div><div class="meta">${esc([x.contact||x.firm,x.phone,x.email].filter(Boolean).join(" · ")||"No contact details yet")}</div></div>`:`<div class="card">Removed</div>`;
-  openSheet(`<h3>Match score ${r.score}</h3><div class="pair">${card(b,"b")}${card(c,"c")}</div>
-  ${r.why.length?`<ul class="reasons">${r.why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`:""}
+  const r2=b&&c?r:{...r,dims:[]};
+  openSheet(`<h3>Bridge</h3>${bridgeHero(b,c,r.score)}<div class="pair">${card(b,"b")}${card(c,"c")}</div>
+  ${journeyHtml(m)}${whyHtml(r2)}${altHtml(b,c)}<div class="sec">Update</div>
   <div class="field"><label>Stage</label></div><div class="seg" role="group" aria-label="Stage">${STAGES.map(s=>`<button data-setstage="${s}" aria-pressed="${s===m.status}">${s}</button>`).join("")}</div>
   <div class="field" id="reasonWrap" ${m.status==="Rejected"?"":"hidden"}><label for="f_reason">Why was it rejected?</label><select id="f_reason"><option value="">Choose</option>${REASONS.map(o=>`<option ${o===m.reason?"selected":""}>${o}</option>`).join("")}</select></div>
   <div class="field"><label for="f_value">Deal value</label><input id="f_value" type="number" inputmode="decimal" min="0" value="${esc(m.dealValue||"")}" placeholder="0"></div>
@@ -2683,10 +2849,12 @@ document.addEventListener("click",async e=>{
   if(d.need!==undefined&&t.classList.contains("chip")){F.need=d.need;document.querySelectorAll("[data-need]").forEach(x=>x.setAttribute("aria-pressed",x===t));$("#findResults").innerHTML=findResults();return}
   if(d.go){if(d.go==="suggest"){tab="pipeline";stage="Suggested"}else tab=d.go;render();window.scrollTo(0,0);return}
   if(d.match){matchSheet(byId("match",d.match));return}
+  if(d.bmode){NET.mode=d.bmode;NET.focus=null;try{localStorage.setItem("rb-bmode",d.bmode)}catch(e){}render();return}
+  if(d.nclear){NET.focus=null;render();return}
   if(d.biz){recordForm("biz",byId("biz",d.biz));return}
   if(d.coi){recordForm("coi",byId("coi",d.coi));return}
-  if(d.approve){const [b,c,s]=d.approve.split("|");if(await approve(b,c,s))toast("Approved. It's in your pipeline.");if(db)render();return}
-  if(d.dismiss){const [b,c]=d.dismiss.split("|");if(await approve(b,c,0,"Dismissed"))toast("Dismissed");if(db)render();return}
+  if(d.approve){const [b,c,s]=d.approve.split("|");if($("#sheet").open)closeSheet();if(await approve(b,c,s))toast("Approved. It's in your pipeline.");if(db)render();return}
+  if(d.dismiss){const [b,c]=d.dismiss.split("|");if($("#sheet").open)closeSheet();if(await approve(b,c,0,"Dismissed"))toast("Dismissed");if(db)render();return}
   if(d.save){const [k,id]=d.save.split("|");saveRecord(k,id);return}
   if(d.del){const [k,id]=d.del.split("|");const noun=k==="biz"?"business":k==="coi"?"advisor":"match";
     if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to delete";return}
@@ -2729,6 +2897,12 @@ document.addEventListener("click",async e=>{
 });
 document.addEventListener("toggle",e=>{const el=e.target;if(el&&el.matches&&el.matches("details[data-sec]")){BV.open=BV.open||{};BV.open[el.dataset.sec]=el.open}},true);
 $("#sheet").addEventListener("click",e=>{if(e.target===$("#sheet"))closeSheet()});
+function netAct(el){
+  if(el.dataset.nfocus){const id=el.dataset.nfocus;NET.focus=NET.focus===id?null:id;render();return}
+  if(el.dataset.nedge){const v=el.dataset.nedge;if(v.startsWith("m:")){const m=byId("match",v.slice(2));if(m)matchSheet(m)}else{const [b,c,sc]=v.slice(2).split("|");suggestSheet(b,c,sc)}}
+}
+document.addEventListener("click",e=>{const el=e.target.closest&&e.target.closest("[data-nfocus],[data-nedge]");if(el)netAct(el)});
+document.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ")return;const el=e.target.closest&&e.target.closest("[data-nfocus],[data-nedge]");if(el){e.preventDefault();netAct(el)}});
 $("#sheet").addEventListener("input",e=>{
   if(e.target.id==="qzcounty"){QZ.county=e.target.value.trim();document.querySelectorAll("[data-qzset^='county|']").forEach(x=>x.setAttribute("aria-pressed","false"));const n=$("[data-qz='next']");if(n)n.textContent=QZ.county?"Next":"Skip"}
   if(e.target.id==="qzname"){QZ.name=e.target.value;QZ.err="";const er=$("#qzerr");if(er)er.textContent=""}
@@ -2743,3 +2917,5 @@ connect();
 </script>
 </body>
 </html>
+
+</body></html>
