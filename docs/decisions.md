@@ -61,3 +61,10 @@ Format: date, decision, why, and who decided.
 - **Decision:** On wide screens, use a left sidebar with one named item per job (dashboard, businesses, prospect pipeline, outreach history, follow-up tasks, appointments) and put each page's main commands at top right, with a ⌄ menu on every business row or card. Phones keep the bottom tabs and pills.
 - **Why:** Jessica's CRM is the workflow people already use for outreach. Matching its layout and commands makes moving between the two tools easy. The screenshots stay out of this repo because they show client and lead names.
 - **Decided by:** @contrerasc08 (asked for it), built by Claude
+
+## 2026-10-30: Supabase for login, MFA and company-level security
+
+- **Decision:** Move from the claude.ai artifact database to Supabase Auth (email and password, authenticator-app MFA) and Postgres with row-level security. Host the page on a free static host. Every record belongs to a company, and the database checks each user's role on every read and write.
+- **Why:** The app is becoming a multi-company product. Postgres suits linked CRM data, reporting and a later Salesforce sync, and row-level security keeps companies apart even if the page has a bug.
+- **Owner account:** created by the owner on the preview, then promoted with a one-time SQL script run by hand. No password or service key is ever in the repo.
+- **Decided by:** @contrerasc08, plan by Claude

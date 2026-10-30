@@ -42,7 +42,11 @@ referral-bridge/
 tests/
 ├── test_review_fixes.py     # Browser tests (Playwright) for save/delete, flagged specialists, need scoring, learning
 ├── test_crm_navigation.py   # Browser tests for the sidebar, prospect board, outreach history, follow-ups, appointments
-└── test_save_failures.py    # Browser tests: a failed save never shows a success message
+├── test_save_failures.py    # Browser tests: a failed save never shows a success message
+└── db/                      # Security tests for the Supabase rules (tests/db/run.sh)
+supabase/
+├── migrations/              # Tables, roles and row-level security
+└── bootstrap_owner.sql      # One-time owner setup, run by hand
 ```
 
 ## How this project is run
