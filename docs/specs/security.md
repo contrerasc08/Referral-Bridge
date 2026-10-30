@@ -47,7 +47,9 @@ A screen for company admins to create invite codes comes with the storage-layer 
 - Sign in with email and password. Everyone sets up an authenticator app before they get in, and the code is asked at every sign-in.
 - Password reset by email. The reply is the same whether or not the account exists. Someone with MFA enters their code before choosing a new password.
 - The page refuses to start if it's given a secret or `service_role` key.
-- Strict security headers (`web/_headers`): scripts only from the portal itself, connections only to Supabase, no framing, no search indexing.
+- Strict security headers (`web/_headers`): scripts, styles and fonts only from the portal itself, connections only to Supabase, no framing, no search indexing. The one relaxation is `style-src-attr 'unsafe-inline'`, because the CRM's screens use `style="..."` attributes; style elements and scripts stay locked to the portal's own files.
+- After sign-in the portal opens the CRM, built from `src/index.html` so both run the same code. `web/crm-store.js` gives it the same database calls it uses in the artifact, backed by the company's tables. Every read and write names the company, new records record who created them (`owner_id`), and row-level security still decides what goes through. A refused save is undone on screen.
+- Demo mode in the portal keeps its made-up records in the browser and never writes them to Supabase.
 - The Supabase client is a pinned copy in `web/vendor/`, so no outside script can change.
 
 ## Supabase project settings

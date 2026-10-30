@@ -3,19 +3,23 @@
 Serves web/ locally and swaps the Supabase client for a mock, so no network or real
 project is needed. Checks sign-in, authenticator-app setup and verification, password
 setup from an invite or reset link, invite codes, key safety checks, the page's
-security policy, and phone layout.
+security policy, phone layout, and the CRM inside the portal: it loads only this
+company's records, saves to the right table and columns, undoes failed saves, follows
+live changes, and keeps demo data on the device.
 Usage: python3 tests/test_portal.py   (exits 1 if any check fails)
 Set RB_CHROMIUM to a Chromium binary to use one that's already installed.
 """
-import asyncio, functools, http.server, json, os, pathlib, sys, threading
+import asyncio, functools, http.server, json, os, pathlib, subprocess, sys, threading
 from playwright.async_api import async_playwright
 
-WEB = pathlib.Path(__file__).resolve().parent.parent / "web"
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+WEB = ROOT / "web"
+subprocess.run(["node", str(ROOT / "scripts" / "build-crm.mjs")], check=True)
 PUB = {"supabaseUrl": "https://demo.supabase.co", "supabaseKey": "sb_publishable_test"}
 
 # A stand-in for supabase-js with just the calls the portal makes.
 MOCK = r"""
-window.__S = Object.assign({session:null, aal:"aal1", factors:[], companies:[], owner:false, calls:[]}, window.__INIT||{});
+window.__S = Object.assign({session:null, aal:"aal1", factors:[], companies:[], owner:false, calls:[], db:{}, deny:[], rt:{}}, window.__INIT||{});
 const S = window.__S, subs = [];
 const ok = d => ({data:d, error:null}), bad = m => ({data:null, error:{message:m}});
 window.supabase = {createClient:(url,key,opt)=>{ S.calls.push(["create",url,key]); return {
@@ -24,7 +28,7 @@ window.supabase = {createClient:(url,key,opt)=>{ S.calls.push(["create",url,key]
     onAuthStateChange: cb => { subs.push(cb); window.__fire = ev => subs.forEach(f=>f(ev,S.session)); setTimeout(()=>cb("INITIAL_SESSION",S.session),0); return {data:{subscription:{unsubscribe(){}}}} },
     signInWithPassword: async({email,password})=>{ S.calls.push(["signin",email]);
       if(password!=="correct horse battery") return bad("Invalid login credentials");
-      S.session={user:{email}}; return ok({session:S.session}) },
+      S.session={user:{email, id:"u1"}}; return ok({session:S.session}) },
     signOut: async()=>{ S.session=null; S.aal="aal1"; return ok({}) },
     resetPasswordForEmail: async(email,o)=>{ S.calls.push(["reset",email,o.redirectTo]); return ok({}) },
     updateUser: async({password})=>{ S.calls.push(["password",password]); return ok({user:S.session.user}) },
@@ -38,11 +42,33 @@ window.supabase = {createClient:(url,key,opt)=>{ S.calls.push(["create",url,key]
         if(code!=="123456") return bad("Invalid TOTP code entered");
         S.factors.forEach(f=>{ if(f.id===factorId) f.status="verified" }); S.aal="aal2"; return ok({}) }
     }},
+  from: t => query(t),
+  channel: name => { const ch = {on(type,f,cb){ (S.rt[f.table]=S.rt[f.table]||[]).push([f,cb]); return ch },
+    subscribe(cb){ S.subscribed=(S.subscribed||0)+1; setTimeout(()=>cb("SUBSCRIBED"),0); return ch }}; return ch },
   rpc: async(name,args)=>{ S.calls.push(["rpc",name,args&&args.code]);
     if(name==="my_access") return S.aal!=="aal2" ? bad("mfa required") : ok({user_id:"u1", mfa:true, platform_owner:S.owner, companies:S.companies});
     if(name==="accept_invite"){ if(args.code!=="GOOD-CODE") return bad("This invite is invalid or expired");
       S.companies=[{company_id:"c1",name:"Referral Bridge",role:"employee",scope:"all"}]; return ok("c1") } }
 }}};
+"""
+
+# A stand-in for the database tables and live updates the CRM uses.
+MOCK += r"""
+const copy = o => JSON.parse(JSON.stringify(o));
+function query(t){ const st={t, f:[], op:"select", body:null, from:0, to:1e9};
+  const b={ select(){ return b }, eq(c,v){ st.f.push([c,v]); return b }, order(){ return b }, range(a,z){ st.from=a; st.to=z; return b },
+    update(o){ st.op="update"; st.body=o; return b }, insert(o){ st.op="insert"; st.body=o; return b }, delete(){ st.op="delete"; return b },
+    then(res,rej){ return new Promise(r=>setTimeout(r,5)).then(()=>run(st)).then(res,rej) } };
+  return b }
+function run(st){ S.calls.push(["db",st.op,st.t,st.f.map(x=>x.join("=")).join("&")]);
+  const rows=(S.db[st.t]=S.db[st.t]||[]), m=r=>st.f.every(([c,v])=>r[c]===v);
+  if(st.op!=="select" && S.deny.includes(st.t)) return bad("new row violates row-level security policy");
+  if(st.op==="select") return ok(rows.filter(m).slice(st.from, st.to+1).map(r=>({id:r.id, data:copy(r.data)})));
+  if(st.op==="insert"){ if(rows.some(r=>r.id===st.body.id && r.company_id===st.body.company_id)) return {data:null, error:{code:"23505", message:"duplicate key"}};
+    rows.push(copy(st.body)); return ok(null) }
+  if(st.op==="update"){ const hit=rows.filter(m); hit.forEach(r=>Object.assign(r,copy(st.body))); return ok(hit.map(r=>({id:r.id}))) }
+  if(st.op==="delete"){ const hit=rows.filter(m); S.db[st.t]=rows.filter(r=>!m(r)); return ok(hit.map(r=>({id:r.id}))) } }
+window.__rt = (t,p) => (S.rt[t]||[]).forEach(([f,cb])=>cb(p));
 """
 
 results = []
@@ -62,13 +88,15 @@ async def page(br, base, cfg=PUB, init=None, path="/", width=1280):
     errs, csp = [], []
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.on("console", lambda m: csp.append(m.text) if "Content Security Policy" in m.text else None)
-    vendor = "window.__INIT=" + json.dumps(init or {}) + ";" + MOCK
+    vendor = "window.__INIT=" + json.dumps(init or {}) + ";(function(){" + MOCK + "})();"
     await pg.route("**/vendor/*.js", lambda r: r.fulfill(status=200, content_type="text/javascript", body=vendor))
     await pg.route("**/config.js", lambda r: r.fulfill(status=200, content_type="text/javascript",
         body=("window.RB_CONFIG=" + json.dumps(cfg) + ";") if cfg is not None else ""))
     await pg.goto(base + path); await pg.wait_for_timeout(150)
     return pg, errs, csp
 
+async def crm(pg):
+    await pg.wait_for_selector("#view", state="attached", timeout=5000); await pg.wait_for_timeout(200)
 async def h1(pg): return (await pg.inner_text("#app h1")).strip()
 async def submit(pg): await pg.click("#app button[type=submit]"); await pg.wait_for_timeout(120)
 async def msg(pg): return (await pg.inner_text("#msg")).strip() if await pg.locator("#msg:visible").count() else ""
@@ -97,11 +125,15 @@ async def main():
     await pg.fill("#ic", "BAD"); await submit(pg)
     check("bad invite code says so", "invalid or expired" in await msg(pg), await msg(pg))
     await pg.fill("#ic", "GOOD-CODE"); await submit(pg)
-    check("good invite code lands on home", await h1(pg) == "You're signed in")
-    check("home shows company and role", "Referral Bridge" in await pg.inner_text("#app") and "Employee" in await pg.inner_text("#app"))
-    check("home doesn't present sample data as live", "Your CRM moves into this portal" in await pg.inner_text("#app"))
-    check("sign out button shown when signed in", await pg.is_visible("#signout"))
-    await pg.click("#signout"); await pg.wait_for_timeout(150)
+    await crm(pg)
+    check("good invite code opens the CRM", await pg.locator("#view").count() == 1 and await pg.locator("#app").count() == 0)
+    check("CRM says it's synced to the account", await pg.inner_text("#sync") == "Synced to your account")
+    check("a new company starts empty, nothing invented", await pg.evaluate("S.biz.length+S.coi.length+S.match.length") == 0
+          and not await pg.is_visible("#demobar"))
+    await pg.click("[data-act=menu]"); await pg.wait_for_timeout(100)
+    t = await pg.inner_text("#sheetBody")
+    check("menu shows the account, role and company", "owner@example.com" in t and "Employee, Referral Bridge" in t, t)
+    await pg.click("[data-act=signout]"); await pg.wait_for_load_state(); await pg.wait_for_timeout(250)
     check("sign out returns to sign in", await h1(pg) == "Sign in")
     check("no page errors (new account)", not errs, errs)
     check("no security policy violations", not csp, csp)
@@ -114,8 +146,10 @@ async def main():
     await pg.fill("#em", "owner@example.com"); await pg.fill("#pw", "correct horse battery"); await submit(pg)
     check("returning user is asked for a code", await h1(pg) == "Enter your code")
     await pg.fill("#code", "123456"); await submit(pg)
-    t = await pg.inner_text("#app")
-    check("owner sees Platform owner and Company admin", "Platform owner" in t and "Company admin" in t)
+    await crm(pg)
+    await pg.click("[data-act=menu]"); await pg.wait_for_timeout(100)
+    t = await pg.inner_text("#sheetBody")
+    check("owner sees Platform owner and Company admin", "Platform owner" in t and "Company admin" in t, t)
     check("no page errors (returning user)", not errs, errs)
     await pg.close()
 
@@ -165,7 +199,9 @@ async def main():
     check("invite code removed from the address bar", "GOOD-CODE" not in pg.url, pg.url)
     await pg.fill("#em", "new@example.com"); await pg.fill("#pw", "correct horse battery"); await submit(pg)
     await pg.fill("#code", "123456"); await submit(pg)
-    check("invite applied automatically after sign-in", await h1(pg) == "You're signed in" and "Referral Bridge" in await pg.inner_text("#app"))
+    await crm(pg)
+    check("invite applied automatically after sign-in", ["rpc", "accept_invite", "GOOD-CODE"] in await pg.evaluate("__S.calls")
+          and await pg.locator("#view").count() == 1)
     await pg.close()
 
     # 7. Key safety
@@ -180,6 +216,90 @@ async def main():
     await pg.close()
     pg, errs, _ = await page(br, base, cfg=None)
     check("missing settings explained", await h1(pg) == "Not set up yet")
+    await pg.close()
+
+    # 9. The CRM in the portal: this company's records only, saved to the right table and columns
+    biz = lambda i, co, name: {"id": i, "company_id": co, "owner_id": "u2", "data": {"name": name, "industry": "Retail", "state": "NJ"}}
+    init = {"session": {"user": {"email": "owner@example.com", "id": "u1"}}, "aal": "aal2",
+            "factors": [{"id": "fv", "factor_type": "totp", "status": "verified"}],
+            "companies": [{"company_id": "c1", "name": "Referral Bridge", "role": "company_admin", "scope": "all"}], "owner": True,
+            "db": {"businesses": [biz("b1", "c1", "Ours Bakery"), biz("b9", "c2", "Other Company Co")],
+                   "signals": [{"id": f"s{i}", "company_id": "c1", "data": {"businessId": "b1", "type": "hiring", "eventDate": "2026-10-01", "provenance": "PROVIDER DATA", "confidence": 0.8, "provider": "test", "providerName": "Test"}} for i in range(2500)]}}
+    pg, errs, csp = await page(br, base, init=init)
+    await crm(pg); await pg.wait_for_timeout(300)
+    names = await pg.evaluate("S.biz.map(b=>b.name)")
+    check("loads this company's records", names == ["Ours Bakery"], names)
+    calls = await pg.evaluate("__S.calls.filter(c=>c[0]==='db'&&c[1]==='select')")
+    check("every load is limited to this company", calls and all("company_id=c1" in c[3] for c in calls), calls[:3])
+    check("loads past 1,000 rows (2,500 signals)", await pg.evaluate("S.signal.length") == 2500)
+    check("live updates opened once for all tables", await pg.evaluate("__S.subscribed") == 1)
+    ok = await pg.evaluate("put('biz',{id:'bn',name:'New Florist',industry:'Retail'})")
+    row = await pg.evaluate("__S.db.businesses.find(r=>r.id==='bn')")
+    check("new record saved with company and owner", ok and row and row["company_id"] == "c1" and row["owner_id"] == "u1"
+          and row["data"]["name"] == "New Florist" and "id" not in row["data"], row)
+    ok = await pg.evaluate("put('biz',{...byId('biz','b1'),name:'Ours Bakery & Cafe'})")
+    row = await pg.evaluate("__S.db.businesses.find(r=>r.id==='b1')")
+    check("edit updates the record and keeps its owner", ok and row["data"]["name"] == "Ours Bakery & Cafe" and row["owner_id"] == "u2", row)
+    ok = await pg.evaluate("put('match',{id:'m1',bizId:'b1',coiId:'c7',status:'Approved'})")
+    row = await pg.evaluate("__S.db.matches.find(r=>r.id==='m1')")
+    check("links filled in for bridges", ok and row["biz_id"] == "b1" and row["coi_id"] == "c7", row)
+    ok = await pg.evaluate("put('req',{id:'r1',note:'x'})")
+    check("camelCase collections map to their tables", ok and await pg.evaluate("!!__S.db.lead_requests.find(r=>r.id==='r1')"))
+    await pg.evaluate("__S.deny=['businesses']")
+    ok = await pg.evaluate("put('biz',{...byId('biz','b1'),name:'Should Not Stick'})")
+    await pg.wait_for_timeout(100)
+    check("refused save returns false and is undone", ok is False and await pg.evaluate("byId('biz','b1').name") == "Ours Bakery & Cafe")
+    check("refused save says so", "Couldn't save" in await pg.inner_text("#toast"))
+    ok = await pg.evaluate("put('biz',{id:'bz',name:'Refused New'})")
+    check("refused new record disappears", ok is False and not await pg.evaluate("!!byId('biz','bz')"))
+    await pg.evaluate("__S.deny=[]")
+    ok = await pg.evaluate("del('biz','bn')")
+    check("delete removes the row", ok and not await pg.evaluate("!!__S.db.businesses.find(r=>r.id==='bn')"))
+    await pg.evaluate("""__rt('businesses',{eventType:'INSERT',new:{id:'b5',company_id:'c1',data:{name:'Added By Teammate'}}})""")
+    await pg.wait_for_timeout(50)
+    check("a teammate's new record appears live", await pg.evaluate("!!byId('biz','b5')"))
+    await pg.evaluate("""__rt('businesses',{eventType:'INSERT',new:{id:'b6',company_id:'c2',data:{name:'Wrong Company'}}})""")
+    check("another company's change is ignored", not await pg.evaluate("!!byId('biz','b6')"))
+    await pg.evaluate("""__rt('businesses',{eventType:'DELETE',old:{id:'b5',company_id:'c1'}})""")
+    await pg.wait_for_timeout(50)
+    check("a teammate's delete disappears live", not await pg.evaluate("!!byId('biz','b5')"))
+    check("nothing saved on the device", await pg.evaluate("localStorage.getItem('rb-data')") is None)
+    await pg.click("#sidenav [data-sub=biz]"); await pg.wait_for_timeout(150)
+    check("records show on screen", "Ours Bakery" in await pg.inner_text("#view"))
+    check("no page errors (CRM)", not errs, errs)
+    check("no security policy violations (CRM)", not csp, csp[:3])
+    check("CRM font is served from this site", await pg.evaluate("document.fonts.check('16px Figtree')"))
+
+    # demo mode stays on the device and is labeled
+    await pg.click("[data-act=menu]"); await pg.wait_for_timeout(100)
+    await pg.click("[data-act=demoon]"); await pg.wait_for_load_state(); await crm(pg)
+    check("demo is labeled", await pg.is_visible("#demobar") and await pg.inner_text("#sync") == "Demo data")
+    check("demo shows sample records", await pg.evaluate("S.biz.length") > 0)
+    writes = await pg.evaluate("__S.calls.filter(c=>c[0]==='db'&&c[1]!=='select').length")
+    await pg.evaluate("put('biz',{...S.biz[0],name:'Demo edit'})")
+    check("demo edits never reach the database", await pg.evaluate("__S.calls.filter(c=>c[0]==='db'&&c[1]!=='select').length") == writes)
+    await pg.click("[data-act=demoexit]"); await pg.wait_for_load_state(); await crm(pg)
+    check("leaving demo goes back to the company's records", not await pg.is_visible("#demobar") and await pg.inner_text("#sync") == "Synced to your account")
+    await pg.close()
+
+    pg, errs, _ = await page(br, base, init=init, width=375)
+    await crm(pg)
+    check("CRM fits a phone, no sideways scroll", not await pg.evaluate("document.documentElement.scrollWidth>innerWidth"))
+    await pg.screenshot(path="/tmp/rb-portal-crm-phone.png")
+    await pg.close()
+
+    owner_only = {**init, "companies": [], "db": {}}
+    pg, errs, _ = await page(br, base, init=owner_only)
+    await pg.wait_for_timeout(200)
+    check("owner with no company sees a message, not an empty CRM", "aren't a member of any company" in await pg.inner_text("#app"))
+    await pg.close()
+
+    two = {**init, "companies": init["companies"] + [{"company_id": "c2", "name": "Second Co", "role": "employee", "scope": "all"}]}
+    pg, errs, _ = await page(br, base, init=two)
+    await crm(pg)
+    await pg.click("[data-act=menu]"); await pg.wait_for_timeout(100)
+    await pg.click("[data-company=c2]"); await pg.wait_for_load_state(); await crm(pg); await pg.wait_for_timeout(200)
+    check("switching company loads that company's records", await pg.evaluate("S.biz.map(b=>b.name)") == ["Other Company Co"])
     await pg.close()
 
     # 8. Phone layout

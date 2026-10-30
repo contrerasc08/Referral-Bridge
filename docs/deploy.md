@@ -22,4 +22,4 @@ Merging to `main` redeploys automatically. Other branches get their own preview 
 
 ## Trying it locally
 
-Copy `web/config.example.js` to `web/config.js`, fill in the URL and publishable key, then run `npx wrangler dev` (or `python3 -m http.server -d web 8080`). `web/config.js` is ignored by git.
+Run `node scripts/build-crm.mjs` (it builds `web/crm/` from `src/index.html`; the deploy does this for you). Copy `web/config.example.js` to `web/config.js`, fill in the URL and publishable key, then run `npx wrangler dev` (or `python3 -m http.server -d web 8080`). `web/config.js` and `web/crm/` are ignored by git.
