@@ -70,7 +70,7 @@ async function step(){
     return viewEnroll(f.all||[]);
   }
   if(needPassword)return viewPassword(s.user.email);
-  return viewHome(s.user.email);
+  return viewHome(s.user.email,s.user.id);
 }
 
 /* ---------- screens ---------- */
@@ -133,16 +133,39 @@ function viewPassword(email){
     if(r.error)return fail(friendly(r.error));
     needPassword=false;if(location.hash)history.replaceState(null,"",location.pathname+location.search);schedule()};
 }
-async function viewHome(email){
+async function viewHome(email,userId){
   var inv=pendingInvite();
   if(inv){var a=await sb.rpc("accept_invite",{code:inv});clearInvite();
     if(a.error)return viewInvite(friendly(a.error))}
   var r=await sb.rpc("my_access");if(r.error)throw r.error;var acc=r.data||{};
   var cos=acc.companies||[];
   if(!cos.length&&!acc.platform_owner)return viewInvite("");
-  show('<h1>You\'re signed in</h1><p class="muted">'+esc(email)+(acc.platform_owner?' · <b>Platform owner</b>':'')+'</p>'+
-    (cos.length?cos.map(function(c){return'<div class="co"><span>'+esc(c.name)+(c.scope==="assigned"?' <span class="small muted">· assigned records only</span>':'')+'</span><span class="tag">'+esc(ROLE[c.role]||c.role)+'</span></div>'}).join(""):'<p class="muted">No company memberships yet.</p>')+
-    '<p class="small muted gap">Your CRM moves into this portal in the next step. Until then, keep using the current Referral Bridge app.</p>');
+  if(!cos.length)return show('<h1>You\'re signed in</h1><p class="muted">'+esc(email)+' · <b>Platform owner</b></p><p>You aren\'t a member of any company yet, so there are no records to show.</p>');
+  launchCrm(email,userId,acc,cos);
+}
+/* ---------- the CRM: the same app as src/index.html, saving to this company's tables ---------- */
+var crmOn=false;
+function launchCrm(email,userId,acc,cos){
+  var pick="";try{pick=localStorage.getItem("rb-company")||""}catch(e){}
+  var co=cos.filter(function(c){return c.company_id===pick})[0]||cos[0];
+  crmOn=true;
+  window.RB_ACCOUNT={email:email,company:co.name,role:ROLE[co.role]||co.role,owner:!!acc.platform_owner,
+    companies:cos.map(function(c){return{id:c.company_id,name:c.name,role:ROLE[c.role]||c.role,current:c===co}}),
+    switchTo:function(id){try{localStorage.setItem("rb-company",id)}catch(e){}location.reload()},
+    signOut:async function(){try{await sb.auth.signOut()}finally{location.reload()}}};
+  var store=window.RBStore(sb,co.company_id,userId);
+  /* the CRM asks its host for a database; downloads and AI fall back to what the browser offers */
+  window.claude={use:function(name){return Promise.resolve(name==="db"?store:null)}};
+  show('<p class="muted">Opening your records…</p>');
+  var pcss=document.querySelector('link[href="portal.css"]');
+  var css=document.createElement("link");css.rel="stylesheet";css.href="crm/app.css";
+  var broken=function(){crmOn=false;css.remove();if(pcss)pcss.disabled=false;show('<h1>Couldn\'t open your records</h1><p class="muted">Part of the app didn\'t load. Check your connection and reload the page.</p>')};
+  css.onerror=broken;
+  css.onload=function(){
+    if(pcss)pcss.disabled=true;
+    var js=document.createElement("script");js.src="crm/app.js";js.onerror=broken;document.body.appendChild(js);
+  };
+  document.head.appendChild(css);
 }
 function viewInvite(err){
   show('<h1>Join your company</h1><p class="muted">Your account isn\'t part of a company yet. Enter the invite code you were sent.</p>'+
@@ -157,5 +180,7 @@ function viewInvite(err){
 signoutBtn.onclick=async function(){signoutBtn.disabled=true;await sb.auth.signOut();signoutBtn.disabled=false;needPassword=false;schedule()};
 /* Re-route only when sign-in state really changes; token refreshes must not restart MFA setup. */
 var ROUTE_ON={INITIAL_SESSION:1,SIGNED_IN:1,SIGNED_OUT:1,PASSWORD_RECOVERY:1};
-sb.auth.onAuthStateChange(function(ev){if(ev==="PASSWORD_RECOVERY")needPassword=true;if(ROUTE_ON[ev])schedule()});
+sb.auth.onAuthStateChange(function(ev){
+  if(crmOn){if(ev==="SIGNED_OUT")location.reload();return} /* the CRM owns the page now */
+  if(ev==="PASSWORD_RECOVERY")needPassword=true;if(ROUTE_ON[ev])schedule()});
 })();

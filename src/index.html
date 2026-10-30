@@ -2532,10 +2532,13 @@ const LAST={};
 function groupOf(v){v=SUB_ALIAS[v]||v;for(const g in GROUPS)if(GROUPS[g].some(([k])=>k===v))return g;return null}
 function subnav(g,cur){const items=GROUPS[g];if(!items||items.length<2)return"";cur=SUB_ALIAS[cur]||cur;
   return`<nav class="subnav" aria-label="${esc(g)} sections">${items.map(([k,l])=>`<button data-sub="${k}" aria-current="${k===cur?"page":"false"}">${esc(l)}</button>`).join("")}</nav>`}
+/* the private portal (web/) signs people in and passes the account here; the artifact has none */
+function accountMenu(row){const a=window.RB_ACCOUNT;if(!a)return"";
+  return`<h3 class="sec">Account</h3><div class="card menu">${(a.companies||[]).length>1?a.companies.filter(c=>!c.current).map(c=>row(`data-company="${esc(c.id)}"`,"Switch to "+c.name,c.role)).join(""):""}${row('data-act="signout"',"Sign out",`${a.email} · ${a.role}, ${a.company}${a.owner?" · Platform owner":""}`)}</div>`}
 function openMenu(){
   const row=(attr,l,dsc)=>`<button class="mrow" ${attr}><span><b>${esc(l)}</b><span class="meta">${esc(dsc)}</span></span><span aria-hidden="true">›</span></button>`;
   openSheet(`<h3>Menu</h3><div class="card menu">${row('data-menugo="target"',"Targeting",tgSummary())}${row('data-menugo="sources"',"Data sources",PROVIDERS.length+" providers and usage")}${row('data-menugo="guide"',"How to use Referral Bridge","Setup, daily routine, what labels mean")}</div>
-  <h3 class="sec">Demo</h3><div class="card menu">${DEMO?row('data-act="demoexit"',"Exit demo mode","Back to your real records")+row('data-act="demoreset"',"Reset demo data","Start the sample over"):row('data-act="demoon"',"Show demo with sample data","Made-up businesses and specialists. Your real records stay untouched.")}</div>
+  ${accountMenu(row)}<h3 class="sec">Demo</h3><div class="card menu">${DEMO?row('data-act="demoexit"',"Exit demo mode","Back to your real records")+row('data-act="demoreset"',"Reset demo data","Start the sample over"):row('data-act="demoon"',"Show demo with sample data","Made-up businesses and specialists. Your real records stay untouched.")}</div>
   <div class="sheet-foot"><span></span><button class="btn" data-act="close">Close</button></div>`)}
 function render(){
   invalidate();
@@ -2755,6 +2758,8 @@ document.addEventListener("click",async e=>{
   if(d.sub){tab=d.sub;render();window.scrollTo(0,0);return}
   if(d.menugo){closeSheet();tab=d.menugo;render();window.scrollTo(0,0);return}
   if(d.act==="menu"){openMenu();return}
+  if(d.act==="signout"){if(window.RB_ACCOUNT){t.disabled=true;window.RB_ACCOUNT.signOut()}return}
+  if(d.company){if(window.RB_ACCOUNT)window.RB_ACCOUNT.switchTo(d.company);return}
   if(d.act==="demoon"){setDemo(true);return}
   if(d.act==="demoexit"){setDemo(false);return}
   if(d.act==="demoreset"){setDemo(true,true);return}

@@ -23,8 +23,10 @@
 ## Next
 - [x] Supabase tables, roles and row-level security (applied to the Supabase project on 2026-10-30)
 - [x] Sign-in portal (`web/`): email and password, authenticator-app MFA for everyone, password reset, invite codes
-- [ ] Put the portal on a private Cloudflare address (`docs/deploy.md`), then create the owner account
-- [ ] Storage layer: the CRM reads and writes Supabase instead of the artifact database, plus a screen for company admins to create invite codes
+- [x] Put the portal on a private Cloudflare address (`docs/deploy.md`), then create the owner account (2026-10-30)
+- [x] Storage layer: the portal runs the same CRM (built from `src/index.html` by `scripts/build-crm.mjs`) and saves to the company's Supabase tables, with live updates, an Account menu, sign out and company switching
+- [ ] A screen for company admins to create invite codes
+- [ ] Point the scheduled bots at Supabase (today they write to the artifact database only)
 - [ ] Move existing records from the artifact database into Supabase (Supabase Pro before real data)
 - [ ] Show the Specialist checker's full results (clear / unverified, with the checks and links) on the specialist detail sheet. "Flagged" already shows on cards and blocks bridges.
 - [ ] Show lead generator coverage gaps in the Brain and feed them to the Prospector

@@ -29,7 +29,7 @@ referral-bridge/
 ├── README.md
 ├── src/
 │   └── index.html           # The whole app (single file, vanilla JS)
-├── web/                     # Private sign-in portal (Supabase Auth + MFA), served by Cloudflare (see docs/deploy.md)
+├── web/                     # Private portal: sign-in (Supabase Auth + MFA), then the CRM saving to Supabase (see docs/deploy.md)
 └── docs/
     ├── decisions.md         # Why things are the way they are
     ├── roadmap.md           # Done, next, later
@@ -45,14 +45,15 @@ tests/
 ├── test_review_fixes.py     # Browser tests (Playwright) for save/delete, flagged specialists, need scoring, learning
 ├── test_crm_navigation.py   # Browser tests for the sidebar, prospect board, outreach history, follow-ups, appointments
 ├── test_save_failures.py    # Browser tests: a failed save never shows a success message
-├── test_portal.py           # Browser tests for the sign-in portal (sign-in, MFA, invites, key safety)
+├── test_portal.py           # Browser tests for the portal (sign-in, MFA, invites, key safety, the CRM's Supabase storage)
 └── db/                      # Security tests for the Supabase rules (tests/db/run.sh)
 supabase/
 ├── migrations/              # Tables, roles and row-level security
 └── bootstrap_owner.sql      # One-time owner setup, run by hand
 wrangler.jsonc               # Cloudflare settings for the portal
 scripts/
-└── write-config.mjs         # Writes web/config.js from environment variables at deploy time
+├── write-config.mjs         # Writes web/config.js from environment variables at deploy time (and runs build-crm)
+└── build-crm.mjs            # Builds the portal's copy of the CRM (web/crm/) from src/index.html
 ```
 
 ## How this project is run

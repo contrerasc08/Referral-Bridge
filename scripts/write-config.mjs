@@ -1,7 +1,9 @@
 // Writes web/config.js from environment variables at deploy time, so no key is stored in the repo.
 // Cloudflare (Workers Builds): build command "node scripts/write-config.mjs", deploy command "npx wrangler deploy".
+// Also builds the portal's copy of the CRM (scripts/build-crm.mjs).
 // Needs SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY. Refuses a secret or service-role key.
 import { writeFileSync } from "node:fs";
+import "./build-crm.mjs";
 const url = (process.env.SUPABASE_URL || "").trim().replace(/\/+$/, "");
 const key = (process.env.SUPABASE_PUBLISHABLE_KEY || "").trim();
 const stop = (m) => { console.error("write-config: " + m); process.exit(1); };
