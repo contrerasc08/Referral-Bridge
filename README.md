@@ -1,54 +1,70 @@
 # Referral Bridge
 
-AI-powered business relationship and referral platform.
+Business needs, bridged to the right specialists.
 
-> **Status:** Early planning / setup
+> **Status:** Working v1, live as a private claude.ai artifact. 11 scheduled bots (all tasks set up) and 7 in-app bots.
 
-## Overview
+## What it is
 
-Referral Bridge helps businesses build, track, and grow referral relationships with partners.
+Referral Bridge is a referral CRM for someone who connects business owners with the specialists who can help them: bankers, SBA and equipment lenders, CPAs, attorneys, insurance agents, wealth advisors, M&A advisors and more.
 
-_TODO: Add a 2–3 sentence description of the problem it solves and who it's for._
+Every company starts as a **business**. A business becomes a **lead** when one of its needs (financing, succession, insurance and so on) is **bridged** to a specialist who can deliver the solution. The app finds businesses with fresh signals (expansions, hires, ownership changes), predicts what they need, matches the right specialist, and tracks outreach until the referral closes.
 
-## Goals
+It focuses on owner-run US businesses with roughly $1M–$100M in revenue.
 
-- [ ] Define core user types (e.g., referrers, receiving businesses, admins)
-- [ ] Define the referral workflow (submit → track → follow up → reward)
-- [ ] Choose tech stack
-- [ ] Build MVP
+## What's built
 
-## How this project is run
-
-This repository is the **single source of truth** for Referral Bridge: code, decisions, and documentation all live here.
-
-| Role | Who | Responsibilities |
-|------|-----|------------------|
-| Owner | @contrerasc08 | Final decisions, priorities |
-| Build & implement | Claude | Writes code, project structure, technical docs |
-| Review & plan | ChatGPT | Reviews code, plans features, suggests improvements |
-
-AI assistants do **not** share conversations with each other. Anything important (decisions, plans, specs) must be written into this repo so every assistant works from the same information.
+- **CRM:** businesses, specialists, bridges (Suggested → Approved → Introduced → Meeting → Closed), outreach logging with prospect stages, follow-ups and CSV export.
+- **Scoring:** an Opportunity Score (why contact this business now), predicted needs, and a Match Score (how right this specialist is). It learns from closed and rejected bridges. See [docs/specs/scoring.md](docs/specs/scoring.md).
+- **Market awareness:** news headlines adjust needs, and industry climate favors growing sectors.
+- **Targeting:** focus states, industries, employee range, owner-run only, and excluded words.
+- **Brain:** one search across everything, plain-language questions answered from stored data, a bot dashboard, and "what the bots noticed".
+- **Bots:** scheduled cloud bots find businesses and specialists, research contacts, write outreach drafts, watch for new signals, vet specialists, track news and coach weekly. In-app bots flag stuck bridges, coverage gaps, missing data and duplicates. See [docs/bots/](docs/bots/README.md).
+- **Demo mode** with made-up data, for showing the app safely.
 
 ## Repository structure
 
 ```
 referral-bridge/
-├── README.md          # This file: project overview
-├── docs/
-│   ├── decisions.md   # Log of key decisions and why
-│   ├── roadmap.md     # Planned features and priorities
-│   └── specs/         # Feature specifications
-└── src/               # Application code (once stack is chosen)
+├── README.md
+├── src/
+│   └── index.html           # The whole app (single file, vanilla JS)
+└── docs/
+    ├── decisions.md         # Why things are the way they are
+    ├── roadmap.md           # Done, next, later
+    ├── specs/
+    │   ├── app-and-workflow.md
+    │   ├── data-model.md
+    │   └── scoring.md
+    └── bots/
+        ├── README.md        # Schedules, outputs, report format
+        └── *.md             # Exact instructions for each scheduled bot
+tests/
+└── test_review_fixes.py     # Browser tests (Playwright) for save/delete, flagged specialists, need scoring, learning
 ```
 
-## Decision log
+## How this project is run
 
-Key decisions are recorded in [`docs/decisions.md`](docs/decisions.md).
+This repository is the **single source of truth**. The live app is published from `src/index.html`, and the bots' instructions are recorded in `docs/bots/`.
 
-| Date | Decision |
-|------|----------|
-| 2026-10-17 | Use GitHub as the central hub for code, history, and docs |
+| Role | Who | Responsibilities |
+|------|-----|------------------|
+| Owner | @contrerasc08 | Final decisions, priorities |
+| Build & implement | Claude | Writes code, publishes the app, runs the bots, keeps docs current |
+| Review & plan | ChatGPT | Reviews code and specs, plans features, suggests improvements |
 
-## Getting started
+AI assistants don't share conversations. Anything important (decisions, plans, specs) must be written into this repo.
 
-_Setup instructions will be added once the tech stack is chosen._
+### Change workflow
+
+1. Changes go on a branch with a pull request.
+2. The owner reviews and merges.
+3. Claude republishes the live app from `src/index.html` and updates any scheduled bot whose instructions changed.
+
+## Running it locally
+
+Open `src/index.html` in a browser. Without the artifact database it saves to `localStorage`. Use ☰ → **Show demo with sample data** to explore. The Ask and CSV-export features only work inside claude.ai.
+
+## Your data
+
+Business, contact and outreach records live in the artifact's private database, **not** in this repo. Nothing personal is committed here.
