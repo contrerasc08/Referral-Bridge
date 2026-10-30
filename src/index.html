@@ -547,6 +547,8 @@ async function del(k,id){
     toast("Couldn't delete. The record is still there. Try again.");return false}}
   else{saveLocal();render();return true}
 }
+/* deletes a list of [key,id] pairs and returns how many failed */
+async function delMany(pairs){let f=0;for(const [k,id] of pairs)if(!await del(k,id))f++;return f}
 function connect(){
   if(DEMO){$("#demobar").hidden=false;$("#sync").textContent="Demo data";return}
   if(!(window.claude&&window.claude.use))return;
@@ -932,7 +934,7 @@ function addSignalSheet(bizId){
 async function saveSignal(bizId){
   const b=byId("biz",bizId);if(!b)return;let url=$("#sg_url").value.trim();if(url&&!/^https?:\/\//i.test(url))url="https://"+url;
   const s=makeSignal(b,{type:$("#sg_type").value,provider:"user",providerName:"You",provenance:"USER-ENTERED",eventDate:$("#sg_date").value||todayISO(),evidence:$("#sg_ev").value.trim(),sourceRef:url,confidence:.9});
-  closeSheet();await put("signal",s);toast("Signal added");render();
+  closeSheet();if(!await put("signal",s))return;toast("Signal added");render();
 }
 
 /* ---------- Real contacts: each detail keeps its source, date and label ---------- */
@@ -965,7 +967,7 @@ async function saveContact(bizId){
   if(!v("ct_name")&&!v("ct_phone")&&!v("ct_email")){$("#ct_err").textContent="Enter a name, phone or email.";return}
   let src=v("ct_src");if(src&&!/^https?:\/\//i.test(src))src="https://"+src;
   b.contacts=[...(b.contacts||[]),{name:v("ct_name"),role:v("ct_role"),phone:v("ct_phone"),email:v("ct_email"),sourceUrl:src,sourceName:src?"Your source":"You",retrievedAt:new Date().toISOString(),provenance:"USER-ENTERED"}];
-  closeSheet();await put("biz",b);toast("Contact saved");render();
+  closeSheet();if(!await put("biz",b))return;toast("Contact saved");render();
 }
 
 /* ---------- Learning loop: signal weights adjust from real outcomes ---------- */
@@ -1133,7 +1135,7 @@ function revBar(){
 async function saveRev(patch){
   const s={...settings(),...patch};
   if(s.revMin!==null&&s.revMin!==undefined&&s.revMax!==null&&s.revMax!==undefined&&s.revMin>s.revMax){const t=s.revMin;s.revMin=s.revMax;s.revMax=t}
-  await put("settings",s);render();
+  const ok=await put("settings",s);render();return ok;
 }
 
 /* ---------- Targeting: one profile that every bot and every score follows ---------- */
@@ -1165,7 +1167,7 @@ function tgSummary(){const t=targeting();
   return[t.focusStates.length?"Focus "+t.focusStates.join(", "):"",t.states.length?"only "+t.states.join(", "):"nationwide",
     t.industries.length?t.industries.length+" target industr"+(t.industries.length===1?"y":"ies"):"",t.excludeIndustries.length?t.excludeIndustries.length+" excluded":"",
     revLabel(),(t.empMin||t.empMax)?`${t.empMin||0}–${t.empMax||"any"} employees`:""].filter(Boolean).join(" · ")}
-async function saveTg(patch){await put("settings",{...targeting(),...patch,id:"targeting"});render()}
+async function saveTg(patch){const ok=await put("settings",{...targeting(),...patch,id:"targeting"});render();return ok}
 function viewTarget(){
   const t=targeting(), real=S.biz.filter(b=>!b.sample), fit=real.filter(inTarget).length, focus=real.filter(b=>t.focusStates.includes(b.state)).length;
   const indSt=i=>t.industries.includes(i)?"on":t.excludeIndustries.includes(i)?"off":"";
@@ -2106,14 +2108,14 @@ async function quizSave(){
     const cl=(QZ.county||"").toLowerCase();
     b={id:uid(),name,industry:QZ.industry||"Other",county:QZ.county,state:NJ.has(cl)?"NJ":CT_C.has(cl)?"CT":PA_C.has(cl)?"PA":cl==="montgomery"?"PA":"NY",trigger:stg?stg[2]:"",source:"Referral",
       notes:[QZ.needs.length?"Needs: "+QZ.needs.join(", "):"",QZ.lang&&QZ.lang!=="No preference"?"Language: "+QZ.lang:""].filter(Boolean).join(". ")};
-    await put("biz",b);
+    if(!await put("biz",b))return;
   }
   const res=quizResults(), taken=new Set(S.match.map(m=>m.bizId+":"+m.coiId));
-  let n=0;
+  let n=0,failed=0;
   for(const id of picks){if(taken.has(b.id+":"+id))continue;const r=res.find(x=>x.c.id===id);
-    await put("match",{id:uid(),bizId:b.id,coiId:id,score:r?r.pct:0,compat:r?r.pct:0,status:"Approved",trigger:b.trigger||"",opp:opportunity(b).score,sigTypes:[...new Set(opportunity(b).active.map(s=>s.type))],history:[{status:"Approved",at:new Date().toISOString()}]});n++}
+    if(!await put("match",{id:uid(),bizId:b.id,coiId:id,score:r?r.pct:0,compat:r?r.pct:0,status:"Approved",trigger:b.trigger||"",opp:opportunity(b).score,sigTypes:[...new Set(opportunity(b).active.map(s=>s.type))],history:[{status:"Approved",at:new Date().toISOString()}]})){failed++;continue}n++}
   closeSheet();tab="pipeline";stage="Approved";render();window.scrollTo(0,0);
-  toast(n?`${n} match${n>1?"es":""} added to your pipeline`:"Those matches were already in your pipeline");
+  toast(failed?`${n} match${n===1?"":"es"} added. ${failed} couldn't be saved; try again.`:n?`${n} match${n>1?"es":""} added to your pipeline`:"Those matches were already in your pipeline");
 }
 let RS={kind:"biz",filter:"all",q:""};
 const PROFILE_FIELDS=[["website","Website","url"],["principal","Owner or principal","text"],["bio","Bio or summary","textarea"],["googleRating","Google rating (0-5)","number"],["googleReviews","Google review count","number"],["yelpRating","Yelp rating (0-5)","number"],["yelpReviews","Yelp review count","number"],["bbb","BBB rating","text"],["linkedin","LinkedIn URL","url"],["facebook","Facebook URL","url"],["instagram","Instagram URL","url"],["established","Year established","number"],["employees","Employees (approx.)","text"],["license","License or registration number","text"],["otherListings","Other listings (Healthgrades, Zocdoc, Avvo...)","textarea"]];
@@ -2187,7 +2189,7 @@ async function saveProfile(kind,id){
   for(const k of ["googleRating","yelpRating"]){if(p[k]&&(isNaN(+p[k])||+p[k]<0||+p[k]>5)){$("#p_err").textContent="Ratings must be between 0 and 5.";$("#p_"+k).focus();return}}
   for(const k of ["website","linkedin","facebook","instagram"]){if(p[k]&&!/^https?:\/\//i.test(p[k]))p[k]="https://"+p[k]}
   p.verified=$("#p_verified").checked;p.checkedAt=new Date().toISOString();
-  r.profile=p;closeSheet();await put(kind,r);toast("Profile saved");if(db)render();
+  r.profile=p;closeSheet();if(!await put(kind,r))return;toast("Profile saved");if(db)render();
 }
 const LS={state:"",kind:"biz",industry:"Healthcare - dental",profession:"CPA",county:"",count:"25",notes:"",q:"",searched:false,rtab:"all"};
 const IND_NOUN={"Healthcare - dental":"dentist","Healthcare - medical":"medical practice","Healthcare - therapy and rehab":"physical therapy clinic","Healthcare - behavioral health":"mental health practice","Healthcare - home health and senior care":"home health agency","Healthcare - pharmacy":"pharmacy","Veterinary":"veterinary clinic","Retail":"boutique","Food service":"restaurant","Hospitality and lodging":"hotel","Construction":"contractor","Manufacturing":"manufacturer","Wholesale and distribution":"distributor","Transportation and logistics":"trucking company","Technology and software":"software company","Professional services":"professional services firm","Finance and insurance":"financial services firm","Real estate or holding":"real estate investor","Personal services":"salon or fitness studio","Auto services":"auto repair shop","Education and childcare":"childcare center","Arts and recreation":"entertainment venue","Agriculture":"farm","Energy and utilities":"solar company","Environmental and waste services":"environmental services company","Nonprofit":"nonprofit","Other":"small business"};
@@ -2411,7 +2413,7 @@ async function saveRecord(kind,id){
   if(kind==="biz"&&rec.revenue!==""){const v=parseMoney(rec.revenue);if(v===null){toast("Revenue should look like 750K, 2.5M or 1B");$("#f_revenue").focus();return}
     const old=byId("biz",rec.id)||{};if(v!==revOf(old)){rec.revenueAsOf=new Date().toISOString();if(!rec.revenueSource||rec.revenueSource===old.revenueSource){rec.revenueSource="You";rec.revenueSourceUrl=""}}rec.revenue=v}
   if(!rec.name){$("#err_name").textContent="Enter a name first.";$("#f_name").focus();return}
-  closeSheet(); await put(kind,rec); toast((kind==="biz"?"Business":"Advisor")+" saved"); if(db)render();
+  closeSheet(); if(!await put(kind,rec))return; toast((kind==="biz"?"Business":"Advisor")+" saved"); if(db)render();
 }
 function matchSheet(m){
   const b=byId("biz",m.bizId),c=byId("coi",m.coiId),r=b&&c?score(b,c):{score:m.score||0,why:[]};
@@ -2541,7 +2543,7 @@ $("#view").addEventListener("dragover",e=>{const c=e.target.closest&&e.target.cl
 $("#view").addEventListener("dragleave",e=>{const c=e.target.closest&&e.target.closest("[data-kcol]");if(c&&!c.contains(e.relatedTarget))c.classList.remove("over")});
 $("#view").addEventListener("drop",async e=>{const c=e.target.closest&&e.target.closest("[data-kcol]");if(!c)return;e.preventDefault();c.classList.remove("over");
   const id=e.dataTransfer.getData("text/plain"), b0=byId("biz",id), st=c.dataset.kcol;if(!b0||stageOf(b0)===st)return;
-  const b={...b0};b.prospectStage=st;if(["Won","Lost"].includes(st))b.followUpAt="";await put("biz",b);toast(b.name+" → "+st);render()});
+  const b={...b0};b.prospectStage=st;if(["Won","Lost"].includes(st))b.followUpAt="";if(!await put("biz",b))return;toast(b.name+" → "+st);render()});
 document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const g=b.dataset.tab,first=GROUPS[g][0][0];
   tab=groupOf(tab)===g?first:(LAST[g]||first);render();window.scrollTo(0,0)});
 $("#view").addEventListener("keydown",e=>{if(e.target.id==="qbrain"&&e.key==="Enter"&&BR.q.trim()){e.preventDefault();ask(BR.q)}if(e.target.id==="askq"&&e.key==="Enter"&&!e.shiftKey){e.preventDefault();ask(e.target.value)}});
@@ -2562,21 +2564,21 @@ $("#view").addEventListener("change",async e=>{
   if(e.target.id==="src_free"){SRCV.free=e.target.checked;render();return}
   if(e.target.id==="rev_min"||e.target.id==="rev_max"){const raw=e.target.value.trim(),v=raw?parseMoney(raw):null;
     if(raw&&v===null){toast("Use amounts like 750K, 2.5M or 1B");return}await saveRev(e.target.id==="rev_min"?{revMin:v}:{revMax:v});return}
-  if(e.target.id==="news_on"){await put("settings",{...settings(),newsOff:!e.target.checked});toast(e.target.checked?"News now informs scores":"News shown, but scores ignore it");render();return}
+  if(e.target.id==="news_on"){if(!await put("settings",{...settings(),newsOff:!e.target.checked}))return;toast(e.target.checked?"News now informs scores":"News shown, but scores ignore it");render();return}
   if(e.target.id==="rev_unknown"){await saveRev({revUnknown:e.target.checked});return}
-  if(e.target.id==="q_auto"){await put("settings",{...settings(),autoResearch:e.target.checked});toast(e.target.checked?"New real businesses will be queued for research":"Only prioritized businesses will be researched");render();return}
-  if(e.target.id==="src_quota"){const n=Math.max(1,Math.round(+e.target.value||DEFAULT_QUOTA));await put("settings",{...settings(),quotaDefault:n});toast("Daily limit saved: "+n+" checks per source");return}
+  if(e.target.id==="q_auto"){if(!await put("settings",{...settings(),autoResearch:e.target.checked}))return;toast(e.target.checked?"New real businesses will be queued for research":"Only prioritized businesses will be researched");render();return}
+  if(e.target.id==="src_quota"){const n=Math.max(1,Math.round(+e.target.value||DEFAULT_QUOTA));if(!await put("settings",{...settings(),quotaDefault:n}))return;toast("Daily limit saved: "+n+" checks per source");return}
   if(e.target.id==="lwhat"){if(LS.kind==="biz")LS.industry=e.target.value;else LS.profession=e.target.value;if(LS.searched)render();return}
   if(e.target.id==="lstate"){LS.state=e.target.value;if(LS.searched)render();return}
   if(e.target.id==="lcount"){LS.count=e.target.value;return}
   if(e.target.id&&e.target.id.startsWith("tg_")){const id=e.target.id,v=e.target.value;
-    if(id==="tg_focus"||id==="tg_states"){const list=parseStates(v);if(v.trim()&&!list.length){toast("Use state codes like NJ, NY, PA");return}await saveTg(id==="tg_focus"?{focusStates:list}:{states:list});toast("Targeting saved");return}
+    if(id==="tg_focus"||id==="tg_states"){const list=parseStates(v);if(v.trim()&&!list.length){toast("Use state codes like NJ, NY, PA");return}if(!await saveTg(id==="tg_focus"?{focusStates:list}:{states:list}))return;toast("Targeting saved");return}
     if(["tg_empmin","tg_empmax","tg_years"].includes(id)){const n=v.trim()===""?0:Math.max(0,Math.round(+v.replace(/[^0-9.]/g,"")));if(isNaN(n)){toast("Enter a whole number");return}
-      await saveTg({[{tg_empmin:"empMin",tg_empmax:"empMax",tg_years:"yearsMin"}[id]]:n});toast("Targeting saved");return}
+      if(!await saveTg({[{tg_empmin:"empMin",tg_empmax:"empMax",tg_years:"yearsMin"}[id]]:n}))return;toast("Targeting saved");return}
     if(id==="tg_owner"){await saveTg({ownerRun:e.target.checked});return}
-    if(id==="tg_only"){await saveTg({targetOnly:e.target.checked});toast(e.target.checked?"Showing only businesses that fit your targeting":"Showing all businesses");return}
-    if(id==="tg_per"){await saveTg({perRun:+v});toast("Each generator adds up to "+v+" per run");return}
-    const k={tg_counties:"counties",tg_kw:"keywords",tg_ex:"excludeWords"}[id];if(k){await saveTg({[k]:v.trim()});toast("Targeting saved")}return}
+    if(id==="tg_only"){if(!await saveTg({targetOnly:e.target.checked}))return;toast(e.target.checked?"Showing only businesses that fit your targeting":"Showing all businesses");return}
+    if(id==="tg_per"){if(!await saveTg({perRun:+v}))return;toast("Each generator adds up to "+v+" per run");return}
+    const k={tg_counties:"counties",tg_kw:"keywords",tg_ex:"excludeWords"}[id];if(k&&await saveTg({[k]:v.trim()}))toast("Targeting saved");return}
   if(e.target.id==="findbiz"){F.bizId=e.target.value;$("#findResults").innerHTML=findResults()}
   if(e.target.id==="findcounty"){F.county=e.target.value;$("#findResults").innerHTML=findResults()}
   if(e.target.id==="findhc"){F.hc=e.target.checked;$("#findResults").innerHTML=findResults()}
@@ -2596,12 +2598,12 @@ document.addEventListener("click",async e=>{
   if(d.tgind){const t=targeting(),i=d.tgind,on=t.industries.includes(i),off=t.excludeIndustries.includes(i);
     const inds=t.industries.filter(x=>x!==i),ex=t.excludeIndustries.filter(x=>x!==i);if(!on&&!off)inds.push(i);else if(on)ex.push(i);
     await saveTg({industries:inds,excludeIndustries:ex});return}
-  if(d.tggen){const t=targeting();await saveTg({gens:{...t.gens,[d.tggen]:!t.gens[d.tggen]}});toast(GEN_NAME[d.tggen]+(targeting().gens[d.tggen]?" is on":" is paused"));return}
+  if(d.tggen){const t=targeting();if(!await saveTg({gens:{...t.gens,[d.tggen]:!t.gens[d.tggen]}}))return;toast(GEN_NAME[d.tggen]+(targeting().gens[d.tggen]?" is on":" is paused"));return}
   if(d.dcopy){const x=S.drafts.find(y=>y.id===d.dcopy);if(x){try{await navigator.clipboard.writeText((x.subject?x.subject+"\n\n":"")+(x.body||""));toast("Copied")}catch(e){toast("Couldn't copy. Select the text and copy it.")}}return}
-  if(d.dsent){const x={...S.drafts.find(y=>y.id===d.dsent)};x.status="sent";x.sentAt=new Date().toISOString();await put("drafts",x);
-    if(x.kind!=="intro_email"){await put("outreach",{id:uid(),bizId:x.bizId,channel:x.kind==="call_script"?"call":"email",outcome:"none",note:"Sent from Intro writer draft"+(x.subject?": "+x.subject:""),at:new Date().toISOString()});const b={...byId("biz",x.bizId)};if(PSTAGES.indexOf(stageOf(b))<PSTAGES.indexOf("Contacted")){b.prospectStage="Contacted";await put("biz",b)}}
+  if(d.dsent){const x={...S.drafts.find(y=>y.id===d.dsent)};x.status="sent";x.sentAt=new Date().toISOString();if(!await put("drafts",x))return;
+    if(x.kind!=="intro_email"){if(!await put("outreach",{id:uid(),bizId:x.bizId,channel:x.kind==="call_script"?"call":"email",outcome:"none",note:"Sent from Intro writer draft"+(x.subject?": "+x.subject:""),at:new Date().toISOString()})){toast("Marked sent, but the outreach entry couldn't be saved. Log it by hand.");render();return}const b={...byId("biz",x.bizId)};if(PSTAGES.indexOf(stageOf(b))<PSTAGES.indexOf("Contacted")){b.prospectStage="Contacted";if(!await put("biz",b)){toast("Logged as outreach, but the stage couldn't be updated.");render();return}}}
     toast(x.kind==="intro_email"?"Marked sent":"Logged as outreach");render();return}
-  if(d.ddis){const x={...S.drafts.find(y=>y.id===d.ddis)};x.status="dismissed";await put("drafts",x);render();return}
+  if(d.ddis){const x={...S.drafts.find(y=>y.id===d.ddis)};x.status="dismissed";if(await put("drafts",x))render();return}
   if(d.botgo!==undefined){closeSheet();const [g,f]=d.botgo.split("|");if(f)BLV.f=f;tab=g;render();window.scrollTo(0,0);return}
   if(d.bq!==undefined){BR.q=d.bq;BR.more={};tab="brain";render();const el=$("#qbrain");if(el&&!d.bq)el.focus();return}
   if(d.brmore){BR.more[d.brmore]=!BR.more[d.brmore];$("#brainBody").innerHTML=brainBody();return}
@@ -2617,7 +2619,7 @@ document.addEventListener("click",async e=>{
   if(d.tnext!==undefined){const ctx=window.__TF;if(!ctx)return;const n=+d.tnext;closeSheet();
     if(ctx.src==="biz"){const b={...byId("biz",ctx.id)};b.followUpAt=n?addDays(localDay(),n):"";b.followUpNote="";if(await put("biz",b)){toast(n?`Done. Next follow-up ${fmtDate(b.followUpAt)}.`:"Done");render()}return}
     const x=byId("task",ctx.id);if(!x)return;if(!await put("task",{...x,status:"done",doneAt:new Date().toISOString()}))return;
-    if(n)await put("task",{id:uid(),kind:"followup",title:x.bizId?`Follow up with ${(byId("biz",x.bizId)||{}).name}`:x.coiId?`Follow up with ${(byId("coi",x.coiId)||{}).name}`:x.title,bizId:x.bizId,coiId:x.coiId,dueAt:addDays(localDay(),n),status:"open",source:"you"});
+    if(n&&!await put("task",{id:uid(),kind:"followup",title:x.bizId?`Follow up with ${(byId("biz",x.bizId)||{}).name}`:x.coiId?`Follow up with ${(byId("coi",x.coiId)||{}).name}`:x.title,bizId:x.bizId,coiId:x.coiId,dueAt:addDays(localDay(),n),status:"open",source:"you"})){toast("Done, but the next follow-up couldn't be saved. Add it again.");render();return}
     toast(n?`Done. Next follow-up ${fmtDate(addDays(localDay(),n))}.`:"Done");render();return}
   if(d.tdone){const [src,id]=d.tdone.split("|");
     if(src==="biz"){const b={...byId("biz",id)};b.followUpAt="";b.followUpNote="";if(await put("biz",b)){toast("Done");render()}return}
@@ -2629,36 +2631,36 @@ document.addEventListener("click",async e=>{
   if(d.ohf){OH.f=d.ohf;render();return}
   if(d.bizview){if($("#sheet").open)closeSheet();if(d.bizview!==BV.id)BV.open={};BV.from=tab==="bizview"?(BV.from||"biz"):tab;BV.id=d.bizview;BV.why=false;tab="bizview";render();window.scrollTo(0,0);return}
   if(d.oppwhy){BV.why=!BV.why;render();return}
-  if(d.follow){const b={...byId("biz",d.follow)};b.followed=!b.followed;await put("biz",b);toast(b.followed?"Following. New signals will show on Today.":"Unfollowed");render();return}
-  if(d.notdup){const b={...byId("biz",d.notdup)};b.possibleDupOf="";await put("biz",b);toast("Marked as a separate business");render();return}
+  if(d.follow){const b={...byId("biz",d.follow)};b.followed=!b.followed;if(!await put("biz",b))return;toast(b.followed?"Following. New signals will show on Today.":"Unfollowed");render();return}
+  if(d.notdup){const b={...byId("biz",d.notdup)};b.possibleDupOf="";if(!await put("biz",b))return;toast("Marked as a separate business");render();return}
   if(d.addsig){addSignalSheet(d.addsig);return}
   if(d.ask){ask($("#askq").value);return}
   if(d.askex){ask(d.askex);return}
   if(d.askstop){if(AQ.ctl)AQ.ctl.abort();return}
   if(d.askclear){AQ.turns=[];AQ.err="";render();return}
-  if(d.learn){await put("settings",{...settings(),learnOff:!settings().learnOff});toast(settings().learnOff?"Learning off: default weights":"Learning on");render();return}
-  if(d.findcontact){await put("creq",{id:uid(),bizId:d.findcontact,name:(byId("biz",d.findcontact)||{}).name||"",status:"Waiting"});toast('Moved to the front of the research queue. Tell Claude: "Research my business queue."');render();return}
+  if(d.learn){if(!await put("settings",{...settings(),learnOff:!settings().learnOff}))return;toast(settings().learnOff?"Learning off: default weights":"Learning on");render();return}
+  if(d.findcontact){if(!await put("creq",{id:uid(),bizId:d.findcontact,name:(byId("biz",d.findcontact)||{}).name||"",status:"Waiting"}))return;toast('Moved to the front of the research queue. Tell Claude: "Research my business queue."');render();return}
   if(d.addcontact){addContactSheet(d.addcontact);return}
   if(d.revopen!==undefined){REVOPEN=d.revopen==="1";render();return}
   if(d.revp!==undefined){const [a,b]=d.revp.split("|");await saveRev({revMin:parseMoney(a),revMax:parseMoney(b)});return}
-  if(d.climf){await put("settings",{...settings(),climateFocus:d.climf});toast(d.climf==="off"?"Climate no longer changes scores":"Scores updated for the economic climate");render();return}
+  if(d.climf){if(!await put("settings",{...settings(),climateFocus:d.climf}))return;toast(d.climf==="off"?"Climate no longer changes scores":"Scores updated for the economic climate");render();return}
   if(d.climlead){LS.kind="biz";LS.industry=d.climlead;tab="leads";render();window.scrollTo(0,0);toast("Industry set. Fill in the area and send the business request.");return}
-  if(d.pstage){const [id,st]=d.pstage.split("|");const b={...byId("biz",id)};b.prospectStage=st;if(["Won","Lost"].includes(st))b.followUpAt="";if($("#sheet").open)closeSheet();await put("biz",b);toast("Stage: "+st);render();return}
+  if(d.pstage){const [id,st]=d.pstage.split("|");const b={...byId("biz",id)};b.prospectStage=st;if(["Won","Lost"].includes(st))b.followUpAt="";if($("#sheet").open)closeSheet();if(!await put("biz",b))return;toast("Stage: "+st);render();return}
   if(d.logout){logOutreachSheet(d.logout);return}
   if(d.lopick){const [k,v]=d.lopick.split("|");$("#sheetBody").dataset[k]=v;t.parentElement.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===t));return}
   if(d.saveout){saveOutreach(d.saveout);return}
   if(d.delout){if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to remove";return}await del("outreach",d.delout);render();return}
   if(d.setfu){followUpSheet(d.setfu);return}
-  if(d.savefu){const b={...byId("biz",d.savefu)};b.followUpAt=$("#fu_d").value;b.followUpNote=$("#fu_n").value.trim();closeSheet();await put("biz",b);toast("Follow-up saved");render();return}
-  if(d.clearfu){if($("#sheet").open)closeSheet();const b={...byId("biz",d.clearfu)};b.followUpAt="";b.followUpNote="";await put("biz",b);toast("Follow-up done");render();return}
+  if(d.savefu){const b={...byId("biz",d.savefu)};b.followUpAt=$("#fu_d").value;b.followUpNote=$("#fu_n").value.trim();closeSheet();if(!await put("biz",b))return;toast("Follow-up saved");render();return}
+  if(d.clearfu){if($("#sheet").open)closeSheet();const b={...byId("biz",d.clearfu)};b.followUpAt="";b.followUpNote="";if(!await put("biz",b))return;toast("Follow-up done");render();return}
   if(d.ovd){OV.days=d.ovd;render();return}
   if(d.export){exportCSV(d.export);return}
   if(d.newsf){NV.f=d.newsf;render();return}
-  if(d.rskip){const b={...byId("biz",d.rskip)};b.researchStatus="skip";await put("biz",b);toast("Skipped. It won't be researched.");render();return}
+  if(d.rskip){const b={...byId("biz",d.rskip)};b.researchStatus="skip";if(!await put("biz",b))return;toast("Skipped. It won't be researched.");render();return}
   if(d.savecontact){saveContact(d.savecontact);return}
-  if(d.delcontact){if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to remove";return}const [id,i]=d.delcontact.split("|");const b={...byId("biz",id)};b.contacts=(b.contacts||[]).filter((_,j)=>j!==+i);await put("biz",b);toast("Contact removed");render();return}
+  if(d.delcontact){if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to remove";return}const [id,i]=d.delcontact.split("|");const b={...byId("biz",id)};b.contacts=(b.contacts||[]).filter((_,j)=>j!==+i);if(!await put("biz",b))return;toast("Contact removed");render();return}
   if(d.savesig){saveSignal(d.savesig);return}
-  if(d.delsig){if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to remove";return}await del("signal",d.delsig);toast("Signal removed");render();return}
+  if(d.delsig){if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to remove";return}if(!await del("signal",d.delsig))return;toast("Signal removed");render();return}
   if(d.sgg){SG.g=d.sgg;render();return}
   if(d.srccat){SRCV.cat=d.srccat;render();return}
   if(d.srctoggle){const s={...settings()};s.enabled={...(s.enabled||{})};s.enabled[d.srctoggle]=!isOn(PROV_BY[d.srctoggle]);await put("settings",s);render();return}
@@ -2684,26 +2686,28 @@ document.addEventListener("click",async e=>{
   if(d.biz){recordForm("biz",byId("biz",d.biz));return}
   if(d.coi){recordForm("coi",byId("coi",d.coi));return}
   if(d.approve){const [b,c,s]=d.approve.split("|");if(await approve(b,c,s))toast("Approved. It's in your pipeline.");if(db)render();return}
-  if(d.dismiss){const [b,c]=d.dismiss.split("|");await approve(b,c,0,"Dismissed");toast("Dismissed");if(db)render();return}
+  if(d.dismiss){const [b,c]=d.dismiss.split("|");if(await approve(b,c,0,"Dismissed"))toast("Dismissed");if(db)render();return}
   if(d.save){const [k,id]=d.save.split("|");saveRecord(k,id);return}
   if(d.del){const [k,id]=d.del.split("|");const noun=k==="biz"?"business":k==="coi"?"advisor":"match";
     if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to delete";return}
-    closeSheet();await del(k,id);if(k!=="match"){for(const m of S.match.filter(m=>(k==="biz"?m.bizId:m.coiId)===id))await del("match",m.id)}
-    if(k==="biz"){for(const s of S.signal.filter(s=>s.businessId===id))await del("signal",s.id);for(const o of S.outreach.filter(o=>o.bizId===id))await del("outreach",o.id);if(tab==="bizview")tab="biz"}
-    toast(noun[0].toUpperCase()+noun.slice(1)+" deleted");if(db)render();return}
+    closeSheet();if(!await del(k,id))return;
+    const rel=k==="match"?[]:[...S.match.filter(m=>(k==="biz"?m.bizId:m.coiId)===id).map(m=>["match",m.id]),
+      ...(k==="biz"?[...S.signal.filter(s=>s.businessId===id).map(s=>["signal",s.id]),...S.outreach.filter(o=>o.bizId===id).map(o=>["outreach",o.id])]:[])];
+    const failed=await delMany(rel);if(k==="biz"&&tab==="bizview")tab="biz";
+    toast(noun[0].toUpperCase()+noun.slice(1)+" deleted"+(failed?`, but ${failed} related record${failed>1?"s":""} couldn't be removed. Try again later.`:""));if(db)render();return}
   if(d.setstage){$("#sheetBody").dataset.stage=d.setstage;document.querySelectorAll("[data-setstage]").forEach(x=>x.setAttribute("aria-pressed",x===t));$("#reasonWrap").hidden=d.setstage!=="Rejected";return}
   if(d.savematch){const m={...byId("match",d.savematch)},st=$("#sheetBody").dataset.stage;
     if(st!==m.status){m.history=[...(m.history||[]),{status:st,at:new Date().toISOString()}];m.status=st}
     m.reason=st==="Rejected"?$("#f_reason").value:"";m.dealValue=$("#f_value").value;m.notes=$("#f_mnotes").value.trim();
-    closeSheet();stage=st;await put("match",m);toast("Match saved");if(db)render();return}
+    closeSheet();stage=st;if(!await put("match",m))return;toast("Match saved");if(db)render();return}
   switch(d.act){
     case"close":closeSheet();break;
     case"clearTest":{if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to remove test signals";return}
-      const ts=S.signal.filter(s=>s.mock);toast(`Removing ${ts.length} test signals…`);for(const s of ts)await del("signal",s.id);
-      for(const u of S.usage)await put("usage",{...u,lastRun:{}});toast("Test signals removed");render();break}
+      const ts=S.signal.filter(s=>s.mock);toast(`Removing ${ts.length} test signals…`);const failed=await delMany(ts.map(s=>["signal",s.id]));let uf=0;
+      for(const u of S.usage)if(!await put("usage",{...u,lastRun:{}}))uf++;toast(failed?`Removed ${ts.length-failed} of ${ts.length} test signals. ${failed} couldn't be removed; tap again to retry.`:uf?"Test signals removed, but the source run history couldn't be reset.":"Test signals removed");render();break}
     case"quiz":quizStart("");break;
     case"sendReq":{const r={id:uid(),kind:LS.kind,state:LS.state,county:LS.county,industry:LS.industry,profession:LS.profession,count:LS.count,notes:LS.notes.trim(),status:"Waiting",research:true};
-      await put("req",r);LS.notes="";toast("Business request saved. Now tell Claude: run my business requests.");render();break}
+      if(!await put("req",r))return;LS.notes="";toast("Business request saved. Now tell Claude: run my business requests.");render();break}
     case"addBiz":recordForm("biz");break;
     case"addCoi":recordForm("coi");break;
     case"import":$("#csvInput").click();break;
@@ -2718,8 +2722,9 @@ document.addEventListener("click",async e=>{
       if(S.match.some(m=>m.bizId===b&&m.coiId===c)){$("#err_pair").textContent="This pair is already matched. Open it from the pipeline.";return}
       const sc=score(byId("biz",b),byId("coi",c)).score;closeSheet();if(await approve(b,c,sc)){stage="Approved";toast("Match added")}if(db)render();break}
     case"clearSample":{if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to remove";return}
-      const sb=new Set(S.biz.filter(x=>x.sample).map(x=>x.id));for(const s of S.signal.filter(s=>sb.has(s.businessId)))await del("signal",s.id);
-      for(const k of ["match","biz","coi"])for(const x of S[k].filter(x=>x.sample))await del(k,x.id);stage=null;toast("Sample records removed");if(db)render();break}
+      const sb=new Set(S.biz.filter(x=>x.sample).map(x=>x.id));
+      const all=[...S.signal.filter(s=>sb.has(s.businessId)).map(s=>["signal",s.id]),...["match","biz","coi"].flatMap(k=>S[k].filter(x=>x.sample).map(x=>[k,x.id]))];
+      const failed=await delMany(all);stage=null;toast(failed?`Removed ${all.length-failed} of ${all.length} sample records. ${failed} couldn't be removed; tap again to retry.`:"Sample records removed");if(db)render();break}
   }
 });
 document.addEventListener("toggle",e=>{const el=e.target;if(el&&el.matches&&el.matches("details[data-sec]")){BV.open=BV.open||{};BV.open[el.dataset.sec]=el.open}},true);

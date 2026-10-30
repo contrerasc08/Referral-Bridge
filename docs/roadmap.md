@@ -13,6 +13,7 @@
 - [x] Scheduled bots: News, Prospector, Research, Intro writer, Signal watcher, Specialist checker, Weekly coach, Retiring owners, Permits and expansions
 - [x] Scheduled tasks for the New business filings and Hiring surges lead generators (created 2026-10-22)
 - [x] Review fixes from PR #1: failed saves and deletes restore data; flagged specialists excluded from scoring and new bridges; each bridge scored against its own need; learning only from Closed and Rejected referrals
+- [x] Success messages only after a save works: 30 actions used to show "saved" even when the save failed
 - [x] In-app bots: Matchmaker, Scorer, Follow-up watcher, Pipeline nudger, Gap finder, Data cleaner, Duplicate checker
 - [x] Ready-to-send drafts on business pages
 - [x] Demo mode with made-up data
