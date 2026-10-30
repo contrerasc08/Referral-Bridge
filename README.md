@@ -29,9 +29,11 @@ referral-bridge/
 ├── README.md
 ├── src/
 │   └── index.html           # The whole app (single file, vanilla JS)
+├── web/                     # Private sign-in portal (Supabase Auth + MFA), deployed to Cloudflare Pages
 └── docs/
     ├── decisions.md         # Why things are the way they are
     ├── roadmap.md           # Done, next, later
+    ├── deploy.md            # Putting the portal on a private Cloudflare Pages address
     ├── specs/
     │   ├── app-and-workflow.md
     │   ├── data-model.md
@@ -43,10 +45,13 @@ tests/
 ├── test_review_fixes.py     # Browser tests (Playwright) for save/delete, flagged specialists, need scoring, learning
 ├── test_crm_navigation.py   # Browser tests for the sidebar, prospect board, outreach history, follow-ups, appointments
 ├── test_save_failures.py    # Browser tests: a failed save never shows a success message
+├── test_portal.py           # Browser tests for the sign-in portal (sign-in, MFA, invites, key safety)
 └── db/                      # Security tests for the Supabase rules (tests/db/run.sh)
 supabase/
 ├── migrations/              # Tables, roles and row-level security
 └── bootstrap_owner.sql      # One-time owner setup, run by hand
+scripts/
+└── write-config.mjs         # Writes web/config.js from environment variables at deploy time
 ```
 
 ## How this project is run
