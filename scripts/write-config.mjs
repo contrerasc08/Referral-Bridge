@@ -14,6 +14,11 @@ if (parts.length === 3) {
   try { role = JSON.parse(Buffer.from(parts[1], "base64url").toString()).role; } catch {}
   if (role === "service_role") stop("that is the service_role key; use the publishable key");
 }
+// Optional: the EcoBridge home page for "Back to home" and "Request access".
+const homeUrl = (process.env.ECOBRIDGE_URL || "").trim();
+if (homeUrl && !/^https:\/\//.test(homeUrl)) stop("ECOBRIDGE_URL should start with https://");
+const out = { supabaseUrl: url, supabaseKey: key };
+if (homeUrl) out.homeUrl = homeUrl;
 writeFileSync(new URL("../web/config.js", import.meta.url),
-  "window.RB_CONFIG=" + JSON.stringify({ supabaseUrl: url, supabaseKey: key }) + ";\n");
+  "window.RB_CONFIG=" + JSON.stringify(out) + ";\n");
 console.log("write-config: wrote web/config.js for " + url);

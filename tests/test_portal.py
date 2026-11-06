@@ -81,7 +81,7 @@ async def main():
 
     # 1. New account: sign in, set up the authenticator app, join with an invite code
     pg, errs, csp = await page(br, base)
-    check("signed out shows sign in", await h1(pg) == "Sign in")
+    check("signed out shows sign in", await h1(pg) == "Welcome back")
     check("sign out button hidden when signed out", not await pg.is_visible("#signout"))
     await pg.fill("#em", "owner@example.com"); await pg.fill("#pw", "wrong"); await submit(pg)
     check("wrong password says so", await msg(pg) == "That email and password don't match.", await msg(pg))
@@ -102,9 +102,39 @@ async def main():
     check("home doesn't present sample data as live", "Your CRM moves into this portal" in await pg.inner_text("#app"))
     check("sign out button shown when signed in", await pg.is_visible("#signout"))
     await pg.click("#signout"); await pg.wait_for_timeout(150)
-    check("sign out returns to sign in", await h1(pg) == "Sign in")
+    check("sign out returns to sign in", await h1(pg) == "Welcome back")
     check("no page errors (new account)", not errs, errs)
     check("no security policy violations", not csp, csp)
+    await pg.close()
+
+    # 1b. Sign-in page design: Client/Team grants nothing, show/hide password, links home
+    pg, errs, csp = await page(br, base)
+    check("sign-in shows Client and Team", await pg.locator(".seg button").count() == 2)
+    await pg.click(".seg button[data-as=Team]")
+    check("Team becomes selected", await pg.get_attribute(".seg button[data-as=Team]", "aria-pressed") == "true"
+          and await pg.get_attribute(".seg button[data-as=Client]", "aria-pressed") == "false")
+    await pg.fill("#pw", "secret words")
+    check("password hidden by default", await pg.get_attribute("#pw", "type") == "password")
+    await pg.click("#eye")
+    check("eye button shows the password", await pg.get_attribute("#pw", "type") == "text" and await pg.get_attribute("#eye", "aria-label") == "Hide password")
+    await pg.click("#eye")
+    check("eye button hides it again", await pg.get_attribute("#pw", "type") == "password")
+    await pg.fill("#em", "team@example.com"); await pg.fill("#pw", "correct horse battery")
+    await pg.evaluate("""() => { const c = window.__S; c.calls.length = 0; }""")
+    await submit(pg)
+    calls = await pg.evaluate("__S.calls")
+    check("Client/Team is not sent to sign-in", calls[:1] == [["signin", "team@example.com"]], calls)
+    check("Team sign-in still goes through MFA", await h1(pg) == "Set up your authenticator app")
+    check("no page errors (sign-in design)", not errs, errs)
+    check("no security policy violations (sign-in design)", not csp, csp)
+    await pg.close()
+    pg, errs, _ = await page(br, base, cfg=dict(PUB, homeUrl="https://eco.example.com/"))
+    check("Back to home goes to EcoBridge", await pg.get_attribute("#home", "href") == "https://eco.example.com/")
+    check("Request access goes to EcoBridge contact", await pg.get_attribute("#request", "href") == "https://eco.example.com/#contact")
+    check("bridge image is set for the time of day", (await pg.get_attribute("html", "data-daypart")) in ("morning", "afternoon", "night"))
+    await pg.close()
+    pg, errs, _ = await page(br, base, cfg=dict(PUB, homeUrl="javascript:alert(1)"))
+    check("unsafe home link is ignored", (await pg.get_attribute("#home", "href")).startswith("https://"))
     await pg.close()
 
     # 2. Returning user with MFA: a stale unfinished setup is cleared, the code is asked every sign-in
@@ -185,6 +215,8 @@ async def main():
     # 8. Phone layout
     pg, errs, _ = await page(br, base, width=375)
     check("no sideways scroll on a phone", not await pg.evaluate("document.documentElement.scrollWidth>innerWidth"))
+    box_img = await pg.locator(".bridge").bounding_box(); box_form = await pg.locator("#app").bounding_box()
+    check("phone shows the bridge above the form", box_img and box_form and box_img["y"] + box_img["height"] <= box_form["y"] + 1 and box_img["height"] <= 230)
     await pg.screenshot(path="/tmp/rb-portal-phone.png")
     await pg.close()
 

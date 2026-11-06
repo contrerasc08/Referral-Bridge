@@ -38,6 +38,9 @@ if(!cfg.supabaseUrl||!cfg.supabaseKey||!window.supabase){
 if(keyIsSecret(cfg.supabaseKey)){
   show('<h1>Wrong key</h1><p>This page was given a secret key. It must only ever use the publishable key. Replace it and redeploy.</p>');return;
 }
+/* EcoBridge home page, for "Back to home" and "Request access". */
+var HOME=/^https:\/\//.test(cfg.homeUrl||"")?cfg.homeUrl:"https://eco-bridge.cc-christophercontreras.workers.dev/";
+var homeLink=$("#home");if(homeLink)homeLink.href=HOME;
 var sb=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 
 /* ---------- state from the link that opened this page ---------- */
@@ -74,12 +77,31 @@ async function step(){
 }
 
 /* ---------- screens ---------- */
+/* "Client" or "Team" only changes the page's wording. It is never sent to sign-in and
+   grants nothing: what each person can see comes from the database and my_access(). */
+var signInAs="Client";
+var EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3.2"/></svg>';
+var EYE_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.8 10.8 0 0 1 12 4.5c6.5 0 10.5 7.5 10.5 7.5a17.6 17.6 0 0 1-3.3 4.2M6.6 6.6C3.4 8.6 1.5 12 1.5 12s4 7.5 10.5 7.5c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3.2 3.2 0 0 0 4.2 4.2"/></svg>';
+var ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>';
 function viewSignIn(){
-  show('<h1>Sign in</h1><p class="muted">Private portal. Accounts are by invitation.</p>'+
-    '<form id="f" novalidate><label for="em">Email</label><input id="em" type="email" autocomplete="username" required>'+
-    '<label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required>'+
-    '<div id="msg" hidden></div><button class="btn" type="submit">Sign in</button></form>'+
-    '<div class="row"><button class="link" id="forgot">Forgot your password?</button></div>');
+  show('<p class="eyebrow">Referral Bridge</p><h1>Welcome back</h1><p class="muted">Sign in to continue to your network.</p>'+
+    '<div class="seg" role="group" aria-label="Signing in as">'+
+      '<button type="button" data-as="Client" aria-pressed="'+(signInAs==="Client")+'">Client</button>'+
+      '<button type="button" data-as="Team" aria-pressed="'+(signInAs==="Team")+'">Team</button></div>'+
+    '<form id="f" novalidate><label for="em">Email</label><input id="em" type="email" autocomplete="username" placeholder="you@company.com" required>'+
+    '<label for="pw">Password</label><div class="pw"><input id="pw" type="password" autocomplete="current-password" required>'+
+    '<button type="button" class="eye" id="eye" aria-label="Show password" aria-pressed="false">'+EYE+'</button></div>'+
+    '<div class="under"><button type="button" class="link" id="forgot">Forgot password?</button></div>'+
+    '<div id="msg" hidden></div><button class="btn" type="submit" id="go">Sign in '+ARROW+'</button></form>'+
+    '<div class="invite"><p>Need an invitation? <a class="link" id="request" href="'+esc(HOME)+'#contact">Request access</a></p></div>');
+  app.querySelectorAll(".seg button").forEach(function(b){b.onclick=function(){
+    signInAs=b.getAttribute("data-as");
+    app.querySelectorAll(".seg button").forEach(function(x){x.setAttribute("aria-pressed",String(x===b))});
+    $("#go").setAttribute("aria-label","Sign in as "+signInAs.toLowerCase());
+  }});
+  $("#eye").onclick=function(){var pw=$("#pw"),show=pw.type==="password";
+    pw.type=show?"text":"password";this.setAttribute("aria-pressed",String(show));
+    this.setAttribute("aria-label",show?"Hide password":"Show password");this.innerHTML=show?EYE_OFF:EYE;pw.focus()};
   $("#forgot").onclick=viewReset;
   $("#f").onsubmit=async function(e){e.preventDefault();
     var em=$("#em").value.trim(),pw=$("#pw").value;if(!em||!pw)return fail("Enter your email and password.");

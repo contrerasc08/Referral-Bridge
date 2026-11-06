@@ -23,3 +23,17 @@ Merging to `main` redeploys automatically. Other branches get their own preview 
 ## Trying it locally
 
 Copy `web/config.example.js` to `web/config.js`, fill in the URL and publishable key, then run `npx wrangler dev` (or `python3 -m http.server -d web 8080`). `web/config.js` is ignored by git.
+
+## Sign-in page design and bridge photos
+
+The sign-in page uses the Ivory & Slate design shared with the EcoBridge site. Its George Washington Bridge photo (looking along the empty lanes toward the towers) changes with the time of day in New York:
+
+| Part of day | When | File |
+| --- | --- | --- |
+| Morning | Sunrise until noon | `web/images/bridge/login-morning.jpg` |
+| Afternoon | Noon until sunset | `web/images/bridge/login-afternoon.jpg` |
+| Night | Sunset until sunrise | `web/images/bridge/login-night.jpg` |
+
+Until the photos are added, a drawn bridge tinted for the time of day shows instead. The Client / Team switch only changes the wording on the page. It is never sent to sign-in and grants nothing; access still comes from the database and `my_access()`.
+
+"Back to home" and "Request access" point to the EcoBridge site. To change that address, set the optional `ECOBRIDGE_URL` build variable in Cloudflare.
