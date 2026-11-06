@@ -63,7 +63,7 @@ async def page(br, base, cfg=PUB, init=None, path="/", width=1280):
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.on("console", lambda m: csp.append(m.text) if "Content Security Policy" in m.text else None)
     vendor = "window.__INIT=" + json.dumps(init or {}) + ";" + MOCK
-    await pg.route("**/vendor/*.js", lambda r: r.fulfill(status=200, content_type="text/javascript", body=vendor))
+    await pg.route("**/vendor/supabase-*.js", lambda r: r.fulfill(status=200, content_type="text/javascript", body=vendor))
     await pg.route("**/config.js", lambda r: r.fulfill(status=200, content_type="text/javascript",
         body=("window.RB_CONFIG=" + json.dumps(cfg) + ";") if cfg is not None else ""))
     await pg.goto(base + path); await pg.wait_for_timeout(150)
@@ -85,6 +85,13 @@ async def main():
     check("sign out button hidden when signed out", not await pg.is_visible("#signout"))
     await pg.fill("#em", "owner@example.com"); await pg.fill("#pw", "wrong"); await submit(pg)
     check("wrong password says so", await msg(pg) == "That email and password don't match.", await msg(pg))
+    check("failed sign-in clears the password", await pg.input_value("#pw") == "")
+    check("sign-in button is back after a failure", (await pg.inner_text("#go")).strip() == "Sign in")
+    await pg.fill("#pw", "wrong")
+    n = await pg.evaluate("""async () => { const before = __S.calls.filter(c => c[0] === "signin").length;
+      const f = document.querySelector("#f"); f.requestSubmit(); f.requestSubmit(); f.requestSubmit();
+      await new Promise(r => setTimeout(r, 100)); return __S.calls.filter(c => c[0] === "signin").length - before }""")
+    check("double-clicking Sign in sends one request", n == 1, n)
     await pg.fill("#pw", "correct horse battery"); await submit(pg)
     check("no MFA yet goes to authenticator setup", await h1(pg) == "Set up your authenticator app")
     check("setup shows QR code and setup key", await pg.locator("img.qr").count() == 1 and "JBSWY3DPEHPK3PXP" in await pg.inner_text(".secret"))

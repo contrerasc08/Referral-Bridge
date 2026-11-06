@@ -30,10 +30,12 @@ The sign-in page uses the Ivory & Slate design shared with the EcoBridge site. I
 
 | Part of day | When | File |
 | --- | --- | --- |
-| Morning | Sunrise until noon | `web/images/bridge/login-morning.jpg` |
-| Afternoon | Noon until sunset | `web/images/bridge/login-afternoon.jpg` |
-| Night | Sunset until sunrise | `web/images/bridge/login-night.jpg` |
+| Morning | Sunrise until noon | `web/assets/bridges/gw-entry-morning.webp` |
+| Afternoon | Noon until sunset | `web/assets/bridges/gw-entry-afternoon.webp` |
+| Night | Sunset until sunrise | `web/assets/bridges/gw-entry-night.webp` |
 
-Until the photos are added, a drawn bridge tinted for the time of day shows instead. The Client / Team switch only changes the wording on the page. It is never sent to sign-in and grants nothing; access still comes from the database and `my_access()`.
+Keep the same camera angle and crop in all three, with no cars or people. Save them as WebP about 1600px wide.
+
+The page picks the photo with `web/js/bridge-clock.mjs`, which uses SunCalc 2.1.2 (copied unchanged into `web/js/vendor/suncalc.js`) to work out sunrise and sunset at the bridge each New York day, including daylight saving changes. `web/js/bridge-images.mjs` loads the right photo on arrival, when the tab comes back into view, and every 30 seconds while the page is open. If a photo fails to load, the last good one stays. Until the photos are added, a drawn bridge tinted for the time of day shows instead. The same files are used by the EcoBridge site; keep the copies in step. The Client / Team switch only changes the wording on the page. It is never sent to sign-in and grants nothing; access still comes from the database and `my_access()`.
 
 "Back to home" and "Request access" point to the EcoBridge site. To change that address, set the optional `ECOBRIDGE_URL` build variable in Cloudflare.

@@ -1,7 +1,7 @@
 /* Referral Bridge portal: Ivory & Slate. Light at every hour; only the bridge photo changes. */
 :root{color-scheme:light;
-  --paper:#F7F2E8;--surface:#FFFDF8;--ink:#1F2A33;--muted:#5B6670;--rule:#E2D9C8;--band:#EFE8DA;
-  --slate:#2C5F73;--slate-dark:#234C5D;--slate-soft:#E4EEF1;--danger:#B3261E;--danger-soft:#FCEDEB;
+  --paper:#F7F4EE;--surface:#FFFDF9;--ink:#1C252C;--muted:#56616A;--rule:#D6D4CE;--band:#EFE8DA;
+  --slate:#315B6C;--slate-dark:#244654;--slate-soft:#E4EEF1;--danger:#B3261E;--danger-soft:#FCEDEB;
   --serif:"Source Serif 4",Georgia,"Times New Roman",serif;--sans:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   /* drawn-bridge fallback colors, set per time of day */
   --sky1:#f4c9a8;--sky2:#b9cfe0;--steel:#4e5c66;--road:#6d757c;--lane:#f3efe6;--glow:transparent}
@@ -25,7 +25,7 @@ a.link,.link{border:0;background:none;color:var(--slate);font:inherit;font-weigh
 .bridge{position:relative;margin:0;aspect-ratio:8/7;overflow:hidden;border-radius:4px;background:var(--sky2)}
 .bridge .art,.bridge img{position:absolute;inset:0;width:100%;height:100%}
 .bridge img{object-fit:cover;opacity:0;transition:opacity .8s ease}
-.bridge img.is-loaded{opacity:1}
+.bridge img[data-bridge-phase]{opacity:1}
 .art .s1{stop-color:var(--sky1)}.art .s2{stop-color:var(--sky2)}
 .art .road{fill:var(--road)}.art .lane{stroke:var(--lane);stroke-width:3;fill:none}
 .art .steel{fill:var(--steel)}.art .arch{fill:var(--sky2);opacity:.85}

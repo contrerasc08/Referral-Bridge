@@ -105,8 +105,11 @@ function viewSignIn(){
   $("#forgot").onclick=viewReset;
   $("#f").onsubmit=async function(e){e.preventDefault();
     var em=$("#em").value.trim(),pw=$("#pw").value;if(!em||!pw)return fail("Enter your email and password.");
-    busy(true);var r=await sb.auth.signInWithPassword({email:em,password:pw});busy(false);
-    if(r.error)return fail(friendly(r.error));schedule()};
+    if(this.getAttribute("aria-busy")==="true")return;
+    var go=$("#go");this.setAttribute("aria-busy","true");busy(true);go.textContent="Signing in\u2026";var r;
+    try{r=await sb.auth.signInWithPassword({email:em,password:pw})}catch(x){r={error:x}}
+    finally{this.setAttribute("aria-busy","false");busy(false);go.innerHTML="Sign in "+ARROW}
+    if(r.error){$("#pw").value="";$("#pw").focus();return fail(friendly(r.error))}schedule()};
 }
 function viewReset(){
   show('<h1>Reset your password</h1><p class="muted">We\'ll email you a link to choose a new one.</p>'+
