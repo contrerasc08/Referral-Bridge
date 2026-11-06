@@ -21,6 +21,8 @@ Records with `sample: true` are test data. They are hidden from bridges and from
 | `req` | `leadRequests` | Requests for new businesses |
 | `usage` | `providerUsage` | Daily data-source usage counters |
 | `task` | `tasks` | Your tasks and the suggestions you added or dismissed |
+| `prof` | `companyProfiles` | Company research profiles: any company, every fact linked to its sources |
+| `crlist` | `researchLists` | Your private lists of company profiles or people |
 
 ## businesses
 
@@ -44,6 +46,35 @@ Records with `sample: true` are test data. They are hidden from bridges and from
 | `possibleDupOf` | Id of a likely duplicate |
 | `lead` | Set by bots. In the app, "lead" status is computed from bridges, not from this field. |
 | `notes`, `createdAt`, `updatedAt` | |
+
+## companyProfiles
+
+A RelPro-style profile of one company, started on the Company research screen and filled by the Company research bot (or by pasting what you found). It can exist without a business record; "Save to my businesses" creates or updates one and sets `bizId`.
+
+| Field | Notes |
+|---|---|
+| `name`, `domain`, `city`, `state` | What you searched for |
+| `status` | `queued`, `researching`, `done`, `partial`, `failed` |
+| `requestedAt`, `researchedAt` | ISO dates |
+| `bizId` | The linked business, once saved |
+| `sources[]` | `{id, name, url, type (official\|company\|directory\|social\|news\|data\|you), retrievedAt, found, note}`. Ids starting with `u` were added by you. |
+| `fields` | Keyed by `legalName, dba, description, industry, ownership, founded, revenue, employees, locations, address, phone, email, website, linkedin, facebook, instagram, x, entityType, status, stateId, formed, registeredAgent, npi, licenses` and the Highlights `naics, sic, certifications, international, sustainability, cannabis, technology, censusTract, tractIncome`. Each is `{v, src[], alt[{v, src[]}]}`: `src` lists the source ids that report `v`; `alt` holds values other sources reported. |
+| `people[]` | `{name, title, linkedin, phone, email, src[]}` |
+| `filings[]` | `{date, kind, detail, src[]}`. The Finance tab groups kinds into Loans (SBA loan, PPP loan, Loan, Financing), Funding (SEC Form D, Funding, Investment), Liens (UCC lien, Tax lien, Judgment), Government contracts (Government contract, Grant) and Other filings. |
+| `news[]` | `{date, title, url, sourceName, summary}` |
+| `signals[]` | `{type, date, evidence, src[]}`; become `signals` records when the profile is saved as a business |
+| `industryGroup` | One of `INDUSTRIES`, used when saving as a business |
+| `summary`, `needs[]`, `talkingPoints[]` | Shown under "Before you call" |
+
+`viewedAt` and `exportedAt` on a profile feed the two system lists, "Previously viewed" (stamped when opened, at most once an hour) and "Exported to file" (stamped when the profile, its people, or a list holding it is exported).
+
+## researchLists
+
+Private lists, like RelPro's Lists: `{name, kind ("company" | "people"), items[]}`. Company items are `{profId, addedAt}`; people items are `{profId, name, title, addedAt}`. System lists aren't stored; they're computed from `viewedAt` and `exportedAt`. On the Profiles screen any list can be shown alone or excluded, so you see only net-new companies (a people list covers the companies its people work at).
+
+Favorite Roles groups live in `settings` doc `favroles`: `{groups: [{name, words}]}`, where `words` is a comma list of title words. Without it the app uses four default groups (Owners and executives, Finance, Operations, HR and benefits).
+
+Saving to a business only fills fields the business doesn't already have, adds new contacts (with their source), adds the profile's source links to `profile.sources`, and adds signals with provider `company-research` (provenance `VERIFIED` when the first source is an official record).
 
 ## cois (specialists)
 

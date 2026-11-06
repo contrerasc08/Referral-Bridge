@@ -19,6 +19,7 @@
 - [x] Demo mode with made-up data
 - [x] Code and specs in GitHub
 - [x] CRM-style navigation from Jessica's OliveStone screenshots: sidebar on wide screens, prospect pipeline board with drag and ⌄ task menus, outreach history with outcome filters and export, follow-up tasks, appointments
+- [x] Company research (RelPro-style): sourced profiles of any company, Preview, pinned key facts, Overview / People / Finance / Highlights / Sources tabs, Favorite Roles, people export, Lists (private, system, exclude from results), prefilled links to 20 sources, paste-in extraction, save to businesses
 
 ## Next
 - [x] Supabase tables, roles and row-level security (applied to the Supabase project on 2026-10-30)
@@ -28,6 +29,7 @@
 - [ ] Move existing records from the artifact database into Supabase (Supabase Pro before real data)
 - [ ] Show the Specialist checker's full results (clear / unverified, with the checks and links) on the specialist detail sheet. "Flagged" already shows on cards and blocks bridges.
 - [ ] Show lead generator coverage gaps in the Brain and feed them to the Prospector
+- [ ] Create the Company research bot's scheduled task (`docs/bots/company-research.md`)
 - [ ] Read-only sharing for a partner (view without editing)
 - [ ] Export or sync to Jessica's OliveStone CRM (needs an import format or API from the vendor)
 
