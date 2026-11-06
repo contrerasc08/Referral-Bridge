@@ -1,36 +1,87 @@
-:root{color-scheme:light;--paper:#F3F5F8;--surface:#FFFFFF;--ink:#18202E;--muted:#5E6878;--rule:#DCE0E6;
-  --biz:#0B7A64;--biz-soft:#E2F3EE;--coi:#5A3EA6;--danger:#B42318;--danger-soft:#FDECEA}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--paper:#11151C;--surface:#1A2029;--ink:#E7EAEF;--muted:#9AA3B2;--rule:#2B3240;
-  --biz:#43C3A5;--biz-soft:#153A32;--coi:#AE98F2;--danger:#F97066;--danger-soft:#3A1D1B}}
-:root[data-theme="dark"]{color-scheme:dark;--paper:#11151C;--surface:#1A2029;--ink:#E7EAEF;--muted:#9AA3B2;--rule:#2B3240;
-  --biz:#43C3A5;--biz-soft:#153A32;--coi:#AE98F2;--danger:#F97066;--danger-soft:#3A1D1B}
+/* Referral Bridge portal: Ivory & Slate. Light at every hour; only the bridge photo changes. */
+:root{color-scheme:light;
+  --paper:#F7F4EE;--surface:#FFFDF9;--ink:#1C252C;--muted:#56616A;--rule:#D6D4CE;--band:#EFE8DA;
+  --slate:#315B6C;--slate-dark:#244654;--slate-soft:#E4EEF1;--danger:#B3261E;--danger-soft:#FCEDEB;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;--sans:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  /* drawn-bridge fallback colors, set per time of day */
+  --sky1:#f4c9a8;--sky2:#b9cfe0;--steel:#4e5c66;--road:#6d757c;--lane:#f3efe6;--glow:transparent}
+:root[data-daypart="afternoon"]{--sky1:#8fbbe2;--sky2:#d8e8f3}
+:root[data-daypart="night"]{--sky1:#0f2340;--sky2:#2c4a72;--steel:#c4ced8;--road:#3a4048;--glow:#ffd98a}
 *{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.top{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--rule);background:var(--surface)}
-.top .link{margin-left:auto}
-.logo{width:22px;height:12px;border:3px solid var(--biz);border-bottom:0;border-radius:22px 22px 0 0}
-main{max-width:440px;margin:0 auto;padding:28px 16px 48px}
-.card{background:var(--surface);border:1px solid var(--rule);border-radius:16px;padding:22px}
-h1{font-size:1.45rem;margin:0 0 6px;letter-spacing:-.01em}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 var(--sans);min-height:100vh;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:14px;padding:16px clamp(16px,4vw,40px);border-bottom:1px solid var(--rule);background:var(--paper)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:1.35rem}
+.brand b{font-weight:600}
+.logo{width:56px;height:22px;color:var(--ink)}
+.top #home{margin-left:auto}
+.top #home+.link{margin-left:12px}
+a.link,.link{border:0;background:none;color:var(--slate);font:inherit;font-weight:500;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.top .link{color:var(--ink);font-family:var(--serif);font-size:1rem}
+
+/* Layout: bridge beside the form on wide screens, compact bridge above it on phones */
+.shell{flex:1;width:100%;max-width:1120px;margin:0 auto;padding:32px clamp(16px,4vw,40px) 40px;display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:start}
+.side{margin:0}
+.tagline{font-family:var(--serif);font-style:italic;font-size:clamp(1.5rem,2.6vw,2.1rem);margin:10px 0 22px;line-height:1.2}
+.bridge{position:relative;margin:0;aspect-ratio:8/7;overflow:hidden;border-radius:4px;background:var(--sky2)}
+.bridge .art,.bridge img{position:absolute;inset:0;width:100%;height:100%}
+.bridge img{object-fit:cover;opacity:0;transition:opacity .8s ease}
+.bridge img[data-bridge-phase]{opacity:1}
+.art .s1{stop-color:var(--sky1)}.art .s2{stop-color:var(--sky2)}
+.art .road{fill:var(--road)}.art .lane{stroke:var(--lane);stroke-width:3;fill:none}
+.art .steel{fill:var(--steel)}.art .arch{fill:var(--sky2);opacity:.85}
+.art .cable{fill:none;stroke:var(--steel);stroke-width:2}.art .glow{fill:var(--glow)}
+.caption{font-family:var(--serif);font-style:italic;color:var(--muted);text-align:center;margin:12px 0 0}
+
+main{width:100%}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:32px clamp(20px,3vw,34px)}
+.eyebrow{font-size:.78rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;margin:0 0 6px}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(1.9rem,3.2vw,2.5rem);line-height:1.1;margin:0 0 8px;letter-spacing:-.01em}
 p{margin:0 0 14px}
 .muted{color:var(--muted)}
 .small{font-size:.86rem}
-label{display:block;font-weight:600;font-size:.9rem;margin:14px 0 6px}
-input{width:100%;font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:11px 12px}
-input:focus{outline:2px solid var(--biz);outline-offset:1px}
+label{display:block;font-weight:500;font-size:.95rem;margin:16px 0 6px}
+input{width:100%;font:inherit;color:var(--ink);background:var(--surface);border:1px solid #9aa3aa;border-radius:8px;padding:11px 12px}
+input::placeholder{color:#8a939a}
+input:focus{outline:2px solid var(--slate);outline-offset:1px;border-color:var(--slate)}
 input.code{font-size:1.4rem;letter-spacing:.3em;text-align:center;font-variant-numeric:tabular-nums}
-.btn{display:block;width:100%;margin-top:18px;font:inherit;font-weight:650;border:0;border-radius:10px;padding:12px;background:var(--biz);color:#fff;cursor:pointer}
-:root[data-theme="dark"] .btn{color:#0B1A16}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#0B1A16}}
+
+/* Client / Team switch (only changes the wording; never grants permissions) */
+
+.pw{position:relative}
+.pw input{padding-right:48px}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:0;background:none;color:var(--ink);cursor:pointer;border-radius:6px;display:grid;place-items:center}
+.eye svg{width:22px;height:22px}
+.eye:focus-visible{outline:2px solid var(--slate)}
+.under{margin-top:10px}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:22px;font:600 1.15rem/1.2 var(--serif);border:0;border-radius:8px;padding:14px;background:var(--slate);color:#fff;cursor:pointer}
+.btn:hover{background:var(--slate-dark)}
 .btn:disabled{opacity:.6;cursor:default}
-.link{border:0;background:none;color:var(--coi);font:inherit;font-weight:600;padding:0;cursor:pointer}
+.btn svg{width:20px;height:20px}
 .row{display:flex;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap}
-.err{background:var(--danger-soft);color:var(--danger);border-radius:10px;padding:10px 12px;margin-top:14px;font-size:.92rem}
-.ok{background:var(--biz-soft);color:var(--biz);border-radius:10px;padding:10px 12px;margin-top:14px;font-size:.92rem}
+.invite{border-top:1px solid var(--rule);margin-top:24px;padding-top:18px;text-align:center}
+.invite p{margin:0}
+.err{background:var(--danger-soft);color:var(--danger);border-radius:8px;padding:10px 12px;margin-top:14px;font-size:.92rem}
+.ok{background:var(--slate-soft);color:var(--slate-dark);border-radius:8px;padding:10px 12px;margin-top:14px;font-size:.92rem}
 .qr{display:block;width:200px;height:200px;margin:8px auto;background:#fff;border-radius:12px;padding:8px}
 .secret{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;word-break:break-all;background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:8px 10px;user-select:all}
 .steps{margin:0 0 6px;padding-left:20px}.steps li{margin-bottom:6px}
 .co{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--rule)}.co:last-child{border-bottom:0}
-.tag{font-size:.78rem;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--biz-soft);color:var(--biz);white-space:nowrap;align-self:center}
+.tag{font-size:.78rem;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--slate-soft);color:var(--slate-dark);white-space:nowrap;align-self:center}
 [hidden]{display:none!important}
 .gap{margin-top:16px}
+.foot{background:var(--band);padding:14px 16px;text-align:center;font-family:var(--serif);font-style:italic;font-size:1.15rem;display:flex;align-items:center;gap:20px}
+.foot::before,.foot::after{content:"";flex:1;border-top:1px solid #8e8a80;max-width:420px;margin:0 auto}
+
+@media (max-width:820px){
+  .top{padding:12px 16px}
+  .brand{font-size:1.15rem}.logo{width:44px;height:18px}
+  .top .link{font-size:.92rem}
+  .shell{display:block;padding:0 0 32px}
+  .tagline,.caption{display:none}
+  .bridge{aspect-ratio:auto;height:clamp(150px,40vw,220px);border-radius:0}
+  main{padding:0 16px}
+  .card{border:0;background:none;padding:22px 2px 0}
+  .foot{display:none}
+}
+#app .muted + form{margin-top:22px}

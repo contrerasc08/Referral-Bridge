@@ -63,7 +63,7 @@ async def page(br, base, cfg=PUB, init=None, path="/", width=1280):
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.on("console", lambda m: csp.append(m.text) if "Content Security Policy" in m.text else None)
     vendor = "window.__INIT=" + json.dumps(init or {}) + ";" + MOCK
-    await pg.route("**/vendor/*.js", lambda r: r.fulfill(status=200, content_type="text/javascript", body=vendor))
+    await pg.route("**/vendor/supabase-*.js", lambda r: r.fulfill(status=200, content_type="text/javascript", body=vendor))
     await pg.route("**/config.js", lambda r: r.fulfill(status=200, content_type="text/javascript",
         body=("window.RB_CONFIG=" + json.dumps(cfg) + ";") if cfg is not None else ""))
     await pg.goto(base + path); await pg.wait_for_timeout(150)
@@ -81,10 +81,17 @@ async def main():
 
     # 1. New account: sign in, set up the authenticator app, join with an invite code
     pg, errs, csp = await page(br, base)
-    check("signed out shows sign in", await h1(pg) == "Sign in")
+    check("signed out shows sign in", await h1(pg) == "Welcome back")
     check("sign out button hidden when signed out", not await pg.is_visible("#signout"))
     await pg.fill("#em", "owner@example.com"); await pg.fill("#pw", "wrong"); await submit(pg)
     check("wrong password says so", await msg(pg) == "That email and password don't match.", await msg(pg))
+    check("failed sign-in clears the password", await pg.input_value("#pw") == "")
+    check("sign-in button is back after a failure", (await pg.inner_text("#go")).strip() == "Sign in")
+    await pg.fill("#pw", "wrong")
+    n = await pg.evaluate("""async () => { const before = __S.calls.filter(c => c[0] === "signin").length;
+      const f = document.querySelector("#f"); f.requestSubmit(); f.requestSubmit(); f.requestSubmit();
+      await new Promise(r => setTimeout(r, 100)); return __S.calls.filter(c => c[0] === "signin").length - before }""")
+    check("double-clicking Sign in sends one request", n == 1, n)
     await pg.fill("#pw", "correct horse battery"); await submit(pg)
     check("no MFA yet goes to authenticator setup", await h1(pg) == "Set up your authenticator app")
     check("setup shows QR code and setup key", await pg.locator("img.qr").count() == 1 and "JBSWY3DPEHPK3PXP" in await pg.inner_text(".secret"))
@@ -102,9 +109,37 @@ async def main():
     check("home doesn't present sample data as live", "Your CRM moves into this portal" in await pg.inner_text("#app"))
     check("sign out button shown when signed in", await pg.is_visible("#signout"))
     await pg.click("#signout"); await pg.wait_for_timeout(150)
-    check("sign out returns to sign in", await h1(pg) == "Sign in")
+    check("sign out returns to sign in", await h1(pg) == "Welcome back")
     check("no page errors (new account)", not errs, errs)
     check("no security policy violations", not csp, csp)
+    await pg.close()
+
+    # 1b. Sign-in page design: one sign-in for everyone, show/hide password, links home
+    pg, errs, csp = await page(br, base)
+    check("no Client/Team switch on sign-in", await pg.locator(".seg, [data-as]").count() == 0
+          and "Team" not in await pg.inner_text("#app"))
+    await pg.fill("#pw", "secret words")
+    check("password hidden by default", await pg.get_attribute("#pw", "type") == "password")
+    await pg.click("#eye")
+    check("eye button shows the password", await pg.get_attribute("#pw", "type") == "text" and await pg.get_attribute("#eye", "aria-label") == "Hide password")
+    await pg.click("#eye")
+    check("eye button hides it again", await pg.get_attribute("#pw", "type") == "password")
+    await pg.fill("#em", "team@example.com"); await pg.fill("#pw", "correct horse battery")
+    await pg.evaluate("""() => { const c = window.__S; c.calls.length = 0; }""")
+    await submit(pg)
+    calls = await pg.evaluate("__S.calls")
+    check("sign-in sends only email and password", calls[:1] == [["signin", "team@example.com"]], calls)
+    check("sign-in still goes through MFA", await h1(pg) == "Set up your authenticator app")
+    check("no page errors (sign-in design)", not errs, errs)
+    check("no security policy violations (sign-in design)", not csp, csp)
+    await pg.close()
+    pg, errs, _ = await page(br, base, cfg=dict(PUB, homeUrl="https://eco.example.com/"))
+    check("Back to home goes to EcoBridge", await pg.get_attribute("#home", "href") == "https://eco.example.com/")
+    check("Request access goes to EcoBridge contact", await pg.get_attribute("#request", "href") == "https://eco.example.com/#contact")
+    check("bridge image is set for the time of day", (await pg.get_attribute("html", "data-daypart")) in ("morning", "afternoon", "night"))
+    await pg.close()
+    pg, errs, _ = await page(br, base, cfg=dict(PUB, homeUrl="javascript:alert(1)"))
+    check("unsafe home link is ignored", (await pg.get_attribute("#home", "href")).startswith("https://"))
     await pg.close()
 
     # 2. Returning user with MFA: a stale unfinished setup is cleared, the code is asked every sign-in
@@ -185,6 +220,8 @@ async def main():
     # 8. Phone layout
     pg, errs, _ = await page(br, base, width=375)
     check("no sideways scroll on a phone", not await pg.evaluate("document.documentElement.scrollWidth>innerWidth"))
+    box_img = await pg.locator(".bridge").bounding_box(); box_form = await pg.locator("#app").bounding_box()
+    check("phone shows the bridge above the form", box_img and box_form and box_img["y"] + box_img["height"] <= box_form["y"] + 1 and box_img["height"] <= 230)
     await pg.screenshot(path="/tmp/rb-portal-phone.png")
     await pg.close()
 

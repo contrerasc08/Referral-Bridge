@@ -1,13 +1,13 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Referral Bridge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
 <style>
 :root{
   --paper:#F3F5F8; --surface:#FFFFFF; --ink:#18202E; --muted:#5E6878; --rule:#DCE0E6;
@@ -434,7 +434,7 @@ button.bridge:active{transform:translateY(0)}
 /* network */
 .net{background:var(--surface);border:1px solid var(--rule);border-radius:14px;box-shadow:var(--lift);padding:10px 4px 6px;overflow-x:auto}
 .net svg{display:block;width:100%;min-width:340px;height:auto}
-.net text{font-family:Figtree,system-ui,sans-serif;fill:var(--ink)}
+.net text{font-family:Inter,system-ui,sans-serif;fill:var(--ink)}
 .net .colh{font-size:9px;font-weight:700;letter-spacing:.1em;fill:var(--muted)}
 .net .nd{cursor:pointer;outline:none}
 .net .nd text{font-size:11.5px}
@@ -481,6 +481,34 @@ button.bridge:active{transform:translateY(0)}
 .alt{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--rule);border-radius:10px;padding:9px 12px;background:var(--paper)}
 .alt .name{font-weight:600;font-size:.92rem}.alt .meta{font-size:.78rem;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.bridge,button.bridge:hover{transition:none;transform:none}}
+
+/* ---- Ivory & Slate: same look as the EcoBridge website. Light at all hours. ---- */
+:root,:root[data-theme="light"],:root[data-theme="dark"]{
+  --paper:#F7F4EE; --surface:#FFFDF9; --ink:#1C252C; --muted:#56616A; --rule:#D6D4CE;
+  --biz:#315B6C; --biz-soft:#E4ECEE; --coi:#7A5C3E; --coi-soft:#EEEAE3;
+  --warn:#9A5B00; --danger:#B42318; --danger-soft:#FBEAE6;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --lift:0 1px 0 rgba(31,42,51,.04),0 10px 24px -14px rgba(31,42,51,.28);
+  --lift-hi:0 2px 0 rgba(31,42,51,.05),0 18px 32px -16px rgba(31,42,51,.38);
+  color-scheme:light;
+}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+h2,h3,.phead h2,.brand,.bigdate{font-family:var(--serif);font-weight:600;letter-spacing:-.01em}
+.phead h2{font-size:1.7rem}
+.top{background:rgba(247,242,232,.94);backdrop-filter:saturate(1.2) blur(6px);-webkit-backdrop-filter:saturate(1.2) blur(6px)}
+.brand{font-size:1.25rem;color:var(--ink)}
+.brand svg path{stroke:var(--biz)}
+.btn{border-radius:999px}
+.btn.primary{background:var(--biz);border-color:var(--biz);color:#fff}
+.btn.primary:hover{background:#244654;border-color:#244654}
+.oppcard,.opp,.hero{background:#244654;color:#FFFDF9}
+.hero{background:linear-gradient(135deg,#244654 0%,#315B6C 60%,#3E6F80 100%)}
+.opp.lo{background:var(--rule);color:var(--ink)}
+.tabs{background:var(--surface)}
+.tabs button[aria-current="page"]{color:var(--biz)}
+.sidenav{background:var(--surface)}
+.search,input,select,textarea{border-color:var(--rule)}
+:focus-visible{outline-color:var(--biz)}
 </style>
 </head>
 <body>

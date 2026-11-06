@@ -23,3 +23,19 @@ Merging to `main` redeploys automatically. Other branches get their own preview 
 ## Trying it locally
 
 Copy `web/config.example.js` to `web/config.js`, fill in the URL and publishable key, then run `npx wrangler dev` (or `python3 -m http.server -d web 8080`). `web/config.js` is ignored by git.
+
+## Sign-in page design and bridge photos
+
+The sign-in page uses the Ivory & Slate design shared with the EcoBridge site. Its George Washington Bridge photo (looking along the empty lanes toward the towers) changes with the time of day in New York:
+
+| Part of day | When | File |
+| --- | --- | --- |
+| Morning | Sunrise until noon | `web/assets/bridges/gw-entry-morning.webp` |
+| Afternoon | Noon until sunset | `web/assets/bridges/gw-entry-afternoon.webp` |
+| Night | Sunset until sunrise | `web/assets/bridges/gw-entry-night.webp` |
+
+Keep the same camera angle and crop in all three, with no cars or people. Save them as WebP about 1600px wide.
+
+The page picks the photo with `web/js/bridge-clock.mjs`, which uses SunCalc 2.1.2 (copied unchanged into `web/js/vendor/suncalc.js`) to work out sunrise and sunset at the bridge each New York day, including daylight saving changes. `web/js/bridge-images.mjs` loads the right photo on arrival, when the tab comes back into view, and every 30 seconds while the page is open. If a photo fails to load, the last good one stays. Until the photos are added, a drawn bridge tinted for the time of day shows instead. The same files are used by the EcoBridge site; keep the copies in step.
+
+"Back to home" and "Request access" point to the EcoBridge site. To change that address, set the optional `ECOBRIDGE_URL` build variable in Cloudflare.
