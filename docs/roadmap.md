@@ -19,7 +19,7 @@
 - [x] Demo mode with made-up data
 - [x] Code and specs in GitHub
 - [x] CRM-style navigation from Jessica's OliveStone screenshots: sidebar on wide screens, prospect pipeline board with drag and ⌄ task menus, outreach history with outcome filters and export, follow-up tasks, appointments
-- [x] Company research (RelPro-style): sourced profiles of any company, Preview, pinned key facts, Overview / People / Finance / Highlights / Sources tabs, Favorite Roles, people export, prefilled links to 20 sources, paste-in extraction, save to businesses
+- [x] Company research (RelPro-style): sourced profiles of any company, Preview, pinned key facts, Overview / People / Finance / Highlights / Sources tabs, Favorite Roles, people export, Lists (private, system, exclude from results), prefilled links to 20 sources, paste-in extraction, save to businesses
 
 ## Next
 - [x] Supabase tables, roles and row-level security (applied to the Supabase project on 2026-10-30)

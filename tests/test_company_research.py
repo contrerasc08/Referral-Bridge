@@ -12,6 +12,8 @@ Runs src/index.html in headless Chromium against a mock artifact database and ch
   6. "Save to my businesses" creates a business with contacts, profile sources and signals,
      then a second save updates it instead of making a duplicate
   7. Searching the same company again opens the existing profile
+  8. Lists: private company and people lists, system lists (Previously viewed, Exported to file),
+     the lists a profile is on, Manage lists, export, and excluding or showing only a list
 Requires: pip install playwright && playwright install chromium
 Usage:    python3 tests/test_company_research.py   (exits 1 if any check fails)
 """
@@ -143,6 +145,44 @@ async def main():
     await pg.click(".crtabs [data-crtab=overview]")
     await pg.click("[data-crsave=p9]"); await pg.wait_for_timeout(300)
     check("second save updates, no duplicate", len(await store("businesses")) == 1 and len(await store("signals")) == 1)
+    # 8 lists
+    await pg.click(".crtabs [data-crtab=overview]")
+    check("opened profile is on Previously viewed", "Previously viewed" in await pg.inner_text(".crlcard"))
+    await pg.click("[data-crladd=p9]"); await pg.fill("#crl_new", "Erie shops"); await pg.click("[data-crlsave]"); await pg.wait_for_timeout(200)
+    ls = await store("researchLists")
+    check("company list created with profile", len(ls) == 1 and ls[0]["name"] == "Erie shops" and ls[0]["kind"] == "company" and ls[0]["items"][0]["profId"] == "p9")
+    check("profile shows its list", "Erie shops" in await pg.inner_text(".crlcard"))
+    await pg.click("[data-crladd=p9]"); await pg.fill("#crl_new", "erie SHOPS"); await pg.click("[data-crlsave]")
+    check("duplicate list name refused", "already have a list" in await pg.inner_text("#crl_err")); await pg.click("#sheet [data-act=close]")
+    await pg.click(".crtabs [data-crtab=people]"); await pg.check("[data-crpick='1']"); await pg.click("[data-crlpeople=p9]"); await pg.fill("#crl_new", "CFOs to call"); await pg.click("[data-crlsave]"); await pg.wait_for_timeout(200)
+    pl = [x for x in await store("researchLists") if x["kind"] == "people"]
+    check("people list holds the picked person", len(pl) == 1 and [i["name"] for i in pl[0]["items"]] == ["Sam Ito"])
+    await pg.click("[data-crback]"); await pg.wait_for_timeout(100)
+    vis_before = await E("[...document.querySelectorAll('#crList .crcard .name')].map(x=>x.textContent)")
+    await pg.click(f"[data-crex='{ls[0]['id']}']"); await pg.wait_for_timeout(100)
+    vis = await E("[...document.querySelectorAll('#crList .crcard .name')].map(x=>x.textContent)")
+    check("exclude a list hides its companies", "Acme Tooling" in vis_before and "Acme Tooling" not in vis and "Lakeside Orthodontics" in vis, vis)
+    await pg.click(f"[data-crex='{ls[0]['id']}']"); await pg.select_option("#crOnly", "sys:viewed"); await pg.wait_for_timeout(100)
+    vis = await E("[...document.querySelectorAll('#crList .crcard .name')].map(x=>x.textContent)")
+    check("show only a system list", "Acme Tooling" in vis and "Lakeside Orthodontics" in vis)
+    await pg.select_option("#crOnly", "")
+    await pg.click("[data-crhome=lists]"); t = await txt()
+    check("manage lists page", all(x in t for x in ["Private lists", "System lists", "Erie shops", "CFOs to call", "Previously viewed", "Exported to file"]))
+    await pg.click(f"[data-crlopen='{pl[0]['id']}']"); t = await txt()
+    check("people list detail shows person and company", "Sam Ito" in t and "Acme Tooling" in t)
+    await pg.click(f"[data-crlexport='{pl[0]['id']}']"); await pg.wait_for_timeout(200); dl = await E("window.__dl")
+    check("people list export", "Sam Ito" in dl["data"] and "Controller" in dl["data"] and "Acme Tooling" in dl["data"])
+    check("export adds to Exported to file", (await E("S.prof.find(p=>p.id==='p9').exportedAt")) is not None)
+    await pg.click("[data-crlopen='']"); await pg.click("[data-crlopen='sys:exported']"); t = await txt()
+    check("exported system list", "Acme Tooling" in t and "System" in t and await pg.locator("[data-crldel]").count() == 0)
+    await pg.click("[data-crlopen='']"); await pg.click(f"[data-crlopen='{ls[0]['id']}']"); await pg.click(f"[data-crlrm='{ls[0]['id']}|p9']"); await pg.wait_for_timeout(150)
+    check("remove from list", [x for x in await store("researchLists") if x["id"] == ls[0]["id"]][0]["items"] == [])
+    pg.once("dialog", lambda dlg: asyncio.ensure_future(dlg.accept()))
+    await pg.click(f"[data-crldel='{ls[0]['id']}']"); await pg.wait_for_timeout(200)
+    check("delete list", len(await store("researchLists")) == 1)
+    await pg.click("[data-crlnew]"); await pg.fill("#crl_name", "Q1 targets"); await pg.click("[data-crlnamesave]"); await pg.wait_for_timeout(150)
+    check("new empty list from Manage lists", any(x["name"] == "Q1 targets" for x in await store("researchLists")) and "Q1 targets" in await txt())
+    await pg.click("[data-crhome=profiles]")
     # phone layout
     await pg.set_viewport_size({"width": 390, "height": 844}); await pg.wait_for_timeout(150)
     over = await E("document.documentElement.scrollWidth>window.innerWidth+1")
@@ -151,7 +191,7 @@ async def main():
     # demo mode has sample profiles
     d = await br.new_page(viewport={"width": 1280, "height": 900}); d.on("pageerror", lambda e: errs.append(str(e)))
     await d.goto(APP); await d.evaluate("localStorage.setItem('rb-mode','demo');localStorage.removeItem('rb-demo')"); await d.reload(); await d.wait_for_timeout(400)
-    check("demo has sample profiles", await d.evaluate("S.prof.length===2 && S.prof[0].bizId==='b2'"))
+    check("demo has sample profiles and lists", await d.evaluate("S.prof.length===2 && S.prof[0].bizId==='b2' && S.crlist.length===2"))
     await d.evaluate("tab='crs';CR.id='p1';render()"); await d.wait_for_timeout(150)
     await d.screenshot(path=f"{OUT}/cr-demo.png", full_page=True)
     check("no page errors", not errs, errs)

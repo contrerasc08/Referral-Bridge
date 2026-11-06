@@ -22,6 +22,7 @@ Records with `sample: true` are test data. They are hidden from bridges and from
 | `usage` | `providerUsage` | Daily data-source usage counters |
 | `task` | `tasks` | Your tasks and the suggestions you added or dismissed |
 | `prof` | `companyProfiles` | Company research profiles: any company, every fact linked to its sources |
+| `crlist` | `researchLists` | Your private lists of company profiles or people |
 
 ## businesses
 
@@ -64,6 +65,12 @@ A RelPro-style profile of one company, started on the Company research screen an
 | `signals[]` | `{type, date, evidence, src[]}`; become `signals` records when the profile is saved as a business |
 | `industryGroup` | One of `INDUSTRIES`, used when saving as a business |
 | `summary`, `needs[]`, `talkingPoints[]` | Shown under "Before you call" |
+
+`viewedAt` and `exportedAt` on a profile feed the two system lists, "Previously viewed" (stamped when opened, at most once an hour) and "Exported to file" (stamped when the profile, its people, or a list holding it is exported).
+
+## researchLists
+
+Private lists, like RelPro's Lists: `{name, kind ("company" | "people"), items[]}`. Company items are `{profId, addedAt}`; people items are `{profId, name, title, addedAt}`. System lists aren't stored; they're computed from `viewedAt` and `exportedAt`. On the Profiles screen any list can be shown alone or excluded, so you see only net-new companies (a people list covers the companies its people work at).
 
 Favorite Roles groups live in `settings` doc `favroles`: `{groups: [{name, words}]}`, where `words` is a comma list of title words. Without it the app uses four default groups (Owners and executives, Finance, Operations, HR and benefits).
 
