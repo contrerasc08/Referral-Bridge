@@ -57,13 +57,15 @@ A RelPro-style profile of one company, started on the Company research screen an
 | `requestedAt`, `researchedAt` | ISO dates |
 | `bizId` | The linked business, once saved |
 | `sources[]` | `{id, name, url, type (official\|company\|directory\|social\|news\|data\|you), retrievedAt, found, note}`. Ids starting with `u` were added by you. |
-| `fields` | Keyed by `legalName, dba, description, industry, naics, ownership, entityType, status, revenue, employees, founded, locations, address, phone, website, email, linkedin, stateId, formed, registeredAgent, npi, licenses`. Each is `{v, src[], alt[{v, src[]}]}`: `src` lists the source ids that report `v`; `alt` holds values other sources reported. |
+| `fields` | Keyed by `legalName, dba, description, industry, ownership, founded, revenue, employees, locations, address, phone, email, website, linkedin, facebook, instagram, x, entityType, status, stateId, formed, registeredAgent, npi, licenses` and the Highlights `naics, sic, certifications, international, sustainability, cannabis, technology, censusTract, tractIncome`. Each is `{v, src[], alt[{v, src[]}]}`: `src` lists the source ids that report `v`; `alt` holds values other sources reported. |
 | `people[]` | `{name, title, linkedin, phone, email, src[]}` |
-| `filings[]` | `{date, kind, detail, src[]}` (state filings, UCC liens, SBA and PPP loans, Form D, contracts, permits, lawsuits) |
+| `filings[]` | `{date, kind, detail, src[]}`. The Finance tab groups kinds into Loans (SBA loan, PPP loan, Loan, Financing), Funding (SEC Form D, Funding, Investment), Liens (UCC lien, Tax lien, Judgment), Government contracts (Government contract, Grant) and Other filings. |
 | `news[]` | `{date, title, url, sourceName, summary}` |
 | `signals[]` | `{type, date, evidence, src[]}`; become `signals` records when the profile is saved as a business |
 | `industryGroup` | One of `INDUSTRIES`, used when saving as a business |
 | `summary`, `needs[]`, `talkingPoints[]` | Shown under "Before you call" |
+
+Favorite Roles groups live in `settings` doc `favroles`: `{groups: [{name, words}]}`, where `words` is a comma list of title words. Without it the app uses four default groups (Owners and executives, Finance, Operations, HR and benefits).
 
 Saving to a business only fills fields the business doesn't already have, adds new contacts (with their source), adds the profile's source links to `profile.sources`, and adds signals with provider `company-research` (provenance `VERIFIED` when the first source is an official record).
 
