@@ -509,6 +509,28 @@ h2,h3,.phead h2,.brand,.bigdate{font-family:var(--serif);font-weight:600;letter-
 .sidenav{background:var(--surface)}
 .search,input,select,textarea{border-color:var(--rule)}
 :focus-visible{outline-color:var(--biz)}
+
+/* Company research */
+.crhead h2{margin:2px 0 6px}.crform{display:grid;gap:0;max-width:640px;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:14px 14px 4px;margin-bottom:18px}.crform .btn{margin:4px 0 10px;justify-self:start}
+.crtop{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:14px;margin:8px 0 12px}
+.crstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.crstats div{background:var(--paper);border-radius:10px;padding:8px 10px;display:grid}.crstats b{font-size:1.15rem}.crstats span{font-size:.75rem;color:var(--muted)}
+.crseg{margin-top:4px}
+.crsec{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:12px 14px;margin-bottom:12px}.crsec h3{margin:0 0 6px;font-size:1rem}
+.crsec.brief{border-left:4px solid var(--coi)}.crul{margin:8px 0 0;padding-left:18px}.crul li{margin:4px 0}
+.crrow{display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:4px 12px;padding:8px 0;border-top:1px solid var(--rule)}.crrow:first-of-type{border-top:0}
+.crl{font-size:.82rem;color:var(--muted)}.crv{min-width:0;overflow-wrap:anywhere}.crrow.crnone .crv{font-style:italic}
+.crv a{color:var(--biz)}
+.crchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.crsrc{display:inline-block;font-size:.72rem;font-weight:600;border:1px solid var(--rule);border-radius:999px;padding:1px 8px;color:var(--muted);text-decoration:none;background:var(--paper)}
+a.crsrc:hover{color:var(--biz);border-color:var(--biz)}
+.crbadge{display:inline-block;font-size:.7rem;font-weight:700;border-radius:6px;padding:1px 6px;margin-left:4px;background:var(--rule);color:var(--muted);vertical-align:1px}
+.crbadge.ok{background:var(--biz-soft);color:var(--biz)}.crbadge.warn{background:var(--danger-soft);color:var(--warn)}
+.cralt{margin-top:6px;padding-left:8px;border-left:2px solid var(--rule);font-size:.88rem}
+.crwait{margin-bottom:12px;border-left:4px solid var(--warn)}
+.crlinks{display:grid;gap:12px}.crgh{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-bottom:4px}
+.crgrp{display:grid;gap:6px}.crlink{display:grid;border:1px solid var(--rule);border-radius:10px;padding:8px 10px;text-decoration:none;color:var(--ink)}.crlink:hover{border-color:var(--biz)}.crlink b{color:var(--biz);font-size:.9rem}
+@media (min-width:760px){.crgrp{grid-template-columns:repeat(2,1fr)}.crgh{grid-column:1/-1}}
+@media (max-width:520px){.crrow{grid-template-columns:1fr}.crstats b{font-size:1rem}}
 </style>
 </head>
 <body>
@@ -572,8 +594,8 @@ const NEEDS={
 const THRESHOLD=50;
 const NEED_CHIPS=[["Any help",""],["Business loan","Banker"],["SBA loan","SBA lender"],["Equipment financing","Equipment lender"],["Tax and accounting","CPA"],["Bookkeeping","Bookkeeper"],["Part-time CFO","Fractional CFO"],["Contracts and entity setup","Attorney"],["Office space","Real estate"],["Insurance coverage","Insurance"],["Wealth","Investment advisor"],["401(k) and retirement plans","Retirement plan advisor"],["Card processing","Merchant services"],["Payroll and HR","Payroll and HR"],["IT and cybersecurity","IT and cybersecurity"],["Marketing","Marketing agency"],["Buying or selling a business","M&A advisor or business broker"],["Strategy and operations","Business consultant"]];
 const F={text:"",need:"",bizId:"",county:"",hc:false};
-const COL={biz:"businesses",coi:"cois",match:"matches",req:"leadRequests",signal:"signals",usage:"providerUsage",settings:"settings",creq:"contactRequests",news:"news",outreach:"outreach",botlog:"botlog",drafts:"drafts",task:"tasks"};
-const S={biz:[],coi:[],match:[],req:[],signal:[],usage:[],settings:[],creq:[],news:[],outreach:[],botlog:[],drafts:[],task:[]};
+const COL={biz:"businesses",coi:"cois",match:"matches",req:"leadRequests",signal:"signals",usage:"providerUsage",settings:"settings",creq:"contactRequests",news:"news",outreach:"outreach",botlog:"botlog",drafts:"drafts",task:"tasks",prof:"companyProfiles"};
+const S={biz:[],coi:[],match:[],req:[],signal:[],usage:[],settings:[],creq:[],news:[],outreach:[],botlog:[],drafts:[],task:[],prof:[]};
 let db=null, tab="today", stage=null, q={biz:"",coi:""};
 
 const $=s=>document.querySelector(s);
@@ -634,7 +656,36 @@ function demoData(){
     {id:"bl5",bot:"watcher",ranAt:D(1),summary:"Checked 8 businesses; 2 new signals"},
     {id:"bl6",bot:"vetting",ranAt:D(3),summary:"Checked 2 specialists: both clear"},
     {id:"bl7",bot:"coach",ranAt:D(3),summary:"4 calls, 1 discovery call, 1 intro made. Focus: Keystone intro",plan:["Send the Keystone Precision intro to David Kim at First Valley Bank","Follow up with Maya Chen at Riverbend PT: follow-up is due","Prep for the discovery call with Dr. Ruiz at Harbor Point Dental","Add an insurance agent who serves Idaho for Summit Ridge Builders"]}];
-  return{biz,coi,signal,news,match,outreach,drafts,botlog,settings:[{id:"providers",revMin:1e6,revMax:1e8,revUnknown:true}]};
+  const prof=[{id:"p1",name:"Keystone Precision Machining",domain:"keystoneprecision.example",city:"Lancaster",state:"PA",bizId:"b2",status:"done",requestedAt:D(3),researchedAt:D(2),industryGroup:"Manufacturing",
+    summary:"Second-generation, family-owned CNC machine shop making precision parts for aerospace and medical device customers. Growing fast: a 40,000 sq ft addition is under construction and it is hiring machinists.",
+    sources:[{id:"s1",name:"PA business registry",url:"https://file.dos.pa.gov/search/business",type:"official",retrievedAt:D(2),found:true},
+      {id:"s2",name:"Company website",url:"https://example.com/",type:"company",retrievedAt:D(2),found:true},
+      {id:"s3",name:"LinkedIn",url:"https://www.linkedin.com/search/results/companies/?keywords=Keystone%20Precision%20Machining",type:"social",retrievedAt:D(2),found:true},
+      {id:"s4",name:"Google Maps",url:"https://www.google.com/maps/search/?api=1&query=Keystone%20Precision%20Machining%20Lancaster%20PA",type:"directory",retrievedAt:D(2),found:true},
+      {id:"s5",name:"Lancaster County permits",url:"https://example.com/",type:"official",retrievedAt:D(2),found:true},
+      {id:"s6",name:"LancasterOnline (sample article)",url:"https://example.com/",type:"news",retrievedAt:D(2),found:true},
+      {id:"s7",name:"SBA loan data",url:"https://data.sba.gov/dataset/7-a-504-foia",type:"official",retrievedAt:D(2),found:true},
+      {id:"s8",name:"Indeed",url:"https://www.indeed.com/",type:"directory",retrievedAt:D(2),found:true},
+      {id:"s9",name:"SEC EDGAR",url:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=Keystone%20Precision",type:"official",retrievedAt:D(2),found:false,note:"No Form D or other filings."}],
+    fields:{legalName:{v:"Keystone Precision Machining, Inc.",src:["s1","s2"]},dba:{v:"Keystone Precision",src:["s2","s4"]},
+      description:{v:"Contract CNC machining for aerospace, medical device and defense customers.",src:["s2","s3"]},industry:{v:"Precision machining (contract manufacturing)",src:["s2","s3"]},
+      naics:{v:"332710 Machine shops",src:["s7"]},ownership:{v:"Private, family-owned (second generation)",src:["s2","s6"]},entityType:{v:"Corporation",src:["s1"]},status:{v:"Active",src:["s1"]},
+      revenue:{v:"About $18M (estimate)",src:["s6"]},employees:{v:"85",src:["s2","s3"],alt:[{v:"About 110",src:["s8"]}]},founded:{v:"1987",src:["s1","s2","s3"]},
+      locations:{v:"1 plant; 40,000 sq ft addition under construction",src:["s5","s6"]},address:{v:"1450 Industrial Way, Lancaster, PA 17601",src:["s1","s4"]},
+      phone:{v:"(555) 010-3344",src:["s2","s4"]},website:{v:"example.com",src:["s2"]},linkedin:{v:"https://www.linkedin.com/search/results/companies/?keywords=Keystone%20Precision%20Machining",src:["s3"]},
+      stateId:{v:"1234567 (sample)",src:["s1"]},formed:{v:"1987-03-12",src:["s1"]},registeredAgent:{v:"Thomas Brandt, 1450 Industrial Way, Lancaster",src:["s1"]},licenses:{v:"ISO 9001:2015, AS9100D",src:["s2"]}},
+    people:[{name:"Tom Brandt",title:"President",src:["s1","s2","s3"]},{name:"Karen Brandt",title:"Secretary and Treasurer",src:["s1"]},{name:"Luis Ortega",title:"VP of Operations",src:["s3"]}],
+    filings:[{date:d(40),kind:"Permit",detail:"Building permit for a 40,000 sq ft manufacturing addition, $6.2M job value",src:["s5"]},
+      {date:d(15),kind:"UCC lien",detail:"Equipment lien filed by an equipment finance company (likely the new CNC machines)",src:["s1"]},
+      {date:"2019-06-04",kind:"SBA loan",detail:"SBA 504 loan, $2.1M, for the building",src:["s7"]}],
+    news:[{date:d(6),title:"Keystone Precision breaks ground on plant addition (sample)",url:"https://example.com/",sourceName:"LancasterOnline",summary:"Expansion adds 40,000 sq ft and about 30 jobs."},
+      {date:d(14),title:"Keystone adds three 5-axis CNC machines (sample)",url:"https://example.com/",sourceName:"Company news"}],
+    signals:[{type:"expansion",date:d(6),evidence:"Broke ground on a 40,000 sq ft addition.",src:["s5","s6"]},{type:"equipment",date:d(14),evidence:"Ordered three 5-axis CNC machines.",src:["s1","s6"]}],
+    needs:["Construction or expansion loan","Equipment financing","Treasury and payroll for new hires","Insurance review for the new building"],
+    talkingPoints:["Congratulate Tom on the groundbreaking; ask how the addition is being financed.","Their 2019 SBA 504 loan may be up for review alongside the new project.","The new UCC lien shows equipment was financed elsewhere: ask how that went.","Headcount sources disagree (85 vs about 110), so confirm the real number."],
+    createdAt:D(3)},
+   {id:"p2",name:"Lakeside Orthodontics",city:"Wayne",state:"NJ",status:"queued",requestedAt:D(0),fields:{},sources:[],people:[],filings:[],news:[],createdAt:D(0)}];
+  return{biz,coi,signal,news,match,outreach,drafts,botlog,prof,settings:[{id:"providers",revMin:1e6,revMax:1e8,revUnknown:true}]};
 }
 if(DEMO){let has=false;try{has=!!localStorage.getItem("rb-demo")}catch(e){}
   if(!has){const dd=demoData();for(const k of Object.keys(S))S[k]=dd[k]||[];saveLocal()}}
@@ -1868,6 +1919,9 @@ const BOTS=[
    what:"Works through your research queue: finds the owner, phone, email and website for each business, with a source for every detail.",
    seen:()=>latest(S.biz.flatMap(b=>(b.contacts||[]).map(c=>c.retrievedAt).concat(b.profile&&b.profile.checkedAt))),
    fallback:()=>{const q=researchQueue().length;return q?`${q} business${q===1?"":"es"} waiting in the queue`:"Queue is empty"},go:"queue"},
+  {id:"company-research",name:"Company research bot",kind:"cloud",rule:{h:6,mi:17},when:"Every day at 6:17 AM",
+   what:"Builds the company profiles you start on Company research: checks state records, federal filings, the company's site, directories, LinkedIn and the news, and links every fact to its source.",
+   seen:()=>latest(S.prof.map(p=>p.researchedAt)),fallback:()=>{const q=S.prof.filter(p=>p.status==="queued").length;return q?`${q} profile${q===1?"":"s"} waiting`:"No profiles waiting"},go:"crs"},
   {id:"writer",name:"Intro writer",kind:"cloud",rule:{h:7,mi:12,dow:[1,2,3,4,5]},when:"Weekdays at 7:12 AM",
    what:"Writes ready-to-send drafts for your bridge-ready businesses: a first email to the owner, a short call script, and the introduction email to the specialist.",
    seen:()=>latest(S.drafts.map(d=>d.createdAt)),fallback:()=>{const n=draftsReady().length;return n?`${n} draft${n===1?"":"s"} ready to send`:"Drafts appear on business pages"},go:"biz",goF:"drafts"},
@@ -2543,16 +2597,242 @@ function findResults(){
     ${why.length?`<div class="why">${esc(why.join(". "))}.</div>`:""}
     <div class="row">${c.phone?`<a class="btn" href="tel:${esc(c.phone)}">Call</a>`:""}${c.email?`<a class="btn" href="mailto:${esc(c.email)}">Email</a>`:""}<button class="btn ghost" data-coi="${c.id}">View details</button>${b?(matched?`<span class="tag s">Already in pipeline</span>`:`<button class="btn primary" data-approve="${b.id}|${c.id}|${s}">Add to pipeline</button>`):""}</div></div>`}).join("")}</div>`;
 }
+/* ======================================================================
+   Company research: a sourced profile of any company, built from many sources.
+   Each field keeps the sources that back it, so you can see where every fact
+   came from. "Concordance" shows the merged profile; "Single source" shows what
+   each source said on its own. The Company research bot fills queued profiles.
+   ====================================================================== */
+const CR_SECTIONS=[
+  ["Overview",[["legalName","Legal name"],["dba","Also known as"],["description","What they do"],["industry","Industry"],["naics","NAICS code"],["ownership","Ownership"],["entityType","Entity type"],["status","Registration status"]]],
+  ["Size",[["revenue","Annual revenue"],["employees","Employees"],["founded","Year founded"],["locations","Locations"]]],
+  ["Contact",[["address","Headquarters"],["phone","Main phone"],["website","Website"],["email","General email"],["linkedin","LinkedIn"]]],
+  ["Registration",[["stateId","State entity ID"],["formed","Formation date"],["registeredAgent","Registered agent"],["npi","NPI"],["licenses","Licenses and certifications"]]]
+];
+const CR_KEYS=CR_SECTIONS.flatMap(([,f])=>f.map(x=>x[0]));
+const CR_LABEL=Object.fromEntries(CR_SECTIONS.flatMap(([,f])=>f));
+const CR_STATUS={queued:["Waiting for research","s"],researching:["Researching","c"],done:["Researched","b"],partial:["Partly researched","c"],failed:["Couldn't find it","s"]};
+const CR_SRC_TYPE={official:"Official record",company:"Company",directory:"Directory",social:"Social",news:"News",data:"Data provider",you:"Added by you"};
+const CR={id:"",mode:"concord",q:""};
+const crNorm=v=>String(v??"").toLowerCase().replace(/^https?:\/\/(www\.)?/,"").replace(/[^a-z0-9]/g,"");
+const crKey=(name,state)=>crNorm(String(name||"").replace(/\b(inc|llc|pllc|pc|corp|corporation|co|company|ltd)\b\.?/gi,""))+"|"+(state||"");
+function crFilled(p){const f=p.fields||{};return CR_KEYS.filter(k=>f[k]&&f[k].v).length}
+function crSrc(p,id){return(p.sources||[]).find(s=>s.id===id)}
+function crChips(p,ids){return(ids||[]).map(id=>{const s=crSrc(p,id);if(!s)return"";
+  return s.url?`<a class="crsrc" href="${esc(s.url)}" target="_blank" rel="noopener" title="${esc(CR_SRC_TYPE[s.type]||"Source")}">${esc(s.name)} ↗</a>`:`<span class="crsrc">${esc(s.name)}</span>`}).join("")}
+function crVal(k,v){v=String(v??"");
+  if((k==="website"||k==="linkedin")&&v){const u=/^https?:\/\//i.test(v)?v:"https://"+v;return`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(v.replace(/^https?:\/\/(www\.)?/i,""))}</a>`}
+  if(k==="formed"&&/^\d{4}-\d{2}-\d{2}$/.test(v))return esc(fmtDate(v));
+  return esc(v)}
+function crAgree(f){const n=(f.src||[]).length;
+  if(f.alt&&f.alt.length)return`<span class="crbadge warn">Sources disagree</span>`;
+  return n>=2?`<span class="crbadge ok">${n} sources agree</span>`:`<span class="crbadge">1 source</span>`}
+/* Links to every place worth checking, filled in with the company's name. Works instantly, before any research runs. */
+function crLinks(p){
+  const e=encodeURIComponent, nm=p.name||"", st=p.state||"", loc=[p.city,st].filter(Boolean).join(", "), g=q=>"https://www.google.com/search?q="+e(q);
+  const sos={NY:"https://apps.dos.ny.gov/publicInquiry/",NJ:"https://www.njportal.com/DOR/BusinessNameSearch",CT:"https://service.ct.gov/business/s/onlinebusinesssearch",PA:"https://file.dos.pa.gov/search/business",DE:"https://icis.corp.delaware.gov/ecorp/entitysearch/namesearch.aspx",FL:"https://search.sunbiz.org/Inquiry/CorporationSearch/ByName",TX:"https://mycpa.cpa.state.tx.us/coa/",CA:"https://bizfileonline.sos.ca.gov/search/business"};
+  const dom=p.domain?String(p.domain).replace(/^https?:\/\//i,"").replace(/\/.*$/,""):"";
+  const L=[
+    ["Official records",[
+      [(st&&US_STATES[st]?US_STATES[st]+" business":"State business")+" registry",sos[st]||g(`${st?US_STATES[st]||st:""} secretary of state business entity search`),"Legal name, entity ID, status, officers, agent"],
+      ["OpenCorporates","https://opencorporates.com/companies"+(st?"/us_"+st.toLowerCase():"")+"?q="+e(nm),"Registrations in every state, officers"],
+      ["SEC EDGAR","https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company="+e(nm),"Form D raises and other filings"],
+      ["SBA and PPP loans","https://projects.propublica.org/coronavirus/bailouts/search?q="+e(nm),"PPP loan size, lender, jobs reported"],
+      ["Federal contracts","https://www.usaspending.gov/search/?hash=&keyword="+e(nm),"Government contracts and grants"],
+      ["SAM.gov","https://sam.gov/search/?index=ent&keywords="+e(nm),"Federal registration, UEI, NAICS codes"],
+      ["NPI Registry","https://npiregistry.cms.hhs.gov/search","Healthcare practices: NPI, specialty, address"]]],
+    ["Company",[
+      ...(dom?[["Website","https://"+dom,"About, leadership, locations, services"]]:[]),
+      ["Google",g(`"${nm}" ${loc}`),"Website, mentions, everything else"],
+      ["Google Maps","https://www.google.com/maps/search/?api=1&query="+e(nm+" "+loc),"Address, phone, hours, reviews"],
+      ["BBB","https://www.bbb.org/search?find_text="+e(nm)+"&find_loc="+e(loc),"Rating, years in business, principal"],
+      ["Dun & Bradstreet",g(`"${nm}" ${loc} site:dnb.com`),"Revenue and employee estimates"],
+      ["ZoomInfo",g(`"${nm}" site:zoominfo.com`),"Revenue, headcount, executives"]]],
+    ["People",[
+      ["LinkedIn company","https://www.linkedin.com/search/results/companies/?keywords="+e(nm),"Headcount, description, staff"],
+      ["LinkedIn people","https://www.linkedin.com/search/results/people/?keywords="+e(nm+" owner OR president OR CEO"),"Owners and executives"]]],
+    ["News and signals",[
+      ["Google News","https://news.google.com/search?q="+e(`"${nm}"`),"Expansion, sales, awards, lawsuits"],
+      ["Hiring",g(`"${nm}" jobs site:indeed.com`),"Open roles show growth"],
+      ["Press releases",g(`"${nm}" press release OR announces`),"Announcements in their own words"]]]
+  ];
+  return L;
+}
+function crLinkPanel(p){
+  return crLinks(p).map(([grp,items])=>`<div class="crgrp"><div class="crgh">${esc(grp)}</div>${items.map(([l,u,d])=>`<a class="crlink" href="${esc(u)}" target="_blank" rel="noopener"><b>${esc(l)} ↗</b><span class="meta">${esc(d)}</span></a>`).join("")}</div>`).join("")}
+function viewCompanyResearch(){
+  const p=CR.id&&byId("prof",CR.id);
+  if(p)return crProfile(p);
+  CR.id="";
+  const t=CR.q.trim().toLowerCase();
+  const list=S.prof.filter(x=>!t||(x.name||"").toLowerCase().includes(t)).sort((a,b)=>(b.updatedAt||b.requestedAt||"").localeCompare(a.updatedAt||a.requestedAt||""));
+  const waiting=S.prof.filter(x=>x.status==="queued").length;
+  return`<section class="crhead"><div class="eyebrow">Company research</div><h2>Research any company</h2>
+  <p class="lede">One profile built from state records, federal filings, the company's own site, directories, LinkedIn and the news. Every fact shows the sources behind it, with links.</p>
+  <form class="crform" id="crForm" role="search">
+    <div class="field"><label for="crName">Company name (required)</label><input id="crName" type="text" required placeholder="e.g. Keystone Precision Machining" autocomplete="off"></div>
+    <div class="field"><label for="crDomain">Website (optional)</label><input id="crDomain" type="text" placeholder="company.com" autocomplete="off"></div>
+    <div class="grid2f"><div class="field"><label for="crCity">City (optional)</label><input id="crCity" type="text" autocomplete="off"></div>
+    <div class="field"><label for="crState">State</label><select id="crState"><option value="">Any state</option>${STATES.map(s=>`<option value="${s}">${esc(US_STATES[s])}</option>`).join("")}</select></div></div>
+    <button class="btn primary" type="submit">Build profile</button>
+  </form></section>
+  <div class="shead"><h3>Profiles</h3><span class="meta">${S.prof.length} total${waiting?` · ${waiting} waiting for research`:""}</span></div>
+  ${S.prof.length>6?`<div class="row" style="margin-bottom:10px"><input class="search" id="qcr" type="search" placeholder="Search profiles" value="${esc(CR.q)}" aria-label="Search profiles"></div>`:""}
+  <div class="list" id="crList">${list.length?list.map(crCard).join(""):`<div class="empty"><p>${S.prof.length?"No profiles match.":"No profiles yet. Enter a company above to build the first one."}</p></div>`}</div>
+  ${waiting?`<p class="hint">The Company research bot fills waiting profiles on its next run. To do it now, tell Claude in chat: "Run my company research."</p>`:""}`;
+}
+function crCard(p){const [sl,sc]=CR_STATUS[p.status]||CR_STATUS.queued, n=crFilled(p), pct=Math.round(100*n/CR_KEYS.length);
+  return`<button class="card b" data-crid="${p.id}"><div class="top-line"><div><div class="name">${esc(p.name)}</div><div class="meta">${esc([p.city,p.state].filter(Boolean).join(", ")||"Location not given")}${p.domain?" · "+esc(p.domain):""}</div></div><span class="tag ${sc}">${esc(sl)}</span></div>
+  <div class="meter"><span class="bar"><i style="width:${pct}%"></i></span>${n} of ${CR_KEYS.length} fields · ${(p.sources||[]).filter(s=>s.found!==false).length} sources${p.researchedAt?" · "+esc(fmtDate(p.researchedAt)):""}</div></button>`}
+function crFieldRow(p,k){const f=(p.fields||{})[k];
+  if(!f||!f.v)return`<div class="crrow crnone"><span class="crl">${esc(CR_LABEL[k])}</span><span class="crv meta">Not found</span></div>`;
+  return`<div class="crrow"><span class="crl">${esc(CR_LABEL[k])}</span><div class="crv"><div>${crVal(k,f.v)} ${crAgree(f)}</div><div class="crchips">${crChips(p,f.src)}</div>
+  ${(f.alt||[]).map(a=>`<div class="cralt"><span class="meta">Also reported:</span> ${crVal(k,a.v)} <span class="crchips">${crChips(p,a.src)}</span></div>`).join("")}</div></div>`}
+function crConcord(p){
+  let h=CR_SECTIONS.map(([sec,fs])=>`<section class="crsec"><h3>${esc(sec)}</h3>${fs.map(([k])=>crFieldRow(p,k)).join("")}</section>`).join("");
+  const ppl=p.people||[], fil=(p.filings||[]).slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")), nw=(p.news||[]).slice().sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  h+=`<section class="crsec"><h3>Owners and executives</h3>${ppl.length?ppl.map(x=>`<div class="crrow"><span class="crl"><b style="color:var(--ink)">${esc(x.name)}</b></span><div class="crv"><div>${esc(x.title||"")}${x.linkedin?` · <a href="${esc(x.linkedin)}" target="_blank" rel="noopener">LinkedIn ↗</a>`:""}${x.phone?` · ${esc(x.phone)}`:""}${x.email?` · ${esc(x.email)}`:""}</div><div class="crchips">${crChips(p,x.src)}</div></div></div>`).join(""):`<p class="meta">No people found yet.</p>`}</section>`;
+  h+=`<section class="crsec"><h3>Filings, loans and liens</h3>${fil.length?fil.map(x=>`<div class="crrow"><span class="crl">${esc(x.date?fmtDate(x.date):"Date unknown")}</span><div class="crv"><div><b>${esc(x.kind||"Filing")}</b> ${esc(x.detail||"")}</div><div class="crchips">${crChips(p,x.src)}</div></div></div>`).join(""):`<p class="meta">No filings found yet.</p>`}</section>`;
+  h+=`<section class="crsec"><h3>News</h3>${nw.length?nw.map(x=>`<div class="crrow"><span class="crl">${esc(x.date?fmtDate(x.date):"")}</span><div class="crv"><div>${x.url?`<a href="${esc(x.url)}" target="_blank" rel="noopener"><b>${esc(x.title)}</b> ↗</a>`:`<b>${esc(x.title)}</b>`}</div><div class="meta">${esc([x.sourceName,x.summary].filter(Boolean).join(" · "))}</div></div></div>`).join(""):`<p class="meta">No news found yet.</p>`}</section>`;
+  return h;
+}
+function crSingle(p){
+  const srcs=(p.sources||[]);if(!srcs.length)return`<div class="empty"><p>No sources checked yet.</p></div>`;
+  return srcs.map(s=>{
+    const rows=[];
+    for(const k of CR_KEYS){const f=(p.fields||{})[k];if(!f)continue;
+      if((f.src||[]).includes(s.id))rows.push([CR_LABEL[k],crVal(k,f.v)]);
+      for(const a of f.alt||[])if((a.src||[]).includes(s.id))rows.push([CR_LABEL[k],crVal(k,a.v)])}
+    for(const x of p.people||[])if((x.src||[]).includes(s.id))rows.push(["Person",esc(x.name+(x.title?", "+x.title:""))]);
+    for(const x of p.filings||[])if((x.src||[]).includes(s.id))rows.push([x.kind||"Filing",esc([x.date&&fmtDate(x.date),x.detail].filter(Boolean).join(" · "))]);
+    return`<section class="crsec"><div class="top-line"><div><h3 style="margin:0">${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)} ↗</a>`:esc(s.name)}</h3>
+    <div class="meta">${esc([CR_SRC_TYPE[s.type],s.retrievedAt&&"checked "+fmtDate(s.retrievedAt)].filter(Boolean).join(" · "))}</div></div>${s.found===false?`<span class="tag s">Nothing found</span>`:`<span class="tag b">${rows.length} fact${rows.length===1?"":"s"}</span>`}</div>
+    ${s.note?`<p class="meta" style="margin:6px 0 0">${esc(s.note)}</p>`:""}
+    ${rows.map(([l,v])=>`<div class="crrow"><span class="crl">${esc(l)}</span><div class="crv">${v}</div></div>`).join("")}</section>`}).join("");
+}
+function crProfile(p){
+  const [sl,sc]=CR_STATUS[p.status]||CR_STATUS.queued, n=crFilled(p), found=(p.sources||[]).filter(s=>s.found!==false).length;
+  const agree=CR_KEYS.filter(k=>{const f=(p.fields||{})[k];return f&&f.v&&(f.src||[]).length>=2&&!(f.alt||[]).length}).length;
+  const linked=p.bizId&&byId("biz",p.bizId), waiting=p.status==="queued"||p.status==="researching";
+  let h=`<button class="btn ghost" data-crback="1">‹ All profiles</button>
+  <section class="crtop"><div class="top-line"><div><h2 style="margin:0">${esc(p.name)}</h2><div class="meta">${esc([p.city,p.state&&(US_STATES[p.state]||p.state)].filter(Boolean).join(", ")||"Location not given")}${p.domain?" · "+esc(p.domain):""}</div></div><span class="tag ${sc}">${esc(sl)}</span></div>
+  <div class="crstats"><div><b>${n}/${CR_KEYS.length}</b><span>fields found</span></div><div><b>${found}</b><span>sources</span></div><div><b>${agree}</b><span>confirmed by 2+</span></div></div>
+  ${p.summary?`<p class="bio" style="margin:10px 0 0">${esc(p.summary)}</p>`:""}
+  <div class="row" style="margin-top:12px;flex-wrap:wrap;gap:8px">
+    ${linked?`<button class="btn primary" data-bizview="${linked.id}">Open business page</button><button class="btn" data-crsave="${p.id}">Update business from profile</button>`:(n?`<button class="btn primary" data-crsave="${p.id}">Save to my businesses</button>`:"")}
+    <button class="btn" data-cradd="${p.id}">Add what you found</button>
+    ${waiting?"":`<button class="btn" data-crrerun="${p.id}">Research again</button>`}
+    <button class="btn danger" data-crdel="${p.id}">Delete</button></div></section>`;
+  if(waiting)h+=`<div class="card crwait"><b>${p.status==="researching"?"Research is running.":"Waiting for research."}</b> The Company research bot checks the sources below, fills in every field it can and links each fact to where it found it. To run it now, tell Claude in chat: "Run my company research." You can also open the sources yourself and use <b>Add what you found</b>.</div>`;
+  if((p.talkingPoints||[]).length||(p.needs||[]).length)h+=`<section class="crsec brief"><h3>Before you call</h3>
+    ${(p.needs||[]).length?`<div class="meta" style="margin-bottom:4px">Likely needs</div><div>${p.needs.map(x=>`<span class="tag c">${esc(x)}</span>`).join("")}</div>`:""}
+    ${(p.talkingPoints||[]).length?`<ul class="crul">${p.talkingPoints.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}</section>`;
+  if(n||(p.sources||[]).length){
+    h+=`<div class="seg2 crseg" role="group" aria-label="Profile view">${[["concord","Concordance"],["single","Single source"]].map(([k,l])=>`<button data-crmode="${k}" aria-pressed="${CR.mode===k}">${l}</button>`).join("")}</div>
+    <p class="meta" style="margin:6px 0 10px">${CR.mode==="concord"?"The best value for each field, merged across sources. Tap a source to open it.":"What each source said on its own."}</p>`;
+    h+=CR.mode==="concord"?crConcord(p):crSingle(p);
+  }
+  h+=`<section class="crsec"><h3>Sources to check</h3><p class="meta" style="margin:0 0 8px">Each link is already filled in with this company's name.</p><div class="crlinks">${crLinkPanel(p)}</div></section>`;
+  return h;
+}
+async function crCreate(name,domain,city,state,bizId){
+  name=String(name||"").trim();if(!name)return null;
+  const key=crKey(name,state), ex=S.prof.find(x=>crKey(x.name,x.state)===key||(bizId&&x.bizId===bizId));
+  if(ex)return ex;
+  const p={id:uid(),name,domain:String(domain||"").trim().replace(/^https?:\/\//i,"").replace(/\/$/,""),city:String(city||"").trim(),state:state||"",status:"queued",requestedAt:new Date().toISOString(),fields:{},sources:[],people:[],filings:[],news:[]};
+  if(bizId)p.bizId=bizId;
+  if(!await put("prof",p))return null;
+  return p;
+}
+/* Merge facts from one source into a profile: same value adds the source, a different value is kept as "Also reported". */
+function crMerge(p,sid,facts){
+  const f={...(p.fields||{})};let added=0;
+  for(const [k,raw] of Object.entries(facts.fields||{})){
+    if(!CR_KEYS.includes(k))continue;const v=String(raw??"").trim();if(!v)continue;
+    const cur=f[k]?{...f[k],src:[...(f[k].src||[])],alt:(f[k].alt||[]).map(a=>({...a,src:[...(a.src||[])]}))}:null;
+    if(!cur||!cur.v){f[k]={v,src:[sid]};added++;continue}
+    if(crNorm(cur.v)===crNorm(v)){if(!cur.src.includes(sid))cur.src.push(sid);f[k]=cur;added++;continue}
+    const a=cur.alt.find(x=>crNorm(x.v)===crNorm(v));
+    if(a){if(!a.src.includes(sid))a.src.push(sid)}else cur.alt.push({v,src:[sid]});
+    f[k]=cur;added++;
+  }
+  const people=(p.people||[]).map(x=>({...x,src:[...(x.src||[])]}));
+  for(const x of facts.people||[]){if(!x||!x.name)continue;const m=people.find(y=>crNorm(y.name)===crNorm(x.name));
+    if(m){if(!m.src.includes(sid))m.src.push(sid);for(const k of ["title","linkedin","phone","email"])if(!m[k]&&x[k])m[k]=x[k]}
+    else people.push({name:x.name,title:x.title||"",linkedin:x.linkedin||"",phone:x.phone||"",email:x.email||"",src:[sid]});added++}
+  const filings=[...(p.filings||[])];
+  for(const x of facts.filings||[]){if(!x||!(x.kind||x.detail))continue;filings.push({date:x.date||"",kind:x.kind||"Filing",detail:x.detail||"",src:[sid]});added++}
+  return{fields:f,people,filings,added};
+}
+function crAddSheet(id){const p=byId("prof",id);if(!p)return;
+  openSheet(`<h3>Add what you found</h3><p class="meta" style="margin:0 0 10px">Paste text from any page about ${esc(p.name)}: a state registry record, their About page, a LinkedIn profile, an article. Claude pulls out the facts and adds them to the profile with this page as the source.</p>
+  <div class="field"><label for="cr_url">Page address</label><input id="cr_url" type="url" placeholder="https://"></div>
+  <div class="field"><label for="cr_sname">Source name</label><input id="cr_sname" type="text" placeholder="e.g. PA business registry"></div>
+  <div class="field"><label for="cr_text">Pasted text (required)</label><textarea id="cr_text" rows="8"></textarea><div class="err" id="cr_err"></div></div>
+  <div class="sheet-foot"><span></span><div class="row"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-crextract="${id}">Add to profile</button></div></div>`)}
+async function crExtract(id,btn){
+  const p0=byId("prof",id);if(!p0)return;
+  const url=$("#cr_url").value.trim(), text=$("#cr_text").value.trim();let sname=$("#cr_sname").value.trim();
+  if(!text){$("#cr_err").textContent="Paste some text first.";return}
+  const sample=await getSample();if(!sample){$("#cr_err").textContent="Claude isn't available here. Open the app inside claude.ai to use this.";return}
+  if(!sname)sname=hostOf(url)||"Pasted text";
+  btn.disabled=true;btn.textContent="Reading…";
+  const prompt=`Extract facts about the company "${p0.name}"${p0.state?" ("+p0.state+")":""} from the text below. Use ONLY what the text says; never guess. If the text is about a different company, return empty results.
+Return JSON only, in this shape:
+{"fields":{${CR_KEYS.map(k=>`"${k}":""`).join(",")}},"people":[{"name":"","title":"","linkedin":"","phone":"","email":""}],"filings":[{"date":"YYYY-MM-DD","kind":"State filing | UCC lien | SBA loan | PPP loan | SEC Form D | Government contract | Permit | Lawsuit | Other","detail":""}],"type":"official | company | directory | social | news | data"}
+Field notes: ${CR_KEYS.map(k=>k+" = "+CR_LABEL[k]).join("; ")}. Leave a field "" when the text doesn't say. formed is YYYY-MM-DD when a full date is given.
+TEXT:
+"""${text.slice(0,12000)}"""`;
+  let out=null;
+  try{out=await sample.json(prompt,{cache:false})}catch(e){btn.disabled=false;btn.textContent="Add to profile";$("#cr_err").textContent=e&&e.code==="rate_limited"?"Too many requests. Wait a minute and try again.":"Couldn't read that text. Try again.";return}
+  const p={...byId("prof",id)||p0}, sid="u"+uid();
+  const r=crMerge(p,sid,out||{});
+  if(!r.added){btn.disabled=false;btn.textContent="Add to profile";$("#cr_err").textContent="No facts about this company were found in that text.";return}
+  p.fields=r.fields;p.people=r.people;p.filings=r.filings;
+  p.sources=[...(p.sources||[]),{id:sid,name:sname,url:/^https?:\/\//i.test(url)?url:"",type:CR_SRC_TYPE[out&&out.type]?out.type:"you",retrievedAt:new Date().toISOString(),found:true,note:"Added by you"}];
+  if(p.status==="queued"||p.status==="failed")p.status="partial";
+  closeSheet();if(!await put("prof",p))return;toast(`Added ${r.added} fact${r.added===1?"":"s"} from ${sname}`);render();
+}
+/* Save or update a business from the profile. Only fills fields the business doesn't already have. */
+async function crSaveBiz(id){
+  const p={...byId("prof",id)};if(!p.id)return;const f=k=>((p.fields||{})[k]||{}).v||"";
+  const key=crKey(p.name,p.state), ex=(p.bizId&&byId("biz",p.bizId))||S.biz.find(b=>!b.sample&&crKey(b.name,b.state)===key);
+  const b=ex?{...ex,profile:{...(ex.profile||{})}}:{id:uid(),name:p.name,source:"Company research",prospectStage:"Prospect",profile:{}};
+  const fill=(k,v)=>{if(v!==""&&v!=null&&(b[k]===undefined||b[k]===""||b[k]===null))b[k]=v};
+  const pfill=(k,v)=>{if(v&&!b.profile[k])b.profile[k]=v};
+  fill("state",p.state);fill("city",p.city);
+  fill("industry",INDUSTRIES.includes(p.industryGroup)?p.industryGroup:"");
+  const ent=f("entityType");fill("entityType",ENTITY.find(x=>x.toLowerCase()===ent.toLowerCase())||"");
+  const rm=String(f("revenue")).replace(/,/g,"").match(/(\d+(?:\.\d+)?)\s*(k|mm|m|b|bn|million|billion|thousand)?\b/i),rev=rm?parseMoney(rm[1]+(rm[2]||"")):null;if(rev){fill("revenue",rev);if(b.revenue===rev){b.revenueEstimate=true;b.revenueSource="Company research"}}
+  const emp=parseInt(String(f("employees")).replace(/[^0-9]/g,""),10);if(emp)fill("employees",emp);
+  fill("formedDate",/^\d{4}-\d{2}-\d{2}$/.test(f("formed"))?f("formed"):"");
+  fill("phone",f("phone"));fill("email",f("email"));
+  const top=(p.people||[])[0];if(top)fill("contact",top.name+(top.title?` (${top.title})`:""));
+  pfill("website",f("website")&&(/^https?:/i.test(f("website"))?f("website"):"https://"+f("website")));pfill("linkedin",f("linkedin"));pfill("bio",f("description"));
+  pfill("principal",top&&top.name);pfill("established",(f("founded").match(/\d{4}/)||[])[0]);pfill("employees",f("employees"));pfill("license",f("licenses")||f("npi"));
+  b.profile.sources=[...new Map([...(b.profile.sources||[]),...(p.sources||[]).filter(s=>s.url&&s.found!==false).map(s=>({name:s.name,url:s.url}))].map(s=>[s.url,s])).values()];
+  b.profile.checkedAt=new Date().toISOString();
+  const have=new Set((b.contacts||[]).map(c=>crNorm(c.name)));
+  b.contacts=[...(b.contacts||[]),...(p.people||[]).filter(x=>!have.has(crNorm(x.name))).map(x=>{const s=crSrc(p,(x.src||[])[0])||{};
+    return{name:x.name,role:x.title||"",phone:x.phone||"",email:x.email||"",sourceName:s.name||"Company research",sourceUrl:s.url||"",retrievedAt:s.retrievedAt||p.researchedAt||"",provenance:s.type==="official"?"VERIFIED":"PROVIDER DATA"}})];
+  if(!await put("biz",b))return;
+  let failed=0;
+  for(const s of p.signals||[]){if(!SIGNAL_TYPES[s.type])continue;const sid=b.id+"--cr-"+s.type+"-"+(s.date||"");if(byId("signal",sid))continue;const src=crSrc(p,(s.src||[])[0])||{};
+    if(!await put("signal",{id:sid,businessId:b.id,type:s.type,provider:"company-research",providerName:src.name||"Company research",sourceRef:src.url||"",eventDate:s.date||"",detectedAt:new Date().toISOString(),evidence:s.evidence||"",confidence:(s.src||[]).length>1?.9:.75,provenance:src.type==="official"?"VERIFIED":"PROVIDER DATA",mock:false,legacy:false}))failed++}
+  if(p.bizId!==b.id){p.bizId=b.id;await put("prof",p)}
+  toast((ex?"Updated "+b.name:"Saved "+b.name+" to your businesses")+(failed?`. ${failed} signal${failed===1?"":"s"} couldn't be saved.`:""));render();
+}
+
 const GROUPS={
   today:[["today","Today"],["prospects","Pipeline"],["followups","Next steps"],["appts","Discovery calls"],["outreach","Touch log"],["queue","Research queue"]],
-  people:[["biz","Businesses"],["coi","Specialists"],["leads","Scout"],["find","Match a specialist"],["research","Look up info"]],
+  people:[["biz","Businesses"],["coi","Specialists"],["leads","Scout"],["find","Match a specialist"],["crs","Company research"],["research","Look up info"]],
   pipeline:[["pipeline","Bridges"]],
   brain:[["brain","Search & ask"],["target","Targeting"],["signals","Signals"],["news","News"],["climate","Industry climate"]]
 };
 const SUB_ALIAS={bizview:"biz",ask:"brain",more:"today"};
 /* Wide screens get a left sidebar with one named item per job, like the OliveStone CRM */
 const SIDENAV=[["Your day",[["today","Today"],["followups","Next steps"],["appts","Discovery calls"]]],
-  ["Prospecting",[["prospects","Pipeline"],["biz","Businesses"],["leads","Scout"],["outreach","Touch log"],["queue","Research queue"]]],
+  ["Prospecting",[["prospects","Pipeline"],["biz","Businesses"],["leads","Scout"],["crs","Company research"],["outreach","Touch log"],["queue","Research queue"]]],
   ["Referrals",[["pipeline","Bridges"],["coi","Specialists"],["find","Match a specialist"]]],
   ["Insight",[["brain","Ask the Brain"],["signals","Signals"],["news","News"],["climate","Industry climate"],["target","Targeting"]]]];
 function sidenav(cur){cur=SUB_ALIAS[cur]||cur;return SIDENAV.map(([g,items])=>`<div class="grp">${esc(g)}</div>`+items.map(([k,l])=>`<button data-sub="${k}" aria-current="${k===cur?"page":"false"}">${esc(l)}</button>`).join("")).join("")}
@@ -2572,11 +2852,11 @@ function render(){
   if(navTab&&tab!=="bizview")LAST[navTab]=SUB_ALIAS[tab]||tab;
   document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===navTab?"page":"false"));
   const active=document.activeElement&&document.activeElement.id;
-  const V={today:viewToday,brain:viewBrain,signals:viewSignals,pipeline:viewPipeline,research:viewResearch,find:viewFind,leads:viewLeads,biz:viewBiz,coi:viewCoi,more:viewMore,sources:viewSources,bizview:viewBizIntel,ask:viewAsk,queue:viewQueue,news:viewNews,climate:viewClimate,guide:viewGuide,outreach:viewOutreach,target:viewTarget,prospects:viewProspects,followups:viewFollowups,appts:viewAppts};
+  const V={today:viewToday,brain:viewBrain,signals:viewSignals,pipeline:viewPipeline,research:viewResearch,find:viewFind,leads:viewLeads,biz:viewBiz,coi:viewCoi,more:viewMore,sources:viewSources,bizview:viewBizIntel,ask:viewAsk,queue:viewQueue,news:viewNews,climate:viewClimate,guide:viewGuide,outreach:viewOutreach,target:viewTarget,prospects:viewProspects,followups:viewFollowups,appts:viewAppts,crs:viewCompanyResearch};
   $("#view").innerHTML=(navTab?subnav(navTab,tab):"")+(V[tab]||viewToday)();
   $("#view").classList.toggle("wide",["prospects","outreach","today","leads","followups"].includes(tab));
   $("#sidenav").innerHTML=sidenav(tab==="bizview"?(BV.from||"biz"):tab);
-  if(["qbrain","qbiz","qcoi","findq","qres","lcounty","lnotes","qoh","qpb","lq"].includes(active)){const el=$("#"+active);if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}}
+  if(["qbrain","qbiz","qcoi","findq","qres","lcounty","lnotes","qoh","qpb","lq","qcr"].includes(active)){const el=$("#"+active);if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}}
 }
 
 /* ---------- forms ---------- */
@@ -2596,7 +2876,7 @@ function closeSheet(){$("#sheet").close()}
 function recordForm(kind,rec){
   const F=kind==="biz"?BIZ_FIELDS:COI_FIELDS, noun=kind==="biz"?"business":"advisor";
   openSheet(`<h3>${rec?"Edit "+noun:"Add "+noun}</h3>${F.map(f=>fieldHtml(f,rec?rec[f[0]]:(f[0]==="state"?"NY":""))).join("")}
-  ${rec?`<button class="btn" style="width:100%;margin-bottom:8px" data-profile="${kind}|${rec.id}">Research public info</button>`:""}${rec&&kind==="biz"?`<button class="btn" style="width:100%;margin-bottom:12px" data-quizbiz="${rec.id}">Find compatible advisors with the quiz</button>`:""}
+  ${rec?`<button class="btn" style="width:100%;margin-bottom:8px" data-profile="${kind}|${rec.id}">Research public info</button>`:""}${rec&&kind==="biz"?`<button class="btn" style="width:100%;margin-bottom:8px" data-crbiz="${rec.id}">Full company profile (all sources)</button>`:""}${rec&&kind==="biz"?`<button class="btn" style="width:100%;margin-bottom:12px" data-quizbiz="${rec.id}">Find compatible advisors with the quiz</button>`:""}
   <div class="sheet-foot">${rec?`<button class="btn danger" data-del="${kind}|${rec.id}">Delete ${noun}</button>`:"<span></span>"}<div class="row"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-save="${kind}|${rec?rec.id:""}">Save ${noun}</button></div></div>`);
   const n=$("#f_name");n.addEventListener("input",()=>{$("#err_name").textContent=""});
 }
@@ -2731,7 +3011,10 @@ async function importCSV(file){
 }
 
 /* ---------- events ---------- */
-$("#view").addEventListener("submit",e=>{if(e.target.id!=="leadForm")return;e.preventDefault();LS.q=$("#lq").value;LS.county=$("#lcounty").value.trim();LS.searched=true;LS.rtab="all";render()});
+$("#view").addEventListener("submit",async e=>{if(e.target.id==="crForm"){e.preventDefault();const b=e.target.querySelector("button[type=submit]");b.disabled=true;
+  const p=await crCreate($("#crName").value,$("#crDomain").value,$("#crCity").value,$("#crState").value);b.disabled=false;
+  if(p){CR.id=p.id;CR.mode="concord";toast(p.status==="queued"?"Profile started. Sources are linked below.":"Opened the existing profile");render();window.scrollTo(0,0)}return}
+  if(e.target.id!=="leadForm")return;e.preventDefault();LS.q=$("#lq").value;LS.county=$("#lcounty").value.trim();LS.searched=true;LS.rtab="all";render()});
 $("#view").addEventListener("dragstart",e=>{const k=e.target.closest&&e.target.closest("[data-kid]");if(!k)return;e.dataTransfer.setData("text/plain",k.dataset.kid);e.dataTransfer.effectAllowed="move"});
 $("#view").addEventListener("dragover",e=>{const c=e.target.closest&&e.target.closest("[data-kcol]");if(!c)return;e.preventDefault();document.querySelectorAll(".kcol.over").forEach(x=>x!==c&&x.classList.remove("over"));c.classList.add("over")});
 $("#view").addEventListener("dragleave",e=>{const c=e.target.closest&&e.target.closest("[data-kcol]");if(c&&!c.contains(e.relatedTarget))c.classList.remove("over")});
@@ -2749,6 +3032,7 @@ $("#view").addEventListener("input",e=>{
   if(e.target.id==="lq"){LS.q=e.target.value}
   if(e.target.id==="lnotes"){LS.notes=e.target.value}
   if(e.target.id==="qres"){RS.q=e.target.value;$("#listRes").innerHTML=researchList()}
+  if(e.target.id==="qcr"){CR.q=e.target.value;render()}
   if(e.target.id==="qoh"){OH.q=e.target.value;$("#ohBody").innerHTML=ohTable()}
   if(e.target.id==="qpb"){PB.q=e.target.value;render()}
   if(e.target.id==="findq"){F.text=e.target.value;$("#findResults").innerHTML=findResults()}
@@ -2780,7 +3064,16 @@ $("#view").addEventListener("change",async e=>{
 $("#csvInput").addEventListener("change",e=>{const f=e.target.files[0];e.target.value="";if(f)importCSV(f).catch(()=>toast("Couldn't read that file. Save it as CSV and try again."))});
 document.addEventListener("click",async e=>{
   const t=e.target.closest("button");if(!t)return;const d=t.dataset;
-  if(d.sub){tab=d.sub;render();window.scrollTo(0,0);return}
+  if(d.sub){if(d.sub==="crs")CR.id="";tab=d.sub;render();window.scrollTo(0,0);return}
+  if(d.crid){CR.id=d.crid;CR.mode="concord";render();window.scrollTo(0,0);return}
+  if(d.crback){CR.id="";render();window.scrollTo(0,0);return}
+  if(d.crmode){CR.mode=d.crmode;render();return}
+  if(d.cradd){crAddSheet(d.cradd);return}
+  if(d.crextract){await crExtract(d.crextract,t);return}
+  if(d.crsave){await crSaveBiz(d.crsave);return}
+  if(d.crrerun){const p={...byId("prof",d.crrerun),status:"queued",requestedAt:new Date().toISOString()};if(await put("prof",p))toast("Queued for the Company research bot");render();return}
+  if(d.crdel){const p=byId("prof",d.crdel);if(!p||!confirm("Delete the profile for "+p.name+"? Saved businesses stay."))return;if(await del("prof",p.id)){CR.id="";toast("Profile deleted");render()}return}
+  if(d.crbiz){const b=byId("biz",d.crbiz);if(!b)return;closeSheet();const p=await crCreate(b.name,((b.profile||{}).website||""),b.city,b.state,b.id);if(p){CR.id=p.id;CR.mode="concord";tab="crs";render();window.scrollTo(0,0)}return}
   if(d.menugo){closeSheet();tab=d.menugo;render();window.scrollTo(0,0);return}
   if(d.act==="menu"){openMenu();return}
   if(d.act==="demoon"){setDemo(true);return}

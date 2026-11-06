@@ -16,6 +16,7 @@ It focuses on owner-run US businesses with roughly $1M–$100M in revenue.
 
 - **CRM:** businesses, specialists, bridges (Suggested → Approved → Introduced → Meeting → Closed), a prospect pipeline board, outreach history, follow-up tasks, appointments and CSV export. Wide screens get a left sidebar modeled on Jessica's OliveStone CRM.
 - **Scoring:** an Opportunity Score (why contact this business now), predicted needs, and a Match Score (how right this specialist is). It learns from closed and rejected bridges. See [docs/specs/scoring.md](docs/specs/scoring.md).
+- **Company research:** a RelPro-style profile of any company. One search builds a profile from state records, federal filings (SEC, SBA/PPP, contracts), the company's site, directories, LinkedIn and the news. Every fact shows the sources that back it, with links; a Concordance view shows the merged profile and a Single source view shows what each source said. Save it to your businesses in one tap.
 - **Market awareness:** news headlines adjust needs, and industry climate favors growing sectors.
 - **Targeting:** focus states, industries, employee range, owner-run only, and excluded words.
 - **Brain:** one search across everything, plain-language questions answered from stored data, a bot dashboard, and "what the bots noticed".
@@ -45,6 +46,7 @@ tests/
 ├── test_review_fixes.py     # Browser tests (Playwright) for save/delete, flagged specialists, need scoring, learning
 ├── test_crm_navigation.py   # Browser tests for the sidebar, prospect board, outreach history, follow-ups, appointments
 ├── test_save_failures.py    # Browser tests: a failed save never shows a success message
+├── test_company_research.py # Browser tests for Company research profiles
 ├── test_portal.py           # Browser tests for the sign-in portal (sign-in, MFA, invites, key safety)
 └── db/                      # Security tests for the Supabase rules (tests/db/run.sh)
 supabase/

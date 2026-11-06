@@ -9,7 +9,7 @@ All times are New York time. Scheduled bots use the owner's Claude usage. All ex
 
 ## Scheduled bots
 
-There are **11 scheduled tasks**, one per bot. Status was checked against the Claude scheduler on 2026-10-22.
+There are **11 scheduled tasks**, one per bot. A 12th, the Company research bot, is documented and gets its task once its pull request is merged. Status was checked against the Claude scheduler on 2026-10-22.
 
 ### Core bots (the nine documented in PR #1)
 
@@ -35,6 +35,12 @@ These two were shown in the app before they had scheduled tasks. Both tasks now 
 | Hiring surges | Fridays 6:18 AM | Companies with many open roles or new senior executives. Follows Targeting. | `businesses`, `signals` | `hiring-…` | Fri Oct 23 | [hiring-surges.md](hiring-surges.md) |
 
 **Known issue:** the Research bot is the only task without automatic approval, so its Oct 20 run stalled waiting for an approval nobody saw ("abandoned"). Turn on **Automatically approve** in that task's settings, or ask Claude to recreate it in auto mode.
+
+### Company research (added 2026-11-06)
+
+| Bot | Schedule | What it does | Writes | Report id | Last run | Instructions |
+|---|---|---|---|---|---|---|
+| Company research bot | Every day 6:17 AM | Fills the RelPro-style profiles started on the Company research screen: many sources merged into one profile, every fact linked to its source | `companyProfiles` | `company-research-…` | Task not created yet | [company-research.md](company-research.md) |
 
 ## In-app bots
 

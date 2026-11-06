@@ -21,6 +21,7 @@ Records with `sample: true` are test data. They are hidden from bridges and from
 | `req` | `leadRequests` | Requests for new businesses |
 | `usage` | `providerUsage` | Daily data-source usage counters |
 | `task` | `tasks` | Your tasks and the suggestions you added or dismissed |
+| `prof` | `companyProfiles` | Company research profiles: any company, every fact linked to its sources |
 
 ## businesses
 
@@ -44,6 +45,27 @@ Records with `sample: true` are test data. They are hidden from bridges and from
 | `possibleDupOf` | Id of a likely duplicate |
 | `lead` | Set by bots. In the app, "lead" status is computed from bridges, not from this field. |
 | `notes`, `createdAt`, `updatedAt` | |
+
+## companyProfiles
+
+A RelPro-style profile of one company, started on the Company research screen and filled by the Company research bot (or by pasting what you found). It can exist without a business record; "Save to my businesses" creates or updates one and sets `bizId`.
+
+| Field | Notes |
+|---|---|
+| `name`, `domain`, `city`, `state` | What you searched for |
+| `status` | `queued`, `researching`, `done`, `partial`, `failed` |
+| `requestedAt`, `researchedAt` | ISO dates |
+| `bizId` | The linked business, once saved |
+| `sources[]` | `{id, name, url, type (official\|company\|directory\|social\|news\|data\|you), retrievedAt, found, note}`. Ids starting with `u` were added by you. |
+| `fields` | Keyed by `legalName, dba, description, industry, naics, ownership, entityType, status, revenue, employees, founded, locations, address, phone, website, email, linkedin, stateId, formed, registeredAgent, npi, licenses`. Each is `{v, src[], alt[{v, src[]}]}`: `src` lists the source ids that report `v`; `alt` holds values other sources reported. |
+| `people[]` | `{name, title, linkedin, phone, email, src[]}` |
+| `filings[]` | `{date, kind, detail, src[]}` (state filings, UCC liens, SBA and PPP loans, Form D, contracts, permits, lawsuits) |
+| `news[]` | `{date, title, url, sourceName, summary}` |
+| `signals[]` | `{type, date, evidence, src[]}`; become `signals` records when the profile is saved as a business |
+| `industryGroup` | One of `INDUSTRIES`, used when saving as a business |
+| `summary`, `needs[]`, `talkingPoints[]` | Shown under "Before you call" |
+
+Saving to a business only fills fields the business doesn't already have, adds new contacts (with their source), adds the profile's source links to `profile.sources`, and adds signals with provider `company-research` (provenance `VERIFIED` when the first source is an official record).
 
 ## cois (specialists)
 
