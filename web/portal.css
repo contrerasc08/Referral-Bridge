@@ -46,10 +46,6 @@ input:focus{outline:2px solid var(--slate);outline-offset:1px;border-color:var(-
 input.code{font-size:1.4rem;letter-spacing:.3em;text-align:center;font-variant-numeric:tabular-nums}
 
 /* Client / Team switch (only changes the wording; never grants permissions) */
-.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink);border-radius:8px;overflow:hidden;margin:20px 0 4px}
-.seg button{font:inherit;font-weight:500;border:0;background:var(--surface);color:var(--ink);padding:10px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--slate);color:#fff}
-.seg button:focus-visible{outline:2px solid var(--slate-dark);outline-offset:-3px}
 
 .pw{position:relative}
 .pw input{padding-right:48px}
@@ -88,3 +84,4 @@ input.code{font-size:1.4rem;letter-spacing:.3em;text-align:center;font-variant-n
   .card{border:0;background:none;padding:22px 2px 0}
   .foot{display:none}
 }
+#app .muted + form{margin-top:22px}

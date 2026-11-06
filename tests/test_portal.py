@@ -114,12 +114,10 @@ async def main():
     check("no security policy violations", not csp, csp)
     await pg.close()
 
-    # 1b. Sign-in page design: Client/Team grants nothing, show/hide password, links home
+    # 1b. Sign-in page design: one sign-in for everyone, show/hide password, links home
     pg, errs, csp = await page(br, base)
-    check("sign-in shows Client and Team", await pg.locator(".seg button").count() == 2)
-    await pg.click(".seg button[data-as=Team]")
-    check("Team becomes selected", await pg.get_attribute(".seg button[data-as=Team]", "aria-pressed") == "true"
-          and await pg.get_attribute(".seg button[data-as=Client]", "aria-pressed") == "false")
+    check("no Client/Team switch on sign-in", await pg.locator(".seg, [data-as]").count() == 0
+          and "Team" not in await pg.inner_text("#app"))
     await pg.fill("#pw", "secret words")
     check("password hidden by default", await pg.get_attribute("#pw", "type") == "password")
     await pg.click("#eye")
@@ -130,8 +128,8 @@ async def main():
     await pg.evaluate("""() => { const c = window.__S; c.calls.length = 0; }""")
     await submit(pg)
     calls = await pg.evaluate("__S.calls")
-    check("Client/Team is not sent to sign-in", calls[:1] == [["signin", "team@example.com"]], calls)
-    check("Team sign-in still goes through MFA", await h1(pg) == "Set up your authenticator app")
+    check("sign-in sends only email and password", calls[:1] == [["signin", "team@example.com"]], calls)
+    check("sign-in still goes through MFA", await h1(pg) == "Set up your authenticator app")
     check("no page errors (sign-in design)", not errs, errs)
     check("no security policy violations (sign-in design)", not csp, csp)
     await pg.close()
