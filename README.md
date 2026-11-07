@@ -20,6 +20,7 @@ It focuses on owner-run US businesses with roughly $1M–$100M in revenue.
 - **Targeting:** focus states, industries, employee range, owner-run only, and excluded words.
 - **Brain:** one search across everything, plain-language questions answered from stored data, a bot dashboard, and "what the bots noticed".
 - **Bots:** scheduled cloud bots find businesses and specialists, research contacts, write outreach drafts, watch for new signals, vet specialists, track news and coach weekly. In-app bots flag stuck bridges, coverage gaps, missing data and duplicates. See [docs/bots/](docs/bots/README.md).
+- **Email:** pick contacts, write one message with fill-ins, and send it from your own Gmail, with starter templates, a daily limit, unsubscribe links, a Do not email list and a website sign-ups import. See [docs/email.md](docs/email.md).
 - **Demo mode** with made-up data, for showing the app safely.
 
 ## Repository structure
@@ -34,6 +35,7 @@ referral-bridge/
     ├── decisions.md         # Why things are the way they are
     ├── roadmap.md           # Done, next, later
     ├── deploy.md            # Putting the portal on a private Cloudflare address
+    ├── email.md             # Email blasts through Gmail: rules, templates, unsubscribes, publishing
     ├── specs/
     │   ├── app-and-workflow.md
     │   ├── data-model.md

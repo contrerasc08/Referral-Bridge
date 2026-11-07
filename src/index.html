@@ -509,6 +509,26 @@ h2,h3,.phead h2,.brand,.bigdate{font-family:var(--serif);font-weight:600;letter-
 .sidenav{background:var(--surface)}
 .search,input,select,textarea{border-color:var(--rule)}
 :focus-visible{outline-color:var(--biz)}
+/* Email */
+.field input,.field select,.field textarea{box-sizing:border-box}
+.emgrid{display:grid;gap:14px;margin-bottom:14px}
+@media (min-width:900px){.emgrid{grid-template-columns:1fr 1fr}}
+.emgrid>section{min-width:0}
+.emlist{max-height:420px;overflow:auto;border-top:1px solid var(--rule)}
+.emrow{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--rule);padding:6px 0}
+.emrow label{display:flex;gap:10px;align-items:flex-start;flex:1;min-width:0;cursor:pointer}
+.emrow input{margin-top:3px;flex:none}
+.emrow .min{display:block;min-width:0}.emrow b{display:block;font-weight:600;overflow-wrap:anywhere}
+.emrow .meta{display:block;font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}
+.emrow.off label{cursor:default;opacity:.75}
+.emsubj{font-weight:650;margin:4px 0 8px;overflow-wrap:anywhere}
+.emtext{white-space:pre-wrap;font:inherit;font-size:.9rem;margin:0;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:12px;overflow-wrap:anywhere}
+.emhtml{border:1px solid var(--rule);border-radius:10px;overflow:hidden;color-scheme:light}
+.emhtml table{font-size:inherit}.emhtml td{border-bottom:0;white-space:normal;text-align:left}
+.emline{font-size:.88rem;margin-bottom:10px;padding:8px 10px;border-radius:10px;background:var(--paper)}
+.emline.ok{background:var(--biz-soft);color:var(--biz)}.emline.warn{background:var(--danger-soft);color:var(--danger)}
+.emprob{margin:10px 0 0;padding-left:18px;font-size:.86rem;color:var(--danger)}
+.btn.dim{opacity:.55}
 </style>
 </head>
 <body>
@@ -531,6 +551,7 @@ h2,h3,.phead h2,.brand,.bigdate{font-family:var(--serif);font-weight:600;letter-
 </nav>
 <dialog id="sheet"><div class="sheet" id="sheetBody"></div></dialog>
 <input type="file" id="csvInput" accept=".csv,text/csv" hidden>
+<input type="file" id="signupInput" accept=".csv,text/csv" hidden>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -572,8 +593,8 @@ const NEEDS={
 const THRESHOLD=50;
 const NEED_CHIPS=[["Any help",""],["Business loan","Banker"],["SBA loan","SBA lender"],["Equipment financing","Equipment lender"],["Tax and accounting","CPA"],["Bookkeeping","Bookkeeper"],["Part-time CFO","Fractional CFO"],["Contracts and entity setup","Attorney"],["Office space","Real estate"],["Insurance coverage","Insurance"],["Wealth","Investment advisor"],["401(k) and retirement plans","Retirement plan advisor"],["Card processing","Merchant services"],["Payroll and HR","Payroll and HR"],["IT and cybersecurity","IT and cybersecurity"],["Marketing","Marketing agency"],["Buying or selling a business","M&A advisor or business broker"],["Strategy and operations","Business consultant"]];
 const F={text:"",need:"",bizId:"",county:"",hc:false};
-const COL={biz:"businesses",coi:"cois",match:"matches",req:"leadRequests",signal:"signals",usage:"providerUsage",settings:"settings",creq:"contactRequests",news:"news",outreach:"outreach",botlog:"botlog",drafts:"drafts",task:"tasks"};
-const S={biz:[],coi:[],match:[],req:[],signal:[],usage:[],settings:[],creq:[],news:[],outreach:[],botlog:[],drafts:[],task:[]};
+const COL={biz:"businesses",coi:"cois",match:"matches",req:"leadRequests",signal:"signals",usage:"providerUsage",settings:"settings",creq:"contactRequests",news:"news",outreach:"outreach",botlog:"botlog",drafts:"drafts",task:"tasks",optout:"emailOptOuts",emaillog:"emailLog",subs:"subscribers"};
+const S={biz:[],coi:[],match:[],req:[],signal:[],usage:[],settings:[],creq:[],news:[],outreach:[],botlog:[],drafts:[],task:[],optout:[],emaillog:[],subs:[]};
 let db=null, tab="today", stage=null, q={biz:"",coi:""};
 
 const $=s=>document.querySelector(s);
@@ -1702,7 +1723,7 @@ function bizCard(b,opt){
   opt=opt||{};const o=opportunity(b), n=needsFor(b)[0], br=bridgesFor(b), due=b.followUpAt&&b.followUpAt<=localDay(), st=b.sample?"":stageOf(b);
   const why=o.active[0]?(SIGNAL_TYPES[o.active[0].type]||SIGNAL_TYPES.other).l:"";
   const rev=revOf(b)!==null?" · "+moneyShort(revOf(b)):"";
-  const tags=[br.length?`<span class="tag b">Bridge ready</span>`:"",due?`<span class="tag due">Follow-up due</span>`:"",st&&st!=="Prospect"?`<span class="tag c">${esc(st)}</span>`:"",b.foundBy&&GEN_NAME[b.foundBy]?`<span class="tag s">${esc(GEN_NAME[b.foundBy])}</span>`:"",b.sample?`<span class="tag s">Sample</span>`:""].join("");
+  const tags=[br.length?`<span class="tag b">Bridge ready</span>`:"",due?`<span class="tag due">Follow-up due</span>`:"",st&&st!=="Prospect"?`<span class="tag c">${esc(st)}</span>`:"",b.foundBy&&GEN_NAME[b.foundBy]?`<span class="tag s">${esc(GEN_NAME[b.foundBy])}</span>`:"",b.sample?`<span class="tag s">Sample</span>`:"",bizOptedOut(b)?`<span class="tag due">Do not email</span>`:""].join("");
   const hl=opt.news===false?null:industryNews(b.industry,2)[0];
   return`<button class="card bc" data-bizview="${b.id}"><div class="oc-top"><div class="min"><div class="name">${esc(b.name)}</div>
   <div class="meta">${esc(shortInd(b.industry))} ${climArrow(b.industry)} · ${esc([b.city,b.state].filter(Boolean).join(", ")||placeOf(b))}${esc(rev)}</div></div>
@@ -1710,6 +1731,7 @@ function bizCard(b,opt){
   ${why||n?`<div class="why2">${why?`<span><b>Why now</b> ${esc(why)}</span>`:""}${n?`<span><b>Needs</b> ${esc(n.label)}</span>`:""}</div>`:""}
   ${tags?`<div class="tags">${tags}</div>`:""}${hl?`<div class="hl1">${esc(hl.title)}</div>`:""}</button>`;
 }
+function bizOptedOut(b){const opt=emOptSet();if(!opt.size)return false;const e=[b.email,...(b.contacts||[]).map(c=>c.email)].filter(Boolean);return e.length>0&&e.every(x=>opt.has(emNorm(x)))}
 function sec(key,title,body,openDefault,count){
   const isOpen=BV.open&&key in BV.open?BV.open[key]:openDefault;
   return`<details class="sec2" data-sec="${key}" ${isOpen?"open":""}><summary><span>${esc(title)}</span>${count!==undefined&&count!==""?`<span class="cnt">${count}</span>`:""}</summary><div class="secbody">${body}</div></details>`;
@@ -1779,7 +1801,7 @@ function viewToday(){
 }
 function viewBiz(){
   const all=S.biz.filter(inRev), n=k=>all.filter(BIZF[k]).length;
-  return`<div class="shead" style="margin-top:4px"><h2>Businesses</h2><div class="row"><button class="btn small" data-act="import">Import</button><button class="btn biz small" data-act="addBiz">+ Add</button></div></div>
+  return`<div class="shead" style="margin-top:4px"><h2>Businesses</h2><div class="row"><button class="btn small" data-emfrom="biz">Email these</button><button class="btn small" data-act="import">Import</button><button class="btn biz small" data-act="addBiz">+ Add</button></div></div>
   <p class="lede">A business becomes a lead once one of its needs is bridged to a specialist.</p>
   <input class="search full" id="qbiz" type="search" placeholder="Search by name, industry or place" value="${esc(q.biz)}" aria-label="Search businesses">
   <div class="chips" role="group" aria-label="Show">${[["all","All"],["ready","Bridge ready"],["due","Follow-up due"],["gap","Needs a specialist"],["new","Not contacted"],...(tgOnly()?[]:[["target","Fits targeting"]]),...Object.keys(GEN_SIG).filter(g=>n("gen-"+g)||BLV.f==="gen-"+g).map(g=>["gen-"+g,GEN_NAME[g]]),...(draftsReady().length?[["drafts","Drafts ready"]]:[])].map(([k,l])=>`<button class="chip" data-blf="${k}" aria-pressed="${BLV.f===k}">${l}<small>${n(k)}</small></button>`).join("")}</div>
@@ -1787,9 +1809,10 @@ function viewBiz(){
 }
 const BIZF={target:b=>!b.sample&&inTarget(b),all:()=>true,ready:b=>!b.sample&&bridgesFor(b).length>0,due:b=>b.followUpAt&&b.followUpAt<=localDay(),gap:b=>!b.sample&&!bridgesFor(b).length&&needsFor(b).length>0,new:b=>!b.sample&&!S.outreach.some(o=>o.bizId===b.id),drafts:b=>draftsReady().some(d=>d.bizId===b.id)};
 for(const g of Object.keys(GEN_SIG))BIZF["gen-"+g]=b=>!b.sample&&b.foundBy===g;
+function bizShown(){const t=q.biz.toLowerCase(), f=BIZF[BLV.f]||BIZF.all;
+  return S.biz.filter(b=>inRev(b)&&f(b)&&(!t||[b.name,b.county,b.city,b.state,b.industry].join(" ").toLowerCase().includes(t))).sort((a,b)=>(a.sample-b.sample)||opportunity(b).score-opportunity(a).score)}
 function bizList(){
-  const t=q.biz.toLowerCase(), f=BIZF[BLV.f]||BIZF.all;
-  const items=S.biz.filter(b=>inRev(b)&&f(b)&&(!t||[b.name,b.county,b.city,b.state,b.industry].join(" ").toLowerCase().includes(t))).sort((a,b)=>(a.sample-b.sample)||opportunity(b).score-opportunity(a).score);
+  const items=bizShown();
   if(!S.biz.length)return`<div class="empty"><p>No businesses yet. Add one, import a list, or ask Claude to find some.</p></div>`;
   if(!items.length)return`<div class="empty"><p>Nothing matches. Try another filter or search.</p></div>`;
   return items.map(b=>bizCard(b)).join("");
@@ -2545,14 +2568,14 @@ function findResults(){
 }
 const GROUPS={
   today:[["today","Today"],["prospects","Pipeline"],["followups","Next steps"],["appts","Discovery calls"],["outreach","Touch log"],["queue","Research queue"]],
-  people:[["biz","Businesses"],["coi","Specialists"],["leads","Scout"],["find","Match a specialist"],["research","Look up info"]],
+  people:[["biz","Businesses"],["coi","Specialists"],["leads","Scout"],["find","Match a specialist"],["research","Look up info"],["email","Email"]],
   pipeline:[["pipeline","Bridges"]],
   brain:[["brain","Search & ask"],["target","Targeting"],["signals","Signals"],["news","News"],["climate","Industry climate"]]
 };
 const SUB_ALIAS={bizview:"biz",ask:"brain",more:"today"};
 /* Wide screens get a left sidebar with one named item per job, like the OliveStone CRM */
 const SIDENAV=[["Your day",[["today","Today"],["followups","Next steps"],["appts","Discovery calls"]]],
-  ["Prospecting",[["prospects","Pipeline"],["biz","Businesses"],["leads","Scout"],["outreach","Touch log"],["queue","Research queue"]]],
+  ["Prospecting",[["prospects","Pipeline"],["biz","Businesses"],["leads","Scout"],["outreach","Touch log"],["email","Email"],["queue","Research queue"]]],
   ["Referrals",[["pipeline","Bridges"],["coi","Specialists"],["find","Match a specialist"]]],
   ["Insight",[["brain","Ask the Brain"],["signals","Signals"],["news","News"],["climate","Industry climate"],["target","Targeting"]]]];
 function sidenav(cur){cur=SUB_ALIAS[cur]||cur;return SIDENAV.map(([g,items])=>`<div class="grp">${esc(g)}</div>`+items.map(([k,l])=>`<button data-sub="${k}" aria-current="${k===cur?"page":"false"}">${esc(l)}</button>`).join("")).join("")}
@@ -2572,11 +2595,11 @@ function render(){
   if(navTab&&tab!=="bizview")LAST[navTab]=SUB_ALIAS[tab]||tab;
   document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===navTab?"page":"false"));
   const active=document.activeElement&&document.activeElement.id;
-  const V={today:viewToday,brain:viewBrain,signals:viewSignals,pipeline:viewPipeline,research:viewResearch,find:viewFind,leads:viewLeads,biz:viewBiz,coi:viewCoi,more:viewMore,sources:viewSources,bizview:viewBizIntel,ask:viewAsk,queue:viewQueue,news:viewNews,climate:viewClimate,guide:viewGuide,outreach:viewOutreach,target:viewTarget,prospects:viewProspects,followups:viewFollowups,appts:viewAppts};
+  const V={today:viewToday,brain:viewBrain,signals:viewSignals,pipeline:viewPipeline,research:viewResearch,find:viewFind,leads:viewLeads,biz:viewBiz,coi:viewCoi,more:viewMore,sources:viewSources,bizview:viewBizIntel,ask:viewAsk,queue:viewQueue,news:viewNews,climate:viewClimate,guide:viewGuide,outreach:viewOutreach,target:viewTarget,prospects:viewProspects,followups:viewFollowups,appts:viewAppts,email:viewEmail};
   $("#view").innerHTML=(navTab?subnav(navTab,tab):"")+(V[tab]||viewToday)();
-  $("#view").classList.toggle("wide",["prospects","outreach","today","leads","followups"].includes(tab));
+  $("#view").classList.toggle("wide",["prospects","outreach","today","leads","followups","email"].includes(tab));
   $("#sidenav").innerHTML=sidenav(tab==="bizview"?(BV.from||"biz"):tab);
-  if(["qbrain","qbiz","qcoi","findq","qres","lcounty","lnotes","qoh","qpb","lq"].includes(active)){const el=$("#"+active);if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}}
+  if(["qbrain","qbiz","qcoi","findq","qres","lcounty","lnotes","qoh","qpb","lq","qem"].includes(active)){const el=$("#"+active);if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}}
 }
 
 /* ---------- forms ---------- */
@@ -2730,6 +2753,342 @@ async function importCSV(file){
   toast(failed?`Imported ${ok} of ${toAdd.length} businesses. ${failed} couldn't be saved; import the file again to retry them.`:`Imported ${ok} businesses`);
 }
 
+/* ======================================================================
+   Email: pick contacts, write one message with fill-ins, send it from your own Gmail.
+   The code keeps the rules: a daily cap, your mailing address and an unsubscribe link
+   on every email, the Do not email list always skipped, and no patient or health details.
+   Gmail is reached through the page's `mcp` capability (the viewer's Gmail connector).
+   ====================================================================== */
+const GMAIL="Gmail";
+const EM_DEFAULTS={fromName:"",fromEmail:"",mailingAddress:"",unsubscribeUrl:"https://eco-bridge.cc-christophercontreras.workers.dev/unsubscribe",siteUrl:"https://eco-bridge.cc-christophercontreras.workers.dev/",dailyCap:50};
+const EM_MAX_CAP=100, EM_GAP=1500;
+const EM_TPL={
+  intro:{name:"Introduction",styled:false,hint:"First email to a practice you found",subject:"A quick introduction, {first name}",
+    body:"Hi {first name},\n\nI'm {my name}, founder of EcoBridge. I connect practices like {practice} with trusted specialists, such as bankers, CPAs, attorneys and insurance advisors, who know how practices run.\n\nIf something is on your list this year, like financing, a new location, billing help or planning ahead, I'd be glad to introduce you to someone good. There's no cost to you.\n\nWould a 15-minute call next week be useful?\n\n{my name}\nEcoBridge"},
+  followup:{name:"Follow-up",styled:false,hint:"A short nudge about a week later",subject:"Following up, {first name}",
+    body:"Hi {first name},\n\nI wanted to follow up on my note from last week. If {practice} could use an introduction to a banker, CPA, attorney or another specialist, I'm happy to help.\n\nIf the timing isn't right, no problem at all.\n\n{my name}\nEcoBridge"},
+  welcome:{name:"Welcome",styled:true,hint:"For new website sign-ups",subject:"Welcome to EcoBridge, {first name}",
+    body:"Hi {first name},\n\nThank you for signing up for EcoBridge updates. Your note came straight to me, and I read every one personally.\n\nEcoBridge connects practices and business owners with specialists they can trust, and Referral Bridge is the community where those introductions happen. Now and then I'll send a short note about events in New York City and North Jersey, new members, and early access to Referral Bridge.\n\nIf you need help with something now, just reply to this email. Please don't send patient or health information by email.\n\nConnections first. Collaboration always.\n\n{my name}\nFounder, EcoBridge"},
+  update:{name:"Update or event",styled:true,hint:"News or an upcoming event. Fill in the [brackets].",subject:"EcoBridge update: [event name]",
+    body:"Hi {first name},\n\nA quick update from EcoBridge.\n\n[Event name] is on [date] at [place]. [One or two sentences on who it's for and why it's worth going.]\n\nRegister here: [link]\n\nI hope to see you there.\n\n{my name}\nEcoBridge"},
+  storefront:{name:"Finish your storefront",styled:true,hint:"Send a few days after Welcome, with the sign-in link",subject:"{first name}, finish setting up your Referral Bridge storefront",
+    body:"Hi {first name},\n\nYour spot in Referral Bridge is ready. The next step is your storefront: the page other members see when they look for someone like you.\n\nSign in here to finish it: https://referral-bridge.cc-christophercontreras.workers.dev/\n\nAdd your photo, what you do, who you serve and the kinds of introductions you're looking for. It takes about 10 minutes, and a complete storefront gets matched first.\n\nIf you haven't set a password yet, use \"Forgot password?\" on the sign-in page with this email address, or reply here and I'll send you an invite.\n\nConnections first. Collaboration always.\n\n{my name}\nFounder, EcoBridge"},
+  beta:{name:"Beta invite",styled:false,hint:"Invite someone to try Referral Bridge",subject:"An invitation to the Referral Bridge beta",
+    body:"Hi {first name},\n\nWe're opening Referral Bridge, the community side of EcoBridge, to a small group of practices and specialists in New York and North Jersey.\n\nMembers get introductions to vetted specialists when a need comes up, and a clear record of which introductions worked.\n\nWould you like an invite for {practice}? Reply \"yes\" and I'll send your access code.\n\n{my name}\nEcoBridge"}
+};
+const EM_WHO=[["biz","Businesses"],["coi","Specialists"],["sub","Website sign-ups"]];
+const EM={who:"biz",q:"",sel:new Set(),tpl:"intro",subject:"",body:"",styled:false,dirty:false,mode:"send",busy:false,stop:false,progress:"",tested:false,err:"",gmail:null,schemas:{},imp:null,open:{}};
+const EM_HEALTH=/\b(patient name|patient'?s|diagnos\w*|date of birth|DOB|MRN|medical record|social security number|SSN|prescription|insurance ID|member ID)\b/i;
+const EM_FILLS=[["{first name}","First name"],["{practice}","Practice or firm"],["{city}","City"],["{my name}","Your name"]];
+
+function emSettings(){return{...EM_DEFAULTS,...(S.settings.find(s=>s.id==="email")||{})}}
+function emCap(){const n=Math.round(+emSettings().dailyCap);return Math.min(EM_MAX_CAP,Math.max(1,isNaN(n)?50:n))}
+const emNorm=e=>String(e||"").trim().toLowerCase();
+const emValid=e=>/^[^\s@<>(),;:"]+@[^\s@<>(),;:"]+\.[a-z]{2,}$/i.test(String(e||"").trim());
+function emOptSet(){return new Set(S.optout.map(o=>emNorm(o.email)))}
+function emOptedOut(email){return!!email&&emOptSet().has(emNorm(email))}
+function emSentToday(){const d=localDay();return S.emaillog.filter(l=>l.status!=="failed"&&l.at&&localDay(l.at)===d).length}
+function emLeft(){return Math.max(0,emCap()-emSentToday())}
+function firstNameOf(full){
+  let n=String(full||"").replace(/\(.*?\)/g," ").split(",")[0].replace(/^\s*(dr|mr|mrs|ms|mx|prof)\.?\s+/i,"").trim();
+  const w=n.split(/\s+/)[0]||"";return /^[A-Za-z][A-Za-z'.-]*$/.test(w)&&w.length>1?w[0].toUpperCase()+w.slice(1):"";
+}
+/* Everyone you could email, one row each: businesses (their primary contact), specialists and website sign-ups. */
+function emPeople(){
+  const out=[];
+  for(const b of S.biz){if(b.sample)continue;const c=(b.contacts||[]).find(x=>emValid(x.email))||{};
+    const name=c.name||String(b.contact||"").replace(/\s*\(.*\)\s*$/,"")||(b.profile||{}).principal||"";
+    out.push({key:"biz|"+b.id,kind:"biz",id:b.id,email:String(c.email||b.email||"").trim(),name,first:firstNameOf(name),practice:b.name||"",city:b.city||"",meta:[shortInd(b.industry),[b.city,b.state].filter(Boolean).join(", ")].filter(Boolean).join(" · ")})}
+  for(const c of S.coi){if(c.sample)continue;
+    out.push({key:"coi|"+c.id,kind:"coi",id:c.id,email:String(c.email||"").trim(),name:c.name||"",first:firstNameOf(c.name),practice:c.firm||"",city:"",meta:[c.profession,c.firm].filter(Boolean).join(" · ")})}
+  for(const s of S.subs){
+    out.push({key:"sub|"+s.id,kind:"sub",id:s.id,email:String(s.email||"").trim(),name:s.name||"",first:firstNameOf(s.name),practice:s.company||"",city:"",meta:[s.role||"Website sign-up",s.company].filter(Boolean).join(" · "),consent:s.consent})}
+  return out;
+}
+function emState(p,opt){return!p.email?"none":!emValid(p.email)?"bad":(opt||emOptSet()).has(emNorm(p.email))?"optout":"ok"}
+function emShown(){const t=EM.q.trim().toLowerCase();
+  return emPeople().filter(p=>p.kind===EM.who&&(!t||[p.name,p.email,p.practice,p.meta].join(" ").toLowerCase().includes(t)))
+    .sort((a,b)=>(a.email?0:1)-(b.email?0:1)||(a.practice||a.name).localeCompare(b.practice||b.name))}
+/* Who a send would reach, and who it skips and why. One email per address. */
+function emQueue(){
+  const opt=emOptSet(), seen=new Set(), by=Object.fromEntries(emPeople().map(p=>[p.key,p]));
+  const q={send:[],none:0,optout:0,dup:0};
+  for(const k of EM.sel){const p=by[k];if(!p)continue;const s=emState(p,opt);
+    if(s==="none"||s==="bad"){q.none++;continue}if(s==="optout"){q.optout++;continue}
+    const e=emNorm(p.email);if(seen.has(e)){q.dup++;continue}seen.add(e);q.send.push(p)}
+  return q;
+}
+function emFill(text,p,s){
+  const v={"first name":p.first||"there","practice":p.practice||"your practice","city":p.city||"your area","my name":s.fromName||""};
+  return String(text||"").replace(/\{\s*(first name|practice|city|my name)\s*\}/gi,(m,k)=>v[k.toLowerCase()]);
+}
+function emUnsubLink(s,email){const u=String(s.unsubscribeUrl||"").trim();return u+(u.includes("?")?"&":"?")+"e="+encodeURIComponent(email)}
+/* What stops a send. The first item is shown when Send is pressed. */
+function emProblems(test){
+  const s=emSettings(), p=[], all=EM.subject+"\n"+EM.body;
+  if(DEMO)p.push("Demo mode never sends email. Exit demo mode to send.");
+  if(!s.fromName.trim())p.push("Add your name under Sender details.");
+  if(!s.mailingAddress.trim())p.push("Add your business mailing address under Sender details. The law requires it on every email.");
+  if(!/^https:\/\/\S+$/.test(String(s.unsubscribeUrl||"").trim()))p.push("Add the unsubscribe page link under Sender details.");
+  if(!EM.subject.trim())p.push("Write a subject line.");
+  if(!EM.body.trim())p.push("Write the message.");
+  const odd=all.match(/\{[^}]*\}/g);if(odd&&odd.some(x=>!/^\{\s*(first name|practice|city|my name)\s*\}$/i.test(x)))p.push(`Fix the fill-in ${odd.find(x=>!/^\{\s*(first name|practice|city|my name)\s*\}$/i.test(x))}. Use {first name}, {practice}, {city} or {my name}.`);
+  const br=all.match(/\[[^\]\n]{1,60}\]/);if(br)p.push(`Replace ${br[0]} with the real details.`);
+  const h=all.match(EM_HEALTH);if(h)p.push(`Remove "${h[0]}". Emails must not include patient or health information.`);
+  if(test){if(!emValid(s.fromEmail))p.push("Add your own email under Sender details, so the test has somewhere to go.")}
+  else{const q=emQueue();if(!q.send.length)p.push(EM.sel.size?"None of the selected contacts can be emailed.":"Select at least one contact.");
+    else if(!emLeft())p.push(`You've reached today's limit of ${emCap()} emails. Send the rest tomorrow.`);
+    if(EM.mode!=="csv"&&!EM.tested)p.push("Send a test to yourself first and check how it looks.")}
+  return p;
+}
+function emText(body,s,email){return body.replace(/\s+$/,"")+`\n\n--\n${s.fromName}, EcoBridge\n${s.mailingAddress.trim()}\nTo stop getting these emails, unsubscribe here: ${emUnsubLink(s,email)} or reply "unsubscribe".`}
+function emLinkify(t){return esc(t).replace(/https?:\/\/[^\s<]+[^\s<.,;:!?)]/g,u=>`<a href="${u}" style="color:#315b6c">${u}</a>`)}
+function emHtml(subject,body,s,email){
+  const paras=body.replace(/\s+$/,"").split(/\n{2,}/).map(x=>`<p style="margin:0 0 16px">${emLinkify(x).replace(/\n/g,"<br>")}</p>`).join("");
+  const un=emUnsubLink(s,email);
+  return`<!doctype html><html><body style="margin:0;padding:0;background:#f7f4ee"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4ee"><tr><td align="center" style="padding:28px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fffdf9;border:1px solid #d6d4ce;border-radius:12px">
+<tr><td style="padding:26px 32px 0;font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:600;color:#244654">EcoBridge</td></tr>
+<tr><td style="padding:6px 32px 0"><div style="height:2px;width:48px;background:#315b6c"></div></td></tr>
+<tr><td style="padding:22px 32px 8px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#1c252c">${paras}</td></tr>
+<tr><td style="padding:16px 32px 26px;border-top:1px solid #eeeae3;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#56616a">${esc(s.fromName)}, EcoBridge · ${esc(s.mailingAddress.trim()).replace(/\n/g,", ")}<br>You're getting this because you're in touch with EcoBridge. <a href="${esc(un)}" style="color:#315b6c">Unsubscribe</a></td></tr>
+</table></td></tr></table></body></html>`;
+}
+function emCompose(p,s){
+  const subject=emFill(EM.subject,p,s).replace(/\s+/g," ").trim(), body=emFill(EM.body,p,s);
+  return{to:p.email,subject,text:emText(body,s,p.email),html:EM.styled?emHtml(subject,body,s,p.email):null};
+}
+
+/* ---------- Gmail through the viewer's connector ---------- */
+async function emGmail(force){
+  if(EM.gmail&&EM.gmail.state==="ready"&&!force)return EM.gmail;
+  let mcp=null;try{mcp=window.claude&&window.claude.use?await window.claude.use("mcp"):null}catch(e){}
+  if(!mcp)return EM.gmail={state:"none"};
+  let list;try{list=await mcp.listTools(GMAIL)}catch(e){return EM.gmail={state:"error",code:e&&e.code}}
+  const sv=(list&&list.servers||[]).find(x=>x.server===GMAIL);
+  if(!sv||!(sv.tools||[]).length)return EM.gmail={state:"notconnected"};
+  if(sv.authStatus==="needs_reauth")return EM.gmail={state:"reauth"};
+  const names=sv.tools.map(t=>t.name);
+  const send=names.find(n=>/^(send|send_?(email|message|mail)|gmail_send_?(email|message)?)$/i.test(n))||names.find(n=>/send/i.test(n)&&!/draft|forward|reply/i.test(n));
+  const draft=names.find(n=>/^create_?draft$/i.test(n))||names.find(n=>/draft/i.test(n)&&/create/i.test(n));
+  const sendDraft=names.find(n=>/send_?draft/i.test(n));
+  if(!send&&!draft)return EM.gmail={state:"notools"};
+  if(!send&&!(draft&&sendDraft)&&EM.mode==="send")EM.mode="draft";
+  return EM.gmail={state:"ready",mcp,send,draft,sendDraft,canSend:!!(send||(draft&&sendDraft))};
+}
+async function emSchema(g,tool){
+  if(tool in EM.schemas)return EM.schemas[tool];
+  try{const d=await g.mcp.describeTool(GMAIL,tool);EM.schemas[tool]=d&&d.inputSchema||null}catch(e){EM.schemas[tool]=null}
+  return EM.schemas[tool];
+}
+/* Fit one email to the tool's own input schema. Unknown required fields stop the send. */
+function emArgs(schema,m){
+  const props=schema&&schema.properties;
+  if(!props)return{args:{to:[m.to],subject:m.subject,body:m.text},missing:[]};
+  const a={},used=new Set(),keys=Object.keys(props);
+  const pick=re=>keys.find(k=>!used.has(k)&&re.test(k)), set=(k,v)=>{used.add(k);a[k]=v};
+  const kTo=pick(/^(to|recipients?|to_?(address(es)?|emails?|recipients?|list))$/i);
+  if(kTo)set(kTo,props[kTo].type==="array"?[m.to]:m.to);
+  const kSub=pick(/subject/i);if(kSub)set(kSub,m.subject);
+  const kHtml=pick(/html/i), kBody=pick(/^(body|text|content|message|plain_?text|text_?body|body_?(text|plain))$/i);
+  if(m.html&&kHtml&&props[kHtml].type!=="boolean"){set(kHtml,m.html);if(kBody)set(kBody,m.text)}
+  else if(kBody){const kType=pick(/^(content_?type|mime_?type|body_?type|format|is_?html|html)$/i), pt=kType&&props[kType];
+    if(m.html&&pt&&pt.type==="boolean"){set(kType,true);set(kBody,m.html)}
+    else if(m.html&&pt&&(pt.enum||[]).some(x=>/html/i.test(x))){set(kType,pt.enum.find(x=>/html/i.test(x)));set(kBody,m.html)}
+    else set(kBody,m.text)}
+  return{args:a,missing:(schema.required||[]).filter(k=>!(k in a))};
+}
+async function emCall(g,tool,m){
+  const {args,missing}=emArgs(await emSchema(g,tool),m);
+  if(missing.length)throw{code:"schema",message:"Gmail asks for "+missing.join(", ")+", which this page doesn't know how to fill."};
+  return(await g.mcp.callTool(GMAIL,tool,args)).payload;
+}
+async function emDeliver(g,m,mode){
+  if(mode==="draft")return emCall(g,g.draft,m);
+  if(g.send)return emCall(g,g.send,m);
+  if(g.draft&&g.sendDraft){const p=await emCall(g,g.draft,m)||{};
+    const id=p.id||p.draftId||p.draft_id||(p.draft&&p.draft.id);if(!id)throw{code:"schema",message:"Gmail saved a draft but didn't say which one, so it wasn't sent. Check your drafts."};
+    const sch=await emSchema(g,g.sendDraft), k=sch&&sch.properties&&Object.keys(sch.properties).find(x=>/draft_?id|^id$/i.test(x))||"draft_id";
+    return(await g.mcp.callTool(GMAIL,g.sendDraft,{[k]:id})).payload}
+  throw{code:"no_send"};
+}
+function emErrMsg(e){const c=e&&e.code;
+  if(c==="server_not_connected"||c==="server_not_found"||c==="selection_required")return"Gmail isn't connected. Add it in claude.ai Settings → Connectors, then reload this page.";
+  if(c==="needs_reauth")return"Your Gmail sign-in expired. Reconnect Gmail in claude.ai Settings → Connectors.";
+  if(c==="not_in_manifest"||c==="approval_required"||c==="consent_required"||c==="not_granted")return"Gmail wasn't allowed for this app. Press Send again and choose Allow when claude.ai asks.";
+  if(c==="blocked_by_policy")return"Your organization doesn't allow this Gmail action.";
+  if(c==="no_send")return"This Gmail connection can't send directly. Choose \"Save as Gmail drafts\" instead.";
+  if(c==="schema")return e.message;
+  if(c==="tool_error")return"Gmail refused the email: "+String(e.message||"no reason given").slice(0,200);
+  return"Gmail didn't answer. The email may or may not have gone out, so check your Gmail Sent folder before trying again.";
+}
+function emGmailLine(){const g=EM.gmail||{state:"checking"};
+  if(DEMO)return["warn","Demo mode never sends email."];
+  return{checking:["","Checking your Gmail connection…"],
+    none:["warn","Sending needs this app open in claude.ai with Gmail connected. You can still download a mail-merge file."],
+    notconnected:["warn","Gmail isn't connected. Add it in claude.ai Settings → Connectors, then reload this page."],
+    reauth:["warn","Your Gmail sign-in expired. Reconnect Gmail in claude.ai Settings → Connectors."],
+    notools:["warn","Your Gmail connection doesn't offer sending or drafts to this app."],
+    error:["warn",emErrMsg(g)],
+    ready:g.canSend?["ok","Gmail connected. Emails go out from your own account, and replies land in your inbox."]:["ok","Gmail connected for drafts. Emails are saved to your Gmail drafts for you to send."]}[g.state]||["",""];
+}
+
+/* ---------- sending ---------- */
+async function emSend(test){
+  if(EM.busy)return;
+  const probs=emProblems(test).filter(x=>!(EM.mode==="csv"&&/test to yourself/.test(x)));
+  if(probs.length){EM.err=probs[0];toast(probs[0]);emRefresh();return}
+  if(EM.mode==="csv"&&!test){emCSV();return}
+  const g=await emGmail();if(g.state!=="ready"){EM.err=emGmailLine()[1];toast(EM.err);render();return}
+  const s=emSettings(), mode=EM.mode==="draft"||!g.canSend?"draft":"send";
+  let list=test?[{key:"test",kind:"test",email:s.fromEmail.trim(),name:s.fromName,first:firstNameOf(s.fromName),practice:"Your Practice",city:""}]:emQueue().send;
+  const left=emLeft(), held=test?0:Math.max(0,list.length-left);if(!test)list=list.slice(0,left);
+  const camp=uid();let ok=0,failed=0;EM.busy=true;EM.stop=false;EM.err="";render();
+  for(let i=0;i<list.length;i++){
+    if(EM.stop)break;const p=list[i];EM.progress=`${test?"Sending a test":mode==="draft"?"Saving draft":"Sending"} ${i+1} of ${list.length}…`;emProgress();
+    const m=emCompose(p,s);
+    try{await emDeliver(g,m,mode);ok++;
+      if(!test){const at=new Date().toISOString(), sentTo=emNorm(p.email);for(const x of emPeople())if(emNorm(x.email)===sentTo)EM.sel.delete(x.key);
+        await put("emaillog",{id:uid(),campaign:camp,to:m.to,kind:p.kind,recId:p.id,name:p.name||"",subject:m.subject,template:EM.tpl,status:mode==="draft"?"drafted":"sent",at});
+        if(p.kind==="biz"&&mode==="send"){await put("outreach",{id:uid(),bizId:p.id,channel:"email",dir:"out",outcome:"none",contact:p.name||p.email,note:"Email: "+m.subject,at});
+          const b=byId("biz",p.id);if(b&&PSTAGES.indexOf(stageOf(b))<PSTAGES.indexOf("Contacted"))await put("biz",{...b,prospectStage:"Contacted"})}}}
+    catch(e){failed++;EM.err=emErrMsg(e);
+      if(!test)await put("emaillog",{id:uid(),campaign:camp,to:m.to,kind:p.kind,recId:p.id,name:p.name||"",subject:m.subject,template:EM.tpl,status:"failed",error:EM.err,at:new Date().toISOString()});
+      if(!(e&&e.code==="tool_error")||ok===0)break} /* anything but a refused single email stops the run */
+    if(i<list.length-1&&!EM.stop)await new Promise(r=>setTimeout(r,EM_GAP));
+  }
+  const stopped=EM.stop&&ok+failed<list.length;EM.busy=false;EM.progress="";
+  if(test){if(ok){EM.tested=true;toast(`Test sent to ${s.fromEmail.trim()}. Check how it looks before sending.`)}else toast(EM.err);render();return}
+  const verb=mode==="draft"?"saved as Gmail drafts":"sent";
+  toast(ok?`${ok} email${ok===1?"":"s"} ${verb}`+(failed?`, ${failed} failed`:"")+(stopped?". Stopped.":"")+(held?` ${held} wait for tomorrow's limit.`:""):(EM.err||"Nothing was sent"));
+  render();
+}
+function emProgress(){const el=$("#emProg");if(el)el.textContent=EM.progress}
+async function emCSV(){
+  const s=emSettings(), q=emQueue();if(!q.send.length){toast("Select at least one contact with an email address");return}
+  const lines=[["Email","First name","Practice","City","Subject","Message","Unsubscribe link"].join(",")];
+  for(const p of q.send){const m=emCompose(p,s);lines.push([m.to,p.first,p.practice,p.city,m.subject,m.text,emUnsubLink(s,m.to)].map(csvCell).join(","))}
+  await saveCSVFile(`referral-bridge-email-${localDay()}.csv`,lines.join("\r\n"),`Downloaded ${q.send.length} personalized email${q.send.length===1?"":"s"}. People on Do not email were left out.`);
+}
+
+/* ---------- the Email page ---------- */
+function emUseTpl(k){const t=EM_TPL[k];if(!t)return;EM.tpl=k;EM.subject=t.subject;EM.body=t.body;EM.styled=t.styled;EM.dirty=false}
+function emRow(p,opt){const st=emState(p,opt), on=EM.sel.has(p.key);
+  const tag=st==="none"?`<span class="tag s">No email</span>`:st==="bad"?`<span class="tag due">Email looks wrong</span>`:st==="optout"?`<span class="tag due">Do not email</span>`:p.kind==="sub"&&p.consent===false?`<span class="tag s">Didn't tick updates</span>`:"";
+  return`<div class="emrow${st!=="ok"?" off":""}"><label><input type="checkbox" data-emsel="${esc(p.key)}" ${on?"checked":""} ${st==="ok"||on?"":"disabled"}>
+  <span class="min"><b>${esc(p.practice&&p.kind!=="coi"?p.practice:p.name||p.practice||p.email)}</b><span class="meta">${esc([p.kind!=="coi"&&p.practice?p.name:"",p.email,p.meta].filter(Boolean).join(" · "))}</span>${tag}</span></label>
+  ${st==="ok"?`<button class="btn ghost small" data-emopt="${esc(p.email)}" title="Never email this address">Do not email</button>`:""}</div>`}
+function emList(){const opt=emOptSet(), rows=emShown();
+  if(!rows.length)return`<div class="empty"><p>${EM.who==="sub"?"No website sign-ups yet. Use Import website sign-ups with your Formspree export.":EM.q?"Nobody matches that search.":"No contacts here yet."}</p></div>`;
+  return rows.slice(0,300).map(p=>emRow(p,opt)).join("")+(rows.length>300?`<p class="meta">Showing the first 300. Search to narrow the list.</p>`:"");
+}
+function emPreview(){const s=emSettings(), q=emQueue();
+  const p=q.send[0]||{email:s.fromEmail||"name@example.com",first:"Ann",practice:"Maple Dental Group",city:"Paramus",name:"Ann Lee"};
+  const m=emCompose(p,{...s,fromName:s.fromName||"Your name",mailingAddress:s.mailingAddress||"[your mailing address]"});
+  return`<div class="meta">Preview for ${esc(p.email)}</div><div class="emsubj">${esc(m.subject)}</div>`+
+    (m.html?`<div class="emhtml">${m.html.replace(/^[\s\S]*?<body[^>]*>|<\/body>[\s\S]*$/g,"")}</div>`:`<pre class="emtext">${emLinkify(m.text)}</pre>`);
+}
+function emSum(){
+  const q=emQueue(), left=emLeft(), cap=emCap(), now=Math.min(q.send.length,left), probs=emProblems(false).filter(x=>!(EM.mode==="csv"&&/test to yourself|limit/.test(x)));
+  const [cls,line]=emGmailLine(), g=EM.gmail||{}, canSend=g.state==="ready"&&g.canSend;
+  const skip=[q.none&&`${q.none} without an email`,q.optout&&`${q.optout} on Do not email`,q.dup&&`${q.dup} duplicate address${q.dup===1?"":"es"}`].filter(Boolean);
+  const label=EM.mode==="csv"?`Download ${q.send.length} for mail merge`:EM.mode==="draft"?`Save ${now} as Gmail drafts`:`Send ${now} email${now===1?"":"s"}`;
+  return`<div class="emline ${cls}">${esc(line)}</div>
+  <div class="chips" role="group" aria-label="How to send">${[["send","Send from Gmail"],["draft","Save as Gmail drafts"],["csv","Download for mail merge"]].filter(([k])=>k!=="send"||canSend||EM.mode==="send").map(([k,l])=>`<button class="chip" data-emmode="${k}" aria-pressed="${EM.mode===k}">${l}</button>`).join("")}</div>
+  <div class="srow"><span>Selected</span><b>${EM.sel.size}</b></div>
+  <div class="srow"><span>Will get this email</span><b>${q.send.length}</b></div>
+  ${skip.length?`<div class="srow"><span>Skipped</span><span class="meta">${skip.join(", ")}</span></div>`:""}
+  ${EM.mode!=="csv"?`<div class="srow"><span>Sent today</span><span><b>${emSentToday()}</b> <span class="meta">of ${cap} a day</span></span></div>${q.send.length>left?`<p class="meta">Today's limit lets ${left} go now. The rest stay selected for tomorrow.</p>`:""}`:`<p class="meta">The file has one row per person with the subject and message already filled in, plus their unsubscribe link.</p>`}
+  ${EM.err?`<div class="emline warn">${esc(EM.err)}</div>`:""}
+  ${probs.length&&!EM.busy?`<ul class="emprob">${probs.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+  <div class="row" style="margin-top:10px">${EM.busy?`<span class="meta" id="emProg">${esc(EM.progress)}</span><button class="btn" data-act="emStop">Stop</button>`:
+    `${EM.mode!=="csv"?`<button class="btn" data-act="emTest">Send a test to me</button>`:""}<button class="btn primary${probs.length?" dim":""}" data-act="emSend">${esc(label)}</button>`}</div>`;
+}
+function emRefresh(){const a=$("#emSum");if(a)a.innerHTML=emSum();const b=$("#emPrev");if(b)b.innerHTML=emPreview();const c=$("#emCount");if(c)c.textContent=EM.sel.size+" selected"}
+function emHistory(){
+  const by={};for(const l of S.emaillog){const k=l.campaign||l.id;(by[k]=by[k]||{subject:l.subject,at:l.at,sent:0,drafted:0,failed:0})[l.status]=(by[k][l.status]||0)+1;if((l.at||"")>(by[k].at||""))by[k].at=l.at}
+  const rows=Object.values(by).sort((a,b)=>(b.at||"").localeCompare(a.at||"")).slice(0,12);
+  if(!rows.length)return`<p class="meta">Nothing sent yet.</p>`;
+  return rows.map(r=>`<div class="srow"><span class="min"><b>${esc(r.subject||"(no subject)")}</b><span class="meta"> ${esc(fmtDate(r.at))}</span></span><span class="meta">${[r.sent&&r.sent+" sent",r.drafted&&r.drafted+" drafts",r.failed&&r.failed+" failed"].filter(Boolean).join(", ")}</span></div>`).join("");
+}
+function viewEmail(){
+  if(!EM.subject&&!EM.body&&!EM.dirty)emUseTpl(EM.tpl);
+  if(!EM.gmail){EM.gmail={state:"checking"};emGmail().then(()=>{if(tab==="email")render()})}
+  const s=emSettings(), people=emPeople(), opt=emOptSet(), cnt=k=>people.filter(p=>p.kind===k&&emState(p,opt)==="ok").length;
+  const f=(id,label,v,type,ph)=>`<div class="field"><label for="${id}">${label}</label>${type==="textarea"?`<textarea id="${id}" placeholder="${esc(ph||"")}" style="min-height:60px">${esc(v)}</textarea>`:`<input id="${id}" type="${type||"text"}" value="${esc(v)}" placeholder="${esc(ph||"")}">`}</div>`;
+  const setupOK=s.fromName.trim()&&s.mailingAddress.trim();
+  return phead("","Prospecting","Email",`<button class="btn" data-act="emImport">Import website sign-ups</button>`)+
+  `<p class="lede">Pick contacts, write one message, and send it from your Gmail. Every email gets your mailing address and an unsubscribe link, and anyone on the Do not email list is always skipped.</p>
+  <div class="emgrid"><section class="card"><h3 class="sec" style="margin-top:0">1. Who gets it</h3>
+    <div class="chips" role="group" aria-label="Contacts">${EM_WHO.map(([k,l])=>`<button class="chip" data-emwho="${k}" aria-pressed="${EM.who===k}">${l}<small>${cnt(k)}</small></button>`).join("")}</div>
+    <input class="search full" id="qem" type="search" placeholder="Search names, practices or emails" value="${esc(EM.q)}" aria-label="Search contacts">
+    <div class="toolbar" style="margin-top:8px"><span class="meta" id="emCount">${EM.sel.size} selected</span><button class="btn small" data-emall="shown">Select all shown</button><button class="btn small" data-emall="none">Clear</button></div>
+    <div class="emlist" id="emList">${emList()}</div></section>
+  <section class="card"><h3 class="sec" style="margin-top:0">2. Message</h3>
+    <div class="chips" role="group" aria-label="Templates">${Object.entries(EM_TPL).map(([k,t])=>`<button class="chip" data-emtpl="${k}" aria-pressed="${EM.tpl===k}" title="${esc(t.hint)}">${esc(t.name)}</button>`).join("")}</div>
+    <p class="meta" style="margin:-4px 0 10px">${esc((EM_TPL[EM.tpl]||{}).hint||"")}</p>
+    <div class="field"><label for="em_subj">Subject</label><input id="em_subj" value="${esc(EM.subject)}"></div>
+    <div class="field"><label for="em_body">Message</label><textarea id="em_body" style="min-height:220px">${esc(EM.body)}</textarea></div>
+    <div class="row" style="margin:-4px 0 10px"><span class="meta">Fill-ins:</span>${EM_FILLS.map(([k,l])=>`<button class="btn small" data-emins="${k}" title="${esc(l)}">${esc(k)}</button>`).join("")}</div>
+    <div class="chips" role="group" aria-label="Look"><button class="chip" data-emstyle="0" aria-pressed="${!EM.styled}">Plain, like a personal note</button><button class="chip" data-emstyle="1" aria-pressed="${EM.styled}">Ivory &amp; Slate design</button></div>
+    <p class="meta">Don't include patient or health information. Your address and an unsubscribe link are added at the bottom.</p></section></div>
+  <div class="emgrid"><section class="card"><h3 class="sec" style="margin-top:0">Preview</h3><div id="emPrev">${emPreview()}</div></section>
+  <section class="card"><h3 class="sec" style="margin-top:0">3. Send</h3><div id="emSum">${emSum()}</div></section></div>
+  <details class="sec2" data-emsec="setup" ${(EM.open.setup??!setupOK)?"open":""} style="margin-top:16px"><summary><span>Sender details</span>${setupOK?"":`<span class="cnt">Needed</span>`}</summary><div class="secbody">
+    ${f("ems_fromName","Your name, as it appears in the email",s.fromName,"text","Your full name")}
+    ${f("ems_fromEmail","Your email, for test sends",s.fromEmail,"email","you@gmail.com")}
+    ${f("ems_mailingAddress","Business mailing address (required by law on every email; a P.O. box works)",s.mailingAddress,"textarea","Street, city, state ZIP")}
+    ${f("ems_unsubscribeUrl","Unsubscribe page",s.unsubscribeUrl,"url")}
+    ${f("ems_dailyCap",`Daily limit (up to ${EM_MAX_CAP}; about 50 keeps your Gmail safe from spam flags)`,emCap(),"number")}
+  </div></details>
+  <details class="sec2" data-emsec="optout" ${EM.open.optout?"open":""}><summary><span>Do not email</span><span class="cnt">${S.optout.length}</span></summary><div class="secbody">
+    <p class="meta" style="margin-top:0">Nobody on this list is ever emailed. Unsubscribes from the website page arrive in your inbox from Formspree; add them with Import website sign-ups or paste them here. Honor each one within 10 days.</p>
+    <div class="field"><label for="em_optadd">Add addresses (one per line or comma separated)</label><textarea id="em_optadd" style="min-height:60px"></textarea></div>
+    <button class="btn" data-act="emOptAdd">Add to Do not email</button>
+    <div style="margin-top:10px">${S.optout.slice().sort((a,b)=>(b.at||"").localeCompare(a.at||"")).slice(0,200).map(o=>`<div class="srow"><span class="min">${esc(o.email)} <span class="meta">${esc([o.source,fmtDate(o.at)].filter(Boolean).join(" · "))}</span></span><button class="btn ghost small" data-emunopt="${o.id}">Remove</button></div>`).join("")}</div>
+  </div></details>
+  <details class="sec2" data-emsec="sent" ${EM.open.sent?"open":""}><summary><span>Sent</span><span class="cnt">${S.emaillog.filter(l=>l.status!=="failed").length}</span></summary><div class="secbody">${emHistory()}</div></details>`;
+}
+async function saveEmSettings(patch){const cur=S.settings.find(s=>s.id==="email")||{id:"email"};if(!await put("settings",{...cur,...patch}))return false;emRefresh();return true}
+async function emOptOut(emails,source){
+  const have=emOptSet(), add=[...new Set(emails.map(emNorm).filter(emValid))].filter(e=>!have.has(e));let ok=0;
+  for(const e of add)if(await put("optout",{id:uid(),email:e,source,at:new Date().toISOString()}))ok++;
+  return{ok,tried:add.length};
+}
+
+/* ---------- Website sign-ups: the Formspree export ---------- */
+const emYes=v=>/^(yes|true|on|1|checked|y)$/i.test(String(v||"").trim());
+async function emReadSignups(file){
+  const rows=parseCSV(await file.text());if(rows.length<2){toast("That file has no rows");return}
+  const head=rows[0].map(h=>h.trim().toLowerCase().replace(/^_/,""));
+  const col=(...re)=>{for(const r of re){const i=head.findIndex(h=>r.test(h));if(i>=0)return i}return-1};
+  const iEmail=col(/^email$/,/^(e-?mail|email_?address|your_?email)$/), iUnEmail=col(/^unsubscribe_?email$/);if(iEmail<0&&iUnEmail<0){toast("Couldn't find an email column. Export the CSV from Formspree and try again.");return}
+  const iName=col(/^name$/,/^full ?name$/,/name/), iCo=col(/^company$/,/practice|company|organi/), iRole=col(/^role$/,/role/), iMsg=col(/^message$/,/message/),
+    iUpd=col(/^updates?$/,/update|newsletter|opt.?in/), iUn=col(/^unsubscribe$/), iSubj=col(/^subject$/), iDate=col(/^date$/,/created|submitted|date|time/);
+  const subs=new Set(S.subs.map(s=>emNorm(s.email))), seen=new Set(), plan={add:[],noTick:[],again:0,optouts:[],bad:0,hasBox:iUpd>=0};
+  for(const r of rows.slice(1)){const ue=iUnEmail>=0?emNorm(r[iUnEmail]):"", email=ue||(iEmail>=0?emNorm(r[iEmail]):"");if(!emValid(email)){plan.bad++;continue}
+    if(ue||(iUn>=0&&emYes(r[iUn]))||(iSubj>=0&&/unsubscribe/i.test(r[iSubj]||""))){if(!emOptedOut(email)&&!plan.optouts.includes(email))plan.optouts.push(email);continue}
+    if(seen.has(email))continue;seen.add(email);if(subs.has(email)){plan.again++;continue}
+    const t=iDate>=0?Date.parse(r[iDate]):NaN;
+    const rec={id:uid(),email,name:iName>=0?(r[iName]||"").trim():"",company:iCo>=0?(r[iCo]||"").trim():"",role:iRole>=0?(r[iRole]||"").trim():"",
+      message:iMsg>=0?(r[iMsg]||"").trim().slice(0,300):"",source:"Website",tags:["Website"],signedUpAt:isNaN(t)?"":new Date(t).toISOString(),consent:iUpd>=0&&emYes(r[iUpd])};
+    (rec.consent?plan.add:plan.noTick).push(rec)}
+  EM.imp=plan;
+  const li=(n,l)=>`<div class="srow"><span>${l}</span><b>${n}</b></div>`;
+  openSheet(`<h3>Import website sign-ups</h3><p class="lede">From your Formspree export. New people are added under Email → Website sign-ups, tagged "Website". Anyone already on the list is skipped.</p>
+  <div class="card">${li(plan.add.length,"Ticked \"EcoBridge updates\": will be added")}${li(plan.noTick.length,plan.hasBox?"Sent the form without ticking updates":"Sent the form before it had an updates box")}${li(plan.again,"Already on your list, skipped")}${li(plan.optouts.length,"Unsubscribe requests: added to Do not email")}${plan.bad?li(plan.bad,"Rows without a usable email, skipped"):""}</div>
+  ${plan.noTick.length?`<label class="check" style="margin-top:12px"><input type="checkbox" id="em_impall"> Also add the ${plan.noTick.length} who didn't tick the box. They'll be marked "Didn't tick updates"; reply to them personally rather than adding them to blasts.</label>`:""}
+  <div class="sheet-foot"><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="emImpOK">Import</button></div>`);
+}
+async function emImportOK(){
+  const plan=EM.imp;if(!plan)return;const all=$("#em_impall")&&$("#em_impall").checked;closeSheet();EM.imp=null;
+  const list=[...plan.add,...(all?plan.noTick:[])], now=new Date().toISOString();let ok=0,failed=0;
+  for(const r of list){if(await put("subs",{...r,importedAt:now}))ok++;else failed++}
+  const o=await emOptOut(plan.optouts,"Unsubscribe page");
+  EM.who="sub";tab="email";
+  toast(`Added ${ok} sign-up${ok===1?"":"s"}`+(o.ok?` and ${o.ok} unsubscribe${o.ok===1?"":"s"}`:"")+(failed||o.ok<o.tried?". Some couldn't be saved; import the file again to retry them.":""));render();
+}
+
 /* ---------- events ---------- */
 $("#view").addEventListener("submit",e=>{if(e.target.id!=="leadForm")return;e.preventDefault();LS.q=$("#lq").value;LS.county=$("#lcounty").value.trim();LS.searched=true;LS.rtab="all";render()});
 $("#view").addEventListener("dragstart",e=>{const k=e.target.closest&&e.target.closest("[data-kid]");if(!k)return;e.dataTransfer.setData("text/plain",k.dataset.kid);e.dataTransfer.effectAllowed="move"});
@@ -2752,8 +3111,16 @@ $("#view").addEventListener("input",e=>{
   if(e.target.id==="qoh"){OH.q=e.target.value;$("#ohBody").innerHTML=ohTable()}
   if(e.target.id==="qpb"){PB.q=e.target.value;render()}
   if(e.target.id==="findq"){F.text=e.target.value;$("#findResults").innerHTML=findResults()}
+  if(e.target.id==="qem"){EM.q=e.target.value;$("#emList").innerHTML=emList()}
+  if(e.target.id==="em_subj"||e.target.id==="em_body"){EM[e.target.id==="em_subj"?"subject":"body"]=e.target.value;EM.dirty=true;EM.tested=false;EM.err="";emRefresh()}
 });
 $("#view").addEventListener("change",async e=>{
+  if(e.target.dataset&&e.target.dataset.emsel){const k=e.target.dataset.emsel;if(e.target.checked)EM.sel.add(k);else EM.sel.delete(k);EM.err="";emRefresh();return}
+  if(e.target.id&&e.target.id.startsWith("ems_")){const k=e.target.id.slice(4);let v=e.target.value.trim();
+    if(k==="dailyCap"){const n=Math.round(+v);if(!n||n<1){toast("Enter a number from 1 to "+EM_MAX_CAP);return}v=Math.min(EM_MAX_CAP,n);e.target.value=v}
+    if(k==="fromEmail"&&v&&!emValid(v)){toast("That email doesn't look right");return}
+    if(k==="unsubscribeUrl"&&v&&!/^https:\/\/\S+$/.test(v)){toast("The unsubscribe link should start with https://");return}
+    if(await saveEmSettings({[k]:v}))toast("Saved");return}
   if(e.target.id&&e.target.id.startsWith("sgf_")){SG[e.target.id.slice(4)]=e.target.value;render();return}
   if(e.target.id==="src_free"){SRCV.free=e.target.checked;render();return}
   if(e.target.id==="rev_min"||e.target.id==="rev_max"){const raw=e.target.value.trim(),v=raw?parseMoney(raw):null;
@@ -2777,10 +3144,21 @@ $("#view").addEventListener("change",async e=>{
   if(e.target.id==="findcounty"){F.county=e.target.value;$("#findResults").innerHTML=findResults()}
   if(e.target.id==="findhc"){F.hc=e.target.checked;$("#findResults").innerHTML=findResults()}
 });
+$("#signupInput").addEventListener("change",e=>{const f=e.target.files[0];e.target.value="";if(f)emReadSignups(f).catch(()=>toast("Couldn't read that file. Export it from Formspree as CSV and try again."))});
 $("#csvInput").addEventListener("change",e=>{const f=e.target.files[0];e.target.value="";if(f)importCSV(f).catch(()=>toast("Couldn't read that file. Save it as CSV and try again."))});
 document.addEventListener("click",async e=>{
   const t=e.target.closest("button");if(!t)return;const d=t.dataset;
   if(d.sub){tab=d.sub;render();window.scrollTo(0,0);return}
+  if(d.emwho){EM.who=d.emwho;render();return}
+  if(d.emall){if(d.emall==="none")EM.sel.clear();else{const opt=emOptSet();for(const p of emShown())if(emState(p,opt)==="ok")EM.sel.add(p.key)}EM.err="";$("#emList").innerHTML=emList();emRefresh();return}
+  if(d.emtpl){if(EM.dirty&&d.emtpl!==EM.tpl&&t.dataset.confirm!=="1"){t.dataset.confirm="1";toast("Tap again to replace your edits with this template");return}emUseTpl(d.emtpl);EM.tested=false;EM.err="";render();return}
+  if(d.emstyle!==undefined){EM.styled=d.emstyle==="1";EM.tested=false;render();return}
+  if(d.emmode){EM.mode=d.emmode;EM.err="";emRefresh();return}
+  if(d.emins){const el=$("#em_body");if(!el)return;const a=el.selectionStart??el.value.length,b=el.selectionEnd??a;el.value=el.value.slice(0,a)+d.emins+el.value.slice(b);el.focus();el.setSelectionRange(a+d.emins.length,a+d.emins.length);EM.body=el.value;EM.dirty=true;EM.tested=false;emRefresh();return}
+  if(d.emopt){if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to confirm";return}const r=await emOptOut([d.emopt],"You");if(r.ok){for(const p of emPeople())if(emNorm(p.email)===emNorm(d.emopt))EM.sel.delete(p.key);toast(d.emopt+" won't be emailed")}render();return}
+  if(d.emunopt){if(t.dataset.confirm!=="1"){t.dataset.confirm="1";t.textContent="Tap again to remove";return}if(await del("optout",d.emunopt))toast("Removed from Do not email");render();return}
+  if(d.emfrom){const opt=emOptSet();EM.who="biz";EM.q="";EM.sel.clear();for(const b of bizShown())if(!b.sample){const p=emPeople().find(x=>x.key==="biz|"+b.id);if(p&&emState(p,opt)==="ok")EM.sel.add(p.key)}
+    tab="email";render();window.scrollTo(0,0);toast(EM.sel.size?`${EM.sel.size} with an email address selected`:"None of these businesses has an email address yet");return}
   if(d.menugo){closeSheet();tab=d.menugo;render();window.scrollTo(0,0);return}
   if(d.act==="menu"){openMenu();return}
   if(d.act==="demoon"){setDemo(true);return}
@@ -2907,6 +3285,13 @@ document.addEventListener("click",async e=>{
     case"addBiz":recordForm("biz");break;
     case"addCoi":recordForm("coi");break;
     case"import":$("#csvInput").click();break;
+    case"emImport":$("#signupInput").click();break;
+    case"emImpOK":emImportOK();break;
+    case"emTest":emSend(true);break;
+    case"emSend":emSend(false);break;
+    case"emStop":EM.stop=true;EM.progress="Stopping after this email…";emProgress();break;
+    case"emOptAdd":{const v=($("#em_optadd")||{}).value||"";const list=v.split(/[\s,;]+/).filter(Boolean);if(!list.length){toast("Paste one or more email addresses");return}
+      const bad=list.filter(x=>!emValid(x));const r=await emOptOut(list,"You");toast(`Added ${r.ok} to Do not email`+(bad.length?`. ${bad.length} didn't look like email addresses.`:""));render();break}
     case"logpick":pickBizSheet();break;
     case"newtask":taskSheet();break;
     case"savetask":saveTask();break;
@@ -2923,7 +3308,7 @@ document.addEventListener("click",async e=>{
       const failed=await delMany(all);stage=null;toast(failed?`Removed ${all.length-failed} of ${all.length} sample records. ${failed} couldn't be removed; tap again to retry.`:"Sample records removed");if(db)render();break}
   }
 });
-document.addEventListener("toggle",e=>{const el=e.target;if(el&&el.matches&&el.matches("details[data-sec]")){BV.open=BV.open||{};BV.open[el.dataset.sec]=el.open}},true);
+document.addEventListener("toggle",e=>{const el=e.target;if(el&&el.dataset&&el.dataset.emsec){EM.open[el.dataset.emsec]=el.open;return}if(el&&el.matches&&el.matches("details[data-sec]")){BV.open=BV.open||{};BV.open[el.dataset.sec]=el.open}},true);
 $("#sheet").addEventListener("click",e=>{if(e.target===$("#sheet"))closeSheet()});
 function netAct(el){
   if(el.dataset.nfocus){const id=el.dataset.nfocus;NET.focus=NET.focus===id?null:id;render();return}

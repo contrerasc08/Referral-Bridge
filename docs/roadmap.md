@@ -20,6 +20,8 @@
 - [x] Code and specs in GitHub
 - [x] CRM-style navigation from Jessica's OliveStone screenshots: sidebar on wide screens, prospect pipeline board with drag and ⌄ task menus, outreach history with outcome filters and export, follow-up tasks, appointments
 
+- [x] Email: send one message to selected contacts from your Gmail, with templates, a daily limit, unsubscribe links, a Do not email list and a website sign-ups import
+
 ## Next
 - [x] Supabase tables, roles and row-level security (applied to the Supabase project on 2026-10-30)
 - [x] Sign-in portal (`web/`): email and password, authenticator-app MFA for everyone, password reset, invite codes
@@ -34,5 +36,6 @@
 ## Later
 - [ ] Split `src/index.html` into modules with a small build step
 - [ ] Automated tests for scoring (fixtures and expected scores)
-- [ ] Email and calendar connections so sent drafts and booked meetings log themselves
+- [ ] Calendar connection so booked meetings log themselves
+- [ ] Formspree sends sign-ups and unsubscribes to the app automatically instead of by CSV import
 - [ ] Multi-user support (a team sharing one pipeline)
