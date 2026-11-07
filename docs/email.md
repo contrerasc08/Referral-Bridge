@@ -28,7 +28,10 @@ Each business that is emailed gets an email touch in the Touch log and moves to 
 | Follow-up | Plain | A nudge about a week later |
 | Welcome | Ivory & Slate | New website sign-ups |
 | Update or event | Ivory & Slate | News or an event (fill in the `[brackets]`) |
+| Finish your storefront | Ivory & Slate | A few days after Welcome: the Referral Bridge sign-in link and a nudge to finish their storefront |
 | Beta invite | Plain | Inviting someone to Referral Bridge |
+
+Website sign-ups get Welcome first, then Finish your storefront a few days later. Both are sent by hand from the Email page (Website sign-ups → select → template → send). They aren't automatic: the CRM only runs while it's open, and scheduled bots never send email (see docs/decisions.md). The storefront email links to the sign-in portal. The storefront page itself (photo, services, who they serve) isn't built yet.
 
 ## Unsubscribes
 

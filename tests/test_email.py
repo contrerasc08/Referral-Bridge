@@ -156,6 +156,9 @@ async def main():
         await pg.click("[data-act='emTest']"); await pg.wait_for_timeout(150)
         check("Unknown fill-in blocks sending", "{firstname}" in await toast(pg), await toast(pg))
 
+        await pg.click("[data-emtpl='storefront']"); await pg.click("[data-emtpl='storefront']"); await pg.wait_for_timeout(100)
+        prev = await pg.inner_html("#emPrev")
+        check("Storefront template links to the sign-in portal", 'href="https://referral-bridge.cc-christophercontreras.workers.dev/"' in prev and "#f7f4ee" in prev)
         # Failures: a refused email is logged and the run continues; no answer stops the run
         await pg.click("[data-emtpl='intro']"); await pg.click("[data-emtpl='intro']"); await pg.wait_for_timeout(100)
         await pg.click("[data-act='emTest']"); await pg.wait_for_timeout(400)
