@@ -21,6 +21,9 @@ Records with `sample: true` are test data. They are hidden from bridges and from
 | `req` | `leadRequests` | Requests for new businesses |
 | `usage` | `providerUsage` | Daily data-source usage counters |
 | `task` | `tasks` | Your tasks and the suggestions you added or dismissed |
+| `optout` | `emailOptOuts` | Do not email: addresses that are never emailed |
+| `emaillog` | `emailLog` | One row per email sent, drafted or failed |
+| `subs` | `subscribers` | Website sign-ups imported from Formspree |
 
 ## businesses
 
@@ -102,3 +105,13 @@ See [../bots/README.md](../bots/README.md#run-report-format-botlog).
 ## outreach direction
 
 `outreach.dir` is `out` (you reached out) or `in` (they reached out). Older records have no `dir` and count as `out`.
+
+## Email
+
+See [../email.md](../email.md).
+
+- `settings/email`: `fromName`, `fromEmail` (for test sends), `mailingAddress`, `unsubscribeUrl`, `dailyCap` (1–100, default 50).
+- `emailOptOuts`: `email` (lowercase), `source` (`You`, `Unsubscribe page`), `at`.
+- `emailLog`: `campaign` (one id per send), `to`, `kind` (`biz`, `coi`, `sub`), `recId`, `name`, `subject`, `template`, `status` (`sent`, `drafted`, `failed`), `error`, `at`. Sent and drafted rows count toward the daily limit.
+- `subscribers`: `email`, `name`, `company`, `role`, `message` (first 300 characters), `source` ("Website"), `tags` (["Website"]), `consent` (true when they ticked "EcoBridge updates"), `signedUpAt`, `importedAt`.
+- A business emailed from the Email page gets an `outreach` row with `channel: "email"` and `note: "Email: <subject>"`.

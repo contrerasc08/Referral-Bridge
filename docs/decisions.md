@@ -68,3 +68,9 @@ Format: date, decision, why, and who decided.
 - **Why:** The app is becoming a multi-company product. Postgres suits linked CRM data, reporting and a later Salesforce sync, and row-level security keeps companies apart even if the page has a bug.
 - **Owner account:** created by the owner on the preview, then promoted with a one-time SQL script run by hand. No password or service key is ever in the repo.
 - **Decided by:** @contrerasc08, plan by Claude
+
+## 2026-11-07: Email blasts go out from the owner's Gmail
+
+- **Decision:** The CRM sends emails itself, through the owner's own Gmail (the claude.ai Gmail connector), not a bulk mailing service. A daily limit of about 50, a mailing address and unsubscribe link on every email, and a Do not email list that sending always skips. No patient or health information. Website sign-ups come in from the Formspree export, and only people who ticked "EcoBridge updates" join the list.
+- **Why:** Emails from a real inbox reach people more often, replies land in Gmail, and no sending domain is needed. Mailing services don't allow lists of researched contacts who never signed up. The limits and opt-outs keep the account in good standing and follow CAN-SPAM.
+- **Decided by:** @contrerasc08 (chose "In-app, through my Gmail"), built by Claude
